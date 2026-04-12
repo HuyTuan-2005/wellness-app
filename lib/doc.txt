@@ -1,0 +1,21 @@
+lib/
+├── main.dart                 # Điểm bắt đầu của ứng dụng, khởi tạo các cài đặt cơ bản
+├── app.dart                  # Chứa widget MaterialApp, cấu hình route và theme tổng thể
+│
+├── core/                     # Nơi chứa các thành phần dùng chung cho toàn bộ app
+│   ├── constants/            # Các hằng số (đường dẫn API, chuỗi string, kích thước chuẩn...)
+│   ├── theme/                # Nơi định nghĩa màu sắc, font chữ, và các component theme (như cấu hình ElevatedButtonThemeData chung cho toàn app)
+│   ├── utils/                # Các hàm hỗ trợ dùng chung (định dạng ngày tháng, tính BMI...)
+│   └── widgets/              # Các custom UI control dùng nhiều lần (ví dụ: các nút bấm có animation, biểu đồ, dialog...)
+│
+├── data/                     # Tầng xử lý và lưu trữ dữ liệu
+│   ├── models/               # Các class định nghĩa cấu trúc dữ liệu (User, HealthMetric, Routine...)
+│   └── services/             # Nơi xử lý logic gọi API (HTTP) hoặc đọc ghi dữ liệu local (SQLite, SharedPreferences)
+│
+└── features/                 # Chia theo từng tính năng chính của ứng dụng
+    ├── home/                 # Màn hình trang chủ tổng hợp
+    │   ├── screens/
+    │   └── widgets/          # Các widget con chỉ dùng riêng cho trang chủ
+    └── profile/              # Tính năng hồ sơ cá nhân
+        ├── screens/
+        └── widgets/
