@@ -1,9 +1,12 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 # wellness-app
 
 # Ứng dụng quản lý sức khỏe cá nhân trên điện thoại - Flutter
 
+=======
+>>>>>>> origin/main
 # wellness_app
 
 A new Flutter project.
