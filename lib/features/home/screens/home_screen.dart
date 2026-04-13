@@ -13,7 +13,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
-<<<<<<< HEAD
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -135,8 +134,5 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
-=======
-    return Container(child: Text("Hello world"));
->>>>>>> 419a040 (add user_card)
   }
 }

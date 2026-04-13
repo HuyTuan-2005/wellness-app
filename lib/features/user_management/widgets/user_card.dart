@@ -38,22 +38,14 @@ class _UserCardState extends State<UserCard> {
           alignment: Alignment.center,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-<<<<<<< HEAD
             color: AppColors.primary.withValues(alpha: 0.1),
-=======
-            color: AppColors.secondary,
->>>>>>> 419a040 (add user_card)
           ),
           child: Text(
             widget._title.split(' ').last[0],
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: AppColors.primary,
-<<<<<<< HEAD
               fontSize: 22,
-=======
-              fontSize: 16,
->>>>>>> 419a040 (add user_card)
             ),
           ),
         ),
