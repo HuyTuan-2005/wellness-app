@@ -19,11 +19,12 @@ class _BMICalculatorScreenState extends State<BMICalculatorScreen> {
 
   void _calculateBMI() {
     if (_formKey.currentState!.validate()) {
-      double height = double.parse(_heightController.text) / 100; // cm -> m
+      double heightCm = double.parse(_heightController.text);
       double weight = double.parse(_weightController.text);
+      double heightM = heightCm / 100;
 
       setState(() {
-        _bmi = weight / (height * height);
+        _bmi = weight / (heightM * heightM);
 
         if (_bmi! < 18.5) {
           _bmiCategory = "Thiếu cân";
@@ -45,137 +46,144 @@ class _BMICalculatorScreenState extends State<BMICalculatorScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('Tính BMI'),
-        backgroundColor: AppColors.background,
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Chỉ số khối cơ thể (BMI)',
-                style: TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'giúp bạn đánh giá tình trạng sức khỏe',
-                style: TextStyle(fontSize: 15, color: AppColors.textSecondary),
-              ),
-              const SizedBox(height: 40),
-
-              // Input Chiều cao
-              _buildInputField(
-                label: 'Chiều cao (cm)',
-                controller: _heightController,
-                icon: Icons.height,
-                hint: 'Ví dụ: 172',
-              ),
-              const SizedBox(height: 20),
-
-              // Input Cân nặng
-              _buildInputField(
-                label: 'Cân nặng (kg)',
-                controller: _weightController,
-                icon: Icons.monitor_weight_outlined,
-                hint: 'Ví dụ: 68.5',
-              ),
-
-              const SizedBox(height: 32),
-
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: _calculateBMI,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text(
-                    'Tính BMI',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 40),
-
-              // Kết quả
-              if (_bmi != null) ...[
-                Center(
-                  child: Column(
-                    children: [
-                      Text(
-                        _bmi!.toStringAsFixed(1),
-                        style: TextStyle(
-                          fontSize: 72,
-                          fontWeight: FontWeight.bold,
-                          color: _bmiColor,
-                        ),
-                      ),
-                      Text(
-                        _bmiCategory,
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w600,
-                          color: _bmiColor,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-
-                      // Thanh màu phân loại
-                      Container(
-                        height: 12,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          gradient: const LinearGradient(
-                            colors: [
-                              Colors.orange,
-                              Colors.green,
-                              Colors.orange,
-                              Colors.red,
-                            ],
+      backgroundColor: const Color(0xFFE8F4FD), // Đồng bộ với Water Tracking
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Tính chỉ số BMI',
+                          style: TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF1A237E),
                           ),
                         ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Chỉ số khối cơ thể',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.blue.shade300,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Icon(
+                      Icons.calculate_rounded,
+                      size: 36,
+                      color: Color(0xFF1A237E),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 30),
+
+                // Input Card
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Column(
+                    children: [
+                      _buildInputField(
+                        label: 'Chiều cao (cm)',
+                        controller: _heightController,
+                        hint: 'Ví dụ: 172',
                       ),
-                      const SizedBox(height: 8),
-                      const Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('Thiếu cân', style: TextStyle(fontSize: 12)),
-                          Text('Bình thường', style: TextStyle(fontSize: 12)),
-                          Text('Thừa cân', style: TextStyle(fontSize: 12)),
-                          Text('Béo phì', style: TextStyle(fontSize: 12)),
-                        ],
+                      const SizedBox(height: 20),
+                      _buildInputField(
+                        label: 'Cân nặng (kg)',
+                        controller: _weightController,
+                        hint: 'Ví dụ: 68.5',
                       ),
                     ],
                   ),
                 ),
+
+                const SizedBox(height: 24),
+
+                // Nút tính
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: ElevatedButton(
+                    onPressed: _calculateBMI,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF1A237E),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    child: const Text(
+                      'Tính BMI',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 40),
+
+                // Kết quả
+                if (_bmi != null)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          _bmi!.toStringAsFixed(1),
+                          style: TextStyle(
+                            fontSize: 72,
+                            fontWeight: FontWeight.bold,
+                            color: _bmiColor,
+                          ),
+                        ),
+                        Text(
+                          _bmiCategory,
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w600,
+                            color: _bmiColor,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        const Divider(),
+                        const SizedBox(height: 12),
+                        _buildBMIRow('Thiếu cân', '< 18.5', Colors.orange),
+                        _buildBMIRow(
+                          'Bình thường',
+                          '18.5 - 24.9',
+                          Colors.green,
+                        ),
+                        _buildBMIRow('Thừa cân', '25.0 - 29.9', Colors.orange),
+                        _buildBMIRow('Béo phì', '> 30', Colors.red),
+                      ],
+                    ),
+                  ),
               ],
-
-              const SizedBox(height: 40),
-
-              // Bảng phân loại BMI
-              _buildSectionTitle('Bảng phân loại BMI'),
-              const SizedBox(height: 12),
-              _buildBMICard('Dưới 18.5', 'Thiếu cân', Colors.orange),
-              _buildBMICard('18.5 - 24.9', 'Bình thường', Colors.green),
-              _buildBMICard('25.0 - 29.9', 'Thừa cân', Colors.orange),
-              _buildBMICard('Trên 30', 'Béo phì', Colors.red),
-            ],
+            ),
           ),
         ),
       ),
@@ -185,7 +193,6 @@ class _BMICalculatorScreenState extends State<BMICalculatorScreen> {
   Widget _buildInputField({
     required String label,
     required TextEditingController controller,
-    required IconData icon,
     required String hint,
   }) {
     return TextFormField(
@@ -194,62 +201,40 @@ class _BMICalculatorScreenState extends State<BMICalculatorScreen> {
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
-        prefixIcon: Icon(icon, color: AppColors.textSecondary),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.secondary),
+          borderSide: BorderSide(color: Colors.grey.shade300),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.primary, width: 2),
+          borderSide: const BorderSide(color: Color(0xFF1A237E), width: 2),
         ),
       ),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Vui lòng nhập $label';
-        }
-        return null;
-      },
+      validator: (value) =>
+          value == null || value.isEmpty ? 'Vui lòng nhập $label' : null,
     );
   }
 
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-    );
-  }
-
-  Widget _buildBMICard(String range, String status, Color color) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      color: AppColors.surface,
-      child: ListTile(
-        leading: Container(
-          width: 24,
-          height: 24,
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.2),
-            shape: BoxShape.circle,
+  Widget _buildBMIRow(String status, String range, Color color) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.circle, size: 10, color: color),
+              const SizedBox(width: 8),
+              Text(status, style: const TextStyle(fontSize: 15)),
+            ],
           ),
-          child: Icon(Icons.circle, size: 12, color: color),
-        ),
-        title: Text(range),
-        trailing: Text(
-          status,
-          style: TextStyle(fontWeight: FontWeight.w600, color: color),
-        ),
+          Text(
+            range,
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+          ),
+        ],
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _heightController.dispose();
-    _weightController.dispose();
-    super.dispose();
   }
 }

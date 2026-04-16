@@ -98,7 +98,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('✅ Đã lưu thông tin thành công!'),
+          content: Text('Đã lưu thông tin thành công!'),
           backgroundColor: Colors.green,
         ),
       );

@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:wellness_app/features/BMI/screens/BMI_screen.dart';
+import 'package:wellness_app/features/blood_pressure/screens/blood_pressure_tracking_screen.dart';
 import '../../../core/theme/app_colors.dart';
 import 'package:wellness_app/features/profile/screens/profile_screen.dart';
+import 'package:wellness_app/features/BMI/screens/BMI_screen.dart';
+import 'package:wellness_app/features/nutrition/screens/nutrition_tracking_screen.dart';
+import 'package:wellness_app/features/sleep/screens/sleep_tracking_screen.dart';
+import 'package:wellness_app/features/water/screens/water_tracking_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -36,100 +40,164 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 20),
-
-            // Lời chào
+            const SizedBox(height: 10),
             const Text(
-              'Chào mừng trở lại!',
+              'Hôm nay bạn khỏe mạnh chứ?',
               style: TextStyle(
-                fontSize: 28,
+                fontSize: 23,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textPrimary,
               ),
             ),
-            Text(
-              'Hôm nay bạn khỏe mạnh chứ?',
-              style: TextStyle(fontSize: 16, color: AppColors.textSecondary),
+
+            const SizedBox(height: 32),
+
+            // ==================== CÁC CARD ĐỒNG NHẤT ====================
+            _FeatureCard(
+              title: 'Tính chỉ số BMI',
+              subtitle: 'Kiểm tra tình trạng cân nặng của bạn',
+              icon: Icons.calculate_rounded,
+              color: AppColors.primary,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const BMICalculatorScreen(),
+                  ),
+                );
+              },
             ),
+            const SizedBox(height: 14),
 
-            const SizedBox(height: 40),
+            _FeatureCard(
+              title: 'Theo dõi nước uống',
+              subtitle: 'Ghi nhận lượng nước và tiến độ mỗi ngày',
+              icon: Icons.water_drop_outlined,
+              color: const Color(0xFF0288D1),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const WaterTrackingScreen(),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 14),
 
-            // Nút Tính BMI - Nổi bật
+            _FeatureCard(
+              title: 'Theo dõi dinh dưỡng',
+              subtitle: 'Quản lý calo, carb và protein theo bữa ăn',
+              icon: Icons.restaurant_menu,
+              color: const Color(0xFF2E7D32),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const NutritionTrackingScreen(),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 14),
+
+            _FeatureCard(
+              title: 'Theo dõi giấc ngủ',
+              subtitle: 'Ghi nhận số giờ ngủ và mục tiêu',
+              icon: Icons.bedtime_outlined,
+              color: const Color(0xFF3949AB),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const SleepTrackingScreen(),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 14),
+
+            _FeatureCard(
+              title: 'Theo dõi huyết áp',
+              subtitle: 'Theo dõi chỉ số và lịch sử đo',
+              icon: Icons.favorite_outline,
+              color: const Color(0xFFD32F2F),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const BloodPressureTrackingScreen(),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ==================== WIDGET CARD ĐỒNG NHẤT ====================
+  Widget _FeatureCard({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: color.withOpacity(0.2), width: 1.5),
+        ),
+        child: Row(
+          children: [
+            // Icon
             Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: AppColors.primary.withOpacity(0.2),
-                  width: 1.5,
-                ),
+                color: color.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(14),
               ),
+              child: Icon(icon, color: color, size: 32),
+            ),
+            const SizedBox(width: 18),
+
+            // Nội dung
+            Expanded(
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(
-                    Icons.calculate_rounded,
-                    size: 60,
-                    color: AppColors.primary,
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Tính chỉ số BMI',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
                   Text(
-                    'Kiểm tra tình trạng cân nặng của bạn',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: AppColors.textSecondary,
+                    title,
+                    style: const TextStyle(
+                      fontSize: 17.5,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(height: 20),
-
-                  SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const BMICalculatorScreen(),
-                          ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text(
-                        'Tính BMI ngay',
-                        style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                  const SizedBox(height: 6),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textSecondary,
+                      height: 1.35,
                     ),
                   ),
                 ],
               ),
             ),
 
-            const SizedBox(height: 30),
-
-            // Các chức năng khác (có thể thêm sau)
-            const Text(
-              'Khám phá thêm',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            // Icon mũi tên
+            Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 20,
+              color: Colors.grey.shade400,
             ),
-            const SizedBox(height: 12),
-
-            // Thêm các card khác ở đây sau...
           ],
         ),
       ),

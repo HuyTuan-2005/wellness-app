@@ -43,7 +43,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 // Header
                 const SizedBox(height: 16),
                 Text(
-                  'Tạo tài khoản',
+                  'Đăng ký tài khoản',
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
@@ -52,7 +52,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Đăng ký để bắt đầu hành trình sức khỏe của bạn',
+                  'để bắt đầu hành trình sức khỏe của bạn',
                   style: TextStyle(
                     fontSize: 14,
                     color: AppColors.textSecondary,
