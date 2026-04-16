@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:wellness_app/core/theme/app_theme.dart';
 import 'package:wellness_app/features/BMI/screens/BMI_screen.dart';
 import 'package:wellness_app/features/appointment/screens/appointment_list_screen.dart';
+import 'package:wellness_app/features/home/screens/home_screen.dart';
 import 'package:wellness_app/features/medication/screens/medication_list_screen.dart';
 import 'package:wellness_app/features/profile/screens/profile_screen.dart';
 
@@ -19,7 +20,7 @@ class WellnessApp extends StatelessWidget {
 
       // home: const DashboardScreen(),
       // home: const MedicationListScreen(),
-      home: const ProfileScreen(),
+      home: const HomeScreen(),
     );
   }
 }
