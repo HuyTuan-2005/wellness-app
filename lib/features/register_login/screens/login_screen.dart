@@ -37,29 +37,12 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 24),
-
                 // Logo / Icon
-                Center(
-                  child: Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Icon(
-                      Icons.favorite,
-                      color: Colors.white,
-                      size: 40,
-                    ),
-                  ),
-                ),
                 const SizedBox(height: 32),
 
                 // Tiêu đề
                 Text(
-                  'Chào mừng trở lại!',
+                  'Đăng nhập tài khoản',
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
@@ -68,7 +51,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Đăng nhập để tiếp tục hành trình sức khỏe',
+                  'để tiếp tục hành trình sức khỏe',
                   style: TextStyle(
                     fontSize: 14,
                     color: AppColors.textSecondary,
