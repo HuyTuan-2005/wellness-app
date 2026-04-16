@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wellness_app/core/theme/app_theme.dart';
-import 'package:wellness_app/features/home/screens/home_screen.dart';
+import 'package:wellness_app/features/admin_dashboard/screens/dashboard_screen.dart';
 
 class WellnessApp extends StatelessWidget {
   const WellnessApp({super.key});
@@ -14,7 +14,7 @@ class WellnessApp extends StatelessWidget {
       // darkTheme: AppTheme.darkTheme,
       theme: AppTheme.lightTheme,
 
-      home: const HomeScreen(),
+      home: const DashboardScreen(),
     );
   }
 }
