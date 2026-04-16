@@ -39,7 +39,7 @@ class AppointmentCard extends StatelessWidget {
       case ReminderStatus.upcoming:
       default:
         statusText = "Sắp đến";
-        statusColor = const Color(0xFF009688);
+        statusColor = const Color(0xFF246BFD);
         statusBgColor = const Color(0xFFE0F2F1);
     }
 
@@ -89,7 +89,7 @@ class AppointmentCard extends StatelessWidget {
                 child: const Text(
                   "Xem chi tiết",
                   style: TextStyle(
-                    color: Color(0xFF009688),
+                    color: Color(0xFF246BFD),
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                   ),

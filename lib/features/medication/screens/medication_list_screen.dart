@@ -62,7 +62,7 @@ class _MedicationListScreenState extends State<MedicationListScreen> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text('Đã đánh dấu "${med.name}" là đã uống!'),
-                    backgroundColor: const Color(0xFF009688),
+                    backgroundColor: const Color(0xFF246BFD),
                     behavior: SnackBarBehavior.floating,
                   ),
                 );
@@ -80,7 +80,7 @@ class _MedicationListScreenState extends State<MedicationListScreen> {
             ),
           );
         },
-        backgroundColor: const Color(0xFF009688),
+        backgroundColor: const Color(0xFF246BFD),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: const Icon(Icons.add, color: Colors.white),
       ),
