@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:wellness_app/features/feedback/screens/feedback_screen.dart';
+import 'package:wellness_app/features/system_notifications/screens/admin_notification_screen.dart';
 import 'package:wellness_app/features/user_management/screens/user_list_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -14,8 +16,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final List<Widget> _page = [
     Container(),
     UserListScreen(),
-    Container(),
-    Container(),
+    AdminNotificationScreen(),
+    FeedbackScreen(),
   ];
 
   void _onTap(int index) {

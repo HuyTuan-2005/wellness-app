@@ -54,7 +54,7 @@ class _UserCardState extends State<UserCard> {
   }
 
   Widget trailing() {
-    if (widget._isActive) {
+    if (!widget._isActive) {
       return IconButton.filled(
         color: AppColors.error,
         style: IconButton.styleFrom(
@@ -77,13 +77,25 @@ class _UserCardState extends State<UserCard> {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: leading(),
-      title: Text(widget._title, style: TextStyle(fontWeight: FontWeight.bold)),
-      subtitle: Text(widget._subTitle, style: TextStyle(fontSize: 13)),
-      trailing: trailing(),
-      tileColor: AppColors.background,
-      selectedColor: AppColors.textSecondary,
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 5),
+      child: ListTile(
+        leading: leading(),
+        title: Text(
+          widget._title,
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        subtitle: Text(widget._subTitle, style: TextStyle(fontSize: 14)),
+        trailing: trailing(),
+        tileColor: AppColors.surface,
+        selectedColor: AppColors.textSecondary,
+
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadiusGeometry.circular(15),
+        ),
+
+        contentPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+      ),
     );
   }
 }

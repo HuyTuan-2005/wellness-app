@@ -10,6 +10,18 @@ class UserListScreen extends StatefulWidget {
 }
 
 class _UserListScreenState extends State<UserListScreen> {
+  List<Map<String, dynamic>> users = [
+    {'title': "Huy Tuấn", 'subtitle': "huytuan@gmail.com", 'isActive': true},
+    {'title': "Trung Tính", 'subtitle': "huytuan@gmail.com", 'isActive': true},
+    {
+      'title': "Quốc Trường",
+      'subtitle': "huytuan@gmail.com",
+      'isActive': false,
+    },
+    {'title': "Hoàng Nhân", 'subtitle': "huytuan@gmail.com", 'isActive': true},
+    {'title': "Hoàng Nhân", 'subtitle': "huytuan@gmail.com", 'isActive': true},
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,10 +37,34 @@ class _UserListScreenState extends State<UserListScreen> {
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
               ),
 
-              UserCard(
-                title: "Huy Tuấn",
-                subTitle: "Huytuan.learn@gmail.com",
-                isActive: false,
+              SizedBox(height: 20),
+
+              TextField(
+                decoration: InputDecoration(
+                  iconColor: AppColors.border,
+                  label: Text("Tìm theo tên..."),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 5),
+                  prefixIcon: Icon(Icons.search_outlined),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                    borderSide: BorderSide(width: 1, color: AppColors.error),
+                  ),
+                ),
+              ),
+
+              SizedBox(height: 20),
+
+              Expanded(
+                child: ListView.builder(
+                  itemCount: users.length,
+                  itemBuilder: (context, index) {
+                    return UserCard(
+                      title: users[index]['title'],
+                      subTitle: users[index]['subtitle'],
+                      isActive: users[index]['isActive'],
+                    );
+                  },
+                ),
               ),
             ],
           ),

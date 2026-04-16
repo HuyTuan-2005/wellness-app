@@ -16,6 +16,14 @@ class AppColors {
     0xFFFFFFFF,
   ); // Màu nền của các thẻ (Card) nổi lên
 
+  // Màu đường viền
+  static const Color border = Color.fromARGB(
+    255,
+    238,
+    238,
+    238,
+  ); // Chữ chú thích
+
   // Hệ thống màu chữ (Text)
   static const Color textPrimary = Color(0xFF111827); // Chữ tiêu đề
   static const Color textSecondary = Color(0xFF6B7280); // Chữ chú thích
