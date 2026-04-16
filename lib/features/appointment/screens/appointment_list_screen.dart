@@ -59,7 +59,7 @@ class _AppointmentListScreenState extends State<AppointmentListScreen> {
             ),
           );
         },
-        backgroundColor: const Color(0xFF009688),
+        backgroundColor: const Color(0xFF246BFD),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: const Icon(Icons.add, color: Colors.white),
       ),

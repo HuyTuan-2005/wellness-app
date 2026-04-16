@@ -40,8 +40,8 @@ class MedicationCard extends StatelessWidget {
       case ReminderStatus.upcoming:
       default:
         iconBgColor = const Color(0xFFE0F2F1); // Teal nhạt
-        iconColor = const Color(0xFF009688); // Teal đậm
-        trailingWidget = _buildActionButton("Đã uống", const Color(0xFF009688));
+        iconColor = const Color(0xFF246BFD); // Teal đậm
+        trailingWidget = _buildActionButton("Đã uống", const Color(0xFF246BFD));
     }
 
     return Container(

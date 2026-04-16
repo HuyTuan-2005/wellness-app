@@ -30,7 +30,7 @@ class MedicationDetailScreen extends StatelessWidget {
         actions: [
           IconButton(
             onPressed: () {},
-            icon: const Icon(Icons.edit_outlined, color: Color(0xFF009688)),
+            icon: const Icon(Icons.edit_outlined, color: Color(0xFF246BFD)),
           ),
         ],
       ),
@@ -52,7 +52,7 @@ class MedicationDetailScreen extends StatelessWidget {
                     child: const Icon(
                       Icons.medication,
                       size: 48,
-                      color: Color(0xFF009688),
+                      color: Color(0xFF246BFD),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -99,7 +99,7 @@ class MedicationDetailScreen extends StatelessWidget {
                     style: TextStyle(fontSize: 16, color: Colors.white),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF009688),
+                    backgroundColor: const Color(0xFF246BFD),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15),
                     ),
@@ -126,7 +126,7 @@ class MedicationDetailScreen extends StatelessWidget {
         style: TextStyle(
           color: status == ReminderStatus.completed
               ? Colors.grey[700]
-              : const Color(0xFF009688),
+              : const Color(0xFF246BFD),
           fontWeight: FontWeight.bold,
           fontSize: 12,
         ),

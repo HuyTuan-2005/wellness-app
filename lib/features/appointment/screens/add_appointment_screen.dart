@@ -146,7 +146,7 @@ class _AddAppointmentScreenState extends State<AddAppointmentScreen> {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF009688),
+                    backgroundColor: const Color(0xFF246BFD),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15),
                     ),

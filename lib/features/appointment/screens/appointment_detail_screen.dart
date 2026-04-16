@@ -50,7 +50,7 @@ class AppointmentDetailScreen extends StatelessWidget {
                         backgroundColor: const Color(0xFFE0F2F1),
                         child: const Icon(
                           Icons.person,
-                          color: Color(0xFF009688),
+                          color: Color(0xFF246BFD),
                           size: 30,
                         ),
                       ),
@@ -125,8 +125,8 @@ class AppointmentDetailScreen extends StatelessWidget {
               icon: const Icon(Icons.directions),
               label: const Text("Chỉ đường đến phòng khám"),
               style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFF009688),
-                side: const BorderSide(color: Color(0xFF009688)),
+                foregroundColor: const Color(0xFF246BFD),
+                side: const BorderSide(color: Color(0xFF246BFD)),
                 minimumSize: const Size(double.infinity, 50),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15),
@@ -144,7 +144,7 @@ class AppointmentDetailScreen extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: const Color(0xFF009688)),
+          Icon(icon, size: 20, color: const Color(0xFF246BFD)),
           const SizedBox(width: 12),
           Text("$label: ", style: TextStyle(color: Colors.grey[600])),
           Expanded(
