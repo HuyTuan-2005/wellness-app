@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import 'package:flutter/material.dart';
 import 'package:wellness_app/features/user_management/screens/user_list_screen.dart';
 
@@ -74,3 +75,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 }
+=======
+
+>>>>>>> 419a040 (add user_card)

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+<<<<<<< HEAD
 import 'package:wellness_app/core/theme/app_colors.dart';
+=======
+>>>>>>> 419a040 (add user_card)
 import 'package:wellness_app/features/user_management/widgets/user_card.dart';
 
 class UserListScreen extends StatefulWidget {
@@ -13,6 +16,7 @@ class _UserListScreenState extends State<UserListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+<<<<<<< HEAD
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: Padding(
@@ -33,6 +37,12 @@ class _UserListScreenState extends State<UserListScreen> {
             ],
           ),
         ),
+=======
+      body: UserCard(
+        title: "Huy Tuấn",
+        subTitle: "Huytuan.learn@gmail.com",
+        isActive: false,
+>>>>>>> 419a040 (add user_card)
       ),
     );
   }
