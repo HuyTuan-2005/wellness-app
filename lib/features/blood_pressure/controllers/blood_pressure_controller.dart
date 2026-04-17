@@ -70,4 +70,10 @@ class BloodPressureController extends ChangeNotifier {
     _targetDiastolic = diastolic;
     notifyListeners();
   }
+
+  void removeEntry(int index) {
+    if (index < 0 || index >= _history.length) return;
+    _history.removeAt(index);
+    notifyListeners();
+  }
 }
