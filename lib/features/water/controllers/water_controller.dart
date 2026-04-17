@@ -29,4 +29,12 @@ class WaterController extends ChangeNotifier {
     notifyListeners();
     return true;
   }
+
+  void removeEntry(int index) {
+    if (index < 0 || index >= _history.length) return;
+    _currentMl -= _history[index].ml;
+    if (_currentMl < 0) _currentMl = 0;
+    _history.removeAt(index);
+    notifyListeners();
+  }
 }
