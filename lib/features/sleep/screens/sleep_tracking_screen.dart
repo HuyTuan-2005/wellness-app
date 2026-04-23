@@ -25,7 +25,7 @@ class _SleepTrackingScreenState extends State<SleepTrackingScreen> {
       context: context,
       initialTime: _bedTime,
     );
-    if (picked == null) return;
+    if (!mounted || picked == null) return;
     setState(() {
       _bedTime = picked;
     });
@@ -36,7 +36,7 @@ class _SleepTrackingScreenState extends State<SleepTrackingScreen> {
       context: context,
       initialTime: _wakeTime,
     );
-    if (picked == null) return;
+    if (!mounted || picked == null) return;
     setState(() {
       _wakeTime = picked;
     });
@@ -44,6 +44,7 @@ class _SleepTrackingScreenState extends State<SleepTrackingScreen> {
 
   void _saveSleepSession() {
     final result = _controller.addSleepSession(bedTime: _bedTime, wakeTime: _wakeTime);
+    if (!mounted) return;
     if (result == SleepSessionResult.success) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Đã lưu phiên ngủ vào lịch sử.')),
@@ -66,15 +67,15 @@ class _SleepTrackingScreenState extends State<SleepTrackingScreen> {
   }
 
   void _onChanged() {
-    setState(() {});
+    if (mounted) setState(() {});
   }
 
   Future<void> _showGoalDialog() async {
     final textController = TextEditingController(text: _controller.goalHours.toStringAsFixed(1));
 
-    await showDialog<void>(
+    final result = await showDialog<double>(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return AlertDialog(
           title: const Text('Mục tiêu giờ ngủ'),
           content: TextField(
@@ -83,14 +84,13 @@ class _SleepTrackingScreenState extends State<SleepTrackingScreen> {
             decoration: const InputDecoration(labelText: 'Nhập số giờ mục tiêu'),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Hủy')),
+            TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: const Text('Hủy')),
             FilledButton(
               onPressed: () {
                 final value = double.tryParse(textController.text);
                 if (value != null) {
-                  _controller.updateGoal(value);
+                  Navigator.of(dialogContext).pop(value);
                 }
-                Navigator.of(context).pop();
               },
               child: const Text('Lưu'),
             ),
@@ -99,7 +99,8 @@ class _SleepTrackingScreenState extends State<SleepTrackingScreen> {
       },
     );
 
-    textController.dispose();
+    if (!mounted || result == null) return;
+    _controller.updateGoal(result);
   }
 
   @override
@@ -237,7 +238,19 @@ class _SleepTrackingScreenState extends State<SleepTrackingScreen> {
                               ),
                               title: Text('${item.hours.toStringAsFixed(1)} giờ ngủ'),
                               subtitle: Text('Từ ${DateHelper.formatTime(item.bedTime)} đến ${DateHelper.formatTime(item.wakeTime)}'),
-                              trailing: Text('${item.createdAt.day}/${item.createdAt.month}'),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text('${item.createdAt.day}/${item.createdAt.month}'),
+                                  const SizedBox(width: 4),
+                                  IconButton(
+                                    icon: Icon(Icons.delete_outline, color: Colors.red.shade300, size: 20),
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(),
+                                    onPressed: () => _controller.removeEntry(index),
+                                  ),
+                                ],
+                              ),
                             );
                           },
                         ),

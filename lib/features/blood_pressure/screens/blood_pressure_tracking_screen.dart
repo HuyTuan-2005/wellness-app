@@ -26,16 +26,16 @@ class _BloodPressureTrackingScreenState extends State<BloodPressureTrackingScree
   }
 
   void _onChanged() {
-    setState(() {});
+    if (mounted) setState(() {});
   }
 
   Future<void> _showTargetDialog() async {
     final sysController = TextEditingController(text: _controller.targetSystolic.toString());
     final diaController = TextEditingController(text: _controller.targetDiastolic.toString());
 
-    await showDialog<void>(
+    final result = await showDialog<({int sys, int dia})>(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return AlertDialog(
           title: const Text('Mục tiêu huyết áp'),
           content: Column(
@@ -55,15 +55,14 @@ class _BloodPressureTrackingScreenState extends State<BloodPressureTrackingScree
             ],
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Hủy')),
+            TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: const Text('Hủy')),
             FilledButton(
               onPressed: () {
                 final sys = int.tryParse(sysController.text);
                 final dia = int.tryParse(diaController.text);
                 if (sys != null && dia != null) {
-                  _controller.updateTarget(systolic: sys, diastolic: dia);
+                  Navigator.of(dialogContext).pop((sys: sys, dia: dia));
                 }
-                Navigator.of(context).pop();
               },
               child: const Text('Lưu'),
             ),
@@ -72,8 +71,8 @@ class _BloodPressureTrackingScreenState extends State<BloodPressureTrackingScree
       },
     );
 
-    sysController.dispose();
-    diaController.dispose();
+    if (!mounted || result == null) return;
+    _controller.updateTarget(systolic: result.sys, diastolic: result.dia);
   }
 
   Future<void> _showAddReadingDialog() async {
@@ -81,9 +80,9 @@ class _BloodPressureTrackingScreenState extends State<BloodPressureTrackingScree
     final diaController = TextEditingController();
     final triggerController = TextEditingController();
 
-    await showDialog<void>(
+    final result = await showDialog<({int sys, int dia, String trigger})>(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return AlertDialog(
           title: const Text('Thêm lần đo huyết áp'),
           content: SingleChildScrollView(
@@ -112,19 +111,16 @@ class _BloodPressureTrackingScreenState extends State<BloodPressureTrackingScree
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Hủy')),
+            TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: const Text('Hủy')),
             FilledButton(
               onPressed: () {
                 final sys = int.tryParse(sysController.text);
                 final dia = int.tryParse(diaController.text);
                 if (sys != null && dia != null) {
-                  _controller.addReading(
-                    systolic: sys,
-                    diastolic: dia,
-                    trigger: triggerController.text.trim(),
+                  Navigator.of(dialogContext).pop(
+                    (sys: sys, dia: dia, trigger: triggerController.text.trim()),
                   );
                 }
-                Navigator.of(context).pop();
               },
               child: const Text('Thêm'),
             ),
@@ -133,9 +129,12 @@ class _BloodPressureTrackingScreenState extends State<BloodPressureTrackingScree
       },
     );
 
-    sysController.dispose();
-    diaController.dispose();
-    triggerController.dispose();
+    if (!mounted || result == null) return;
+    _controller.addReading(
+      systolic: result.sys,
+      diastolic: result.dia,
+      trigger: result.trigger,
+    );
   }
 
   @override
@@ -279,49 +278,60 @@ class _BloodPressureTrackingScreenState extends State<BloodPressureTrackingScree
                         ),
                       )
                     else
-                      ..._controller.history.map(
-                        (item) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 6),
-                          child: Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.red.shade50,
-                                  borderRadius: BorderRadius.circular(10),
+                      ..._controller.history.asMap().entries.map(
+                        (mapEntry) {
+                          final index = mapEntry.key;
+                          final item = mapEntry.value;
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 6),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red.shade50,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Icon(Icons.favorite, color: Colors.red.shade300, size: 20),
                                 ),
-                                child: Icon(Icons.favorite, color: Colors.red.shade300, size: 20),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      '${item.systolic}/${item.diastolic} mmHg',
-                                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Color(0xFFB71C1C)),
-                                    ),
-                                    if (item.trigger.isNotEmpty)
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
                                       Text(
-                                        item.trigger,
-                                        style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                                        '${item.systolic}/${item.diastolic} mmHg',
+                                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Color(0xFFB71C1C)),
                                       ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      'Phân loại: ${_controller.classify(item)}',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        color: _controller.statusColorFor(item),
+                                      if (item.trigger.isNotEmpty)
+                                        Text(
+                                          item.trigger,
+                                          style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                                        ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        'Phân loại: ${_controller.classify(item)}',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: _controller.statusColorFor(item),
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              Text(DateHelper.formatTime(item.time), style: TextStyle(fontSize: 12, color: Colors.grey.shade500)),
-                            ],
-                          ),
-                        ),
+                                Text(DateHelper.formatTime(item.time), style: TextStyle(fontSize: 12, color: Colors.grey.shade500)),
+                                const SizedBox(width: 4),
+                                IconButton(
+                                  icon: Icon(Icons.delete_outline, color: Colors.red.shade300, size: 20),
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(),
+                                  onPressed: () => _controller.removeEntry(index),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
                       ),
                   ],
                 ),

@@ -13,7 +13,7 @@ class WellnessApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Ứng dụng Sức khỏe',
+      title: 'Wellness App',
       debugShowCheckedModeBanner: false,
 
       // darkTheme: AppTheme.darkTheme,

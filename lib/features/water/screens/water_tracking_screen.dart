@@ -27,12 +27,12 @@ class _WaterTrackingScreenState extends State<WaterTrackingScreen> {
   }
 
   void _onControllerChanged() {
-    setState(() {});
+    if (mounted) setState(() {});
   }
 
   void _addWaterAndNotify(int ml) {
     final reachedGoal = _controller.addWater(ml);
-    if (reachedGoal) {
+    if (reachedGoal && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Chúc mừng! Bạn đã đạt mục tiêu nước uống hôm nay.')),
       );
@@ -42,9 +42,9 @@ class _WaterTrackingScreenState extends State<WaterTrackingScreen> {
   Future<void> _showGoalDialog() async {
     final textController = TextEditingController(text: _controller.goalMl.toString());
 
-    await showDialog<void>(
+    final result = await showDialog<int>(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return AlertDialog(
           title: const Text('Mục tiêu nước uống'),
           content: TextField(
@@ -57,23 +57,15 @@ class _WaterTrackingScreenState extends State<WaterTrackingScreen> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () => Navigator.of(dialogContext).pop(),
               child: const Text('Hủy'),
             ),
             FilledButton(
               onPressed: () {
                 final value = int.tryParse(textController.text);
-                if (value == null) {
-                  return;
+                if (value != null) {
+                  Navigator.of(dialogContext).pop(value);
                 }
-
-                final ok = _controller.updateGoal(value);
-                if (!ok) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Mục tiêu không hợp lệ. Vui lòng nhập từ 500ml trở lên.')),
-                  );
-                }
-                Navigator.of(context).pop();
               },
               child: const Text('Lưu'),
             ),
@@ -82,7 +74,14 @@ class _WaterTrackingScreenState extends State<WaterTrackingScreen> {
       },
     );
 
-    textController.dispose();
+    if (!mounted || result == null) return;
+
+    final ok = _controller.updateGoal(result);
+    if (!ok) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Mục tiêu không hợp lệ. Vui lòng nhập từ 500ml trở lên.')),
+      );
+    }
   }
 
   @override
@@ -294,32 +293,43 @@ class _WaterTrackingScreenState extends State<WaterTrackingScreen> {
                         ),
                       )
                     else
-                      ..._controller.history.map(
-                        (entry) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 6),
-                          child: Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.blue.shade50,
-                                  borderRadius: BorderRadius.circular(10),
+                      ..._controller.history.asMap().entries.map(
+                        (mapEntry) {
+                          final index = mapEntry.key;
+                          final entry = mapEntry.value;
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 6),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue.shade50,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Icon(Icons.water_drop, color: Colors.blue.shade400, size: 20),
                                 ),
-                                child: Icon(Icons.water_drop, color: Colors.blue.shade400, size: 20),
-                              ),
-                              const SizedBox(width: 12),
-                              Text(
-                                '+${entry.ml}ml',
-                                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Color(0xFF1A237E)),
-                              ),
-                              const Spacer(),
-                              Text(
-                                DateHelper.formatTime(entry.time),
-                                style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
-                              ),
-                            ],
-                          ),
-                        ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  '+${entry.ml}ml',
+                                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Color(0xFF1A237E)),
+                                ),
+                                const Spacer(),
+                                Text(
+                                  DateHelper.formatTime(entry.time),
+                                  style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
+                                ),
+                                const SizedBox(width: 4),
+                                IconButton(
+                                  icon: Icon(Icons.delete_outline, color: Colors.red.shade300, size: 20),
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(),
+                                  onPressed: () => _controller.removeEntry(index),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
                       ),
                   ],
                 ),

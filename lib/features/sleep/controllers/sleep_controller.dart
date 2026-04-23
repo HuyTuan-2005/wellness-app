@@ -50,6 +50,12 @@ class SleepController extends ChangeNotifier {
     notifyListeners();
     return SleepSessionResult.success;
   }
+
+  void removeEntry(int index) {
+    if (index < 0 || index >= _history.length) return;
+    _history.removeAt(index);
+    notifyListeners();
+  }
 }
 
 enum SleepSessionResult { success, invalidTimeRange }

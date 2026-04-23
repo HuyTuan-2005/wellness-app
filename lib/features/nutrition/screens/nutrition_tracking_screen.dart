@@ -30,15 +30,15 @@ class _NutritionTrackingScreenState extends State<NutritionTrackingScreen> {
   }
 
   void _onChanged() {
-    setState(() {});
+    if (mounted) setState(() {});
   }
 
   Future<void> _showGoalDialog() async {
     final textController = TextEditingController(text: _controller.goalCalo.toString());
 
-    await showDialog<void>(
+    final result = await showDialog<int>(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return AlertDialog(
           title: const Text('Mục tiêu calo'),
           content: TextField(
@@ -51,16 +51,15 @@ class _NutritionTrackingScreenState extends State<NutritionTrackingScreen> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () => Navigator.of(dialogContext).pop(),
               child: const Text('Hủy'),
             ),
             FilledButton(
               onPressed: () {
                 final value = int.tryParse(textController.text);
                 if (value != null) {
-                  _controller.updateGoal(value);
+                  Navigator.of(dialogContext).pop(value);
                 }
-                Navigator.of(context).pop();
               },
               child: const Text('Lưu'),
             ),
@@ -69,7 +68,8 @@ class _NutritionTrackingScreenState extends State<NutritionTrackingScreen> {
       },
     );
 
-    textController.dispose();
+    if (!mounted || result == null) return;
+    _controller.updateGoal(result);
   }
 
   Future<void> _openAddFoodDialog() async {
@@ -295,42 +295,53 @@ class _NutritionTrackingScreenState extends State<NutritionTrackingScreen> {
                         ),
                       )
                     else
-                      ..._controller.history.map(
-                        (entry) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 6),
-                          child: Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.green.shade50,
-                                  borderRadius: BorderRadius.circular(10),
+                      ..._controller.history.asMap().entries.map(
+                        (mapEntry) {
+                          final index = mapEntry.key;
+                          final entry = mapEntry.value;
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 6),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.green.shade50,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Icon(entry.mealType.icon, color: Colors.green.shade400, size: 20),
                                 ),
-                                child: Icon(entry.mealType.icon, color: Colors.green.shade400, size: 20),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      entry.foodName,
-                                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Color(0xFF1B5E20)),
-                                    ),
-                                    Text(
-                                      '${entry.quantity}g - ${entry.calo.round()} kcal',
-                                      style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
-                                    ),
-                                  ],
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        entry.foodName,
+                                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Color(0xFF1B5E20)),
+                                      ),
+                                      Text(
+                                        '${entry.quantity}g - ${entry.calo.round()} kcal',
+                                        style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                DateHelper.formatTime(entry.time),
-                                style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
-                              ),
-                            ],
-                          ),
-                        ),
+                                Text(
+                                  DateHelper.formatTime(entry.time),
+                                  style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                                ),
+                                const SizedBox(width: 4),
+                                IconButton(
+                                  icon: Icon(Icons.delete_outline, color: Colors.red.shade300, size: 20),
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(),
+                                  onPressed: () => _controller.removeEntry(index),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
                       ),
                   ],
                 ),
