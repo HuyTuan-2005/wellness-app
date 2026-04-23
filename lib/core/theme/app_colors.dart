@@ -25,8 +25,14 @@ class AppColors {
   ); // Chữ chú thích
 
   // Hệ thống màu chữ (Text)
-  static const Color textPrimary = Color(0xFF111827); // Chữ tiêu đề
+  static const Color textPrimary = Color.fromARGB(
+    255,
+    5,
+    98,
+    173,
+  ); // Chữ tiêu đề
   static const Color textSecondary = Color(0xFF6B7280); // Chữ chú thích
+  static const Color textDark = Colors.black; // Chữ chú thích
 
   // Màu trạng thái (Semantic) - Cực kỳ quan trọng cho app sức khỏe
   static const Color success = Color(

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:wellness_app/core/theme/app_colors.dart';
+import 'package:wellness_app/features/feedback/screens/feedback_details_screen.dart';
 import '../widgets/feedback_item.dart';
 
 class FeedbackScreen extends StatefulWidget {
@@ -16,11 +18,43 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
       'name': 'Nguyễn Văn A',
       'email': 'nva123@gmail.com',
       'content':
+          'Ứng dụng rất hữu ích, nhưng phần biểu đồ hiển thị hơi chậm trên điện thoại cũ của tôi.' +
+          'Ứng dụng rất hữu ích, nhưng phần biểu đồ hiển thị hơi chậm trên điện thoại cũ của tôi.' +
+          'Ứng dụng rất hữu ích, nhưng phần biểu đồ hiển thị hơi chậm trên điện thoại cũ của tôi.' +
+          'Ứng dụng rất hữu ích, nhưng phần biểu đồ hiển thị hơi chậm trên điện thoại cũ của tôi.' +
+          'Ứng dụng rất hữu ích, nhưng phần biểu đồ hiển thị hơi chậm trên điện thoại cũ của tôi.' +
+          'Ứng dụng rất hữu ích, nhưng phần biểu đồ hiển thị hơi chậm trên điện thoại cũ của tôi.' +
+          'Ứng dụng rất hữu ích, nhưng phần biểu đồ hiển thị hơi chậm trên điện thoại cũ của tôi.' +
+          'Ứng dụng rất hữu ích, nhưng phần biểu đồ hiển thị hơi chậm trên điện thoại cũ của tôi.' +
           'Ứng dụng rất hữu ích, nhưng phần biểu đồ hiển thị hơi chậm trên điện thoại cũ của tôi.',
       'date': '14/04/2026',
       'isRead': false,
       'reply': '',
     },
+    {
+      'id': 2,
+      'name': 'Trần Quốc Trường',
+      'email': 'truong@gmail.com',
+      'content':
+          'Tôi muốn đề xuất thêm tính năng kết nối và đồng bộ nhịp tim qua Apple Health.',
+      'date': '12/04/2026',
+      'isRead': true,
+      'reply':
+          'Cảm ơn bạn, đội ngũ phát triển đã ghi nhận và sẽ nghiên cứu tích hợp trong phiên bản sắp tới.',
+    },
+
+    {
+      'id': 2,
+      'name': 'Trần Quốc Trường',
+      'email': 'truong@gmail.com',
+      'content':
+          'Tôi muốn đề xuất thêm tính năng kết nối và đồng bộ nhịp tim qua Apple Health.',
+      'date': '12/04/2026',
+      'isRead': false,
+      'reply':
+          'Cảm ơn bạn, đội ngũ phát triển đã ghi nhận và sẽ nghiên cứu tích hợp trong phiên bản sắp tới.',
+    },
+
     {
       'id': 2,
       'name': 'Trần Quốc Trường',
@@ -44,211 +78,156 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
     final fb = _feedbacks[index];
     final replyController = TextEditingController();
 
-    showModalBottomSheet(
+    showDialog(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        // Cần dùng StatefulBuilder để UI trong BottomSheet cập nhật ngay khi ấn "Gửi phản hồi"
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            return Container(
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          // scrollable: true,
+          backgroundColor: AppColors.surface,
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("Phản hồi nhanh"),
+              IconButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                icon: Icon(Icons.close),
               ),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
+            ],
+          ),
+          content: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                  color: AppColors.background,
+                ),
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Header của popup (Avatar + Tên + Nút tắt)
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        CircleAvatar(
-                          radius: 24,
-                          backgroundColor: Colors.blue.shade50,
-                          child: Text(
-                            fb['name'][0].toUpperCase(),
-                            style: const TextStyle(
-                              color: Color(0xFF246BFD),
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                fb['name'],
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                ),
-                              ),
-                              Text(
-                                fb['email'],
-                                style: TextStyle(
-                                  color: Colors.grey.shade500,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: () => Navigator.pop(context),
-                          icon: const Icon(Icons.close, color: Colors.grey),
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
-                        ),
-                      ],
+                    ListTile(
+                      visualDensity: VisualDensity.compact,
+                      contentPadding: EdgeInsets.zero,
+                      leading: CircleAvatar(
+                        radius: 22,
+                        child: Text(fb['name'].split(" ").last[0]),
+                      ),
+                      title: Text(
+                        fb["name"],
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Text(fb["email"]),
                     ),
-                    const SizedBox(height: 20),
+                    // Row(
+                    //   children: [
+                    //     CircleAvatar(
+                    //       radius: 22,
+                    //       child: Text(fb['name'].split(" ").last[0]),
+                    //     ),
+                    //     const SizedBox(width: 12),
+                    //     Column(
+                    //       crossAxisAlignment: CrossAxisAlignment.start,
+                    //       children: [
+                    //         Text(
+                    //           fb["name"],
+                    //           style: TextStyle(fontWeight: FontWeight.bold),
+                    //         ),
+                    //         Text(fb["email"]),
+                    //       ],
+                    //     ),
+                    //   ],
+                    // ),
+                    const SizedBox(height: 12),
 
-                    // Nội dung góp ý của user
                     Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(18.0),
                       decoration: BoxDecoration(
-                        color: Colors.grey.shade50,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.grey.shade200),
-                      ),
-                      child: Text(
-                        fb['content'],
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Color(0xFF1E293B),
-                          height: 1.5,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
+                        color: AppColors.surface,
 
-                    // Khu vực Admin trả lời
-                    if (fb['reply'].toString().isNotEmpty)
-                      // Đã trả lời -> Hiện đoạn chat
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFEFF6FF),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: const Color(0xFFBFDBFE)),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Row(
-                              children: [
-                                Icon(
-                                  Icons.mail_outline,
-                                  size: 14,
-                                  color: Color(0xFF246BFD),
-                                ),
-                                SizedBox(width: 4),
-                                Text(
-                                  'Admin đã phản hồi:',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF246BFD),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              fb['reply'],
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: Color(0xFF1E3A8A),
-                                height: 1.5,
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    else
-                      // Chưa trả lời -> Hiện ô nhập liệu
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          TextField(
-                            controller: replyController,
-                            maxLines: 3,
-                            decoration: InputDecoration(
-                              hintText: 'Viết câu trả lời để gửi qua Email...',
-                              hintStyle: const TextStyle(
-                                fontSize: 13,
-                                color: Colors.grey,
-                              ),
-                              filled: true,
-                              fillColor: Colors.white,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(
-                                  color: Colors.grey.shade300,
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: Color(0xFF246BFD),
-                                ),
-                              ),
+                          Text(
+                            fb['date'],
+                            style: TextStyle(
+                              color: AppColors.textDark.withValues(alpha: 0.4),
+                              fontSize: 12,
                             ),
                           ),
-                          const SizedBox(height: 12),
-                          ElevatedButton.icon(
-                            onPressed: () {
-                              if (replyController.text.isNotEmpty) {
-                                // Cập nhật dữ liệu
-                                setState(() {
-                                  _feedbacks[index]['reply'] =
-                                      replyController.text;
-                                });
-                                // Cập nhật luôn UI của BottomSheet hiện tại
-                                setModalState(() {});
-                              }
+                          const SizedBox(height: 8),
+                          InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => FeedbackDetailsScreen(),
+                                  fullscreenDialog: false,
+                                ),
+                              );
                             },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF246BFD),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              elevation: 0,
-                            ),
-                            icon: const Icon(
-                              Icons.send,
-                              size: 14,
-                              color: Colors.white,
-                            ),
-                            label: const Text(
-                              'Gửi phản hồi',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            child: Text(
+                              fb['content'],
+                              maxLines: 10,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
                       ),
-
-                    const SizedBox(height: 16),
+                    ),
                   ],
                 ),
               ),
-            );
-          },
+              const SizedBox(height: 20),
+              Text(
+                "Phản hồi của bạn",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+
+              TextField(
+                maxLines: 3,
+                controller: replyController,
+                decoration: InputDecoration(
+                  hintText: "Nhập phản hồi",
+                  hintStyle: TextStyle(
+                    color: AppColors.textDark.withAlpha(90),
+                    fontSize: 15,
+                  ),
+
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                    borderSide: BorderSide(color: AppColors.border),
+                  ),
+
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                    borderSide: BorderSide(color: AppColors.primary, width: 2),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton.icon(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+
+              label: Text("Gửi"),
+              icon: const Icon(Icons.send, color: Colors.blue),
+              style: TextButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.surface,
+              ),
+              iconAlignment: IconAlignment.end,
+            ),
+          ],
         );
       },
     );
@@ -302,7 +281,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
             content: fb['content'],
             date: fb['date'],
             isRead: fb['isRead'],
-            onTap: () => _openFeedbackDetail(index), // Mở popup khi ấn
+            onTap: () => _openFeedbackDetail(index),
           );
         },
       ),

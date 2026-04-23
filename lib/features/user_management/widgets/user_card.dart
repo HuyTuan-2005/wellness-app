@@ -45,7 +45,7 @@ class _UserCardState extends State<UserCard> {
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: AppColors.primary,
-              fontSize: 22,
+              fontSize: 18,
             ),
           ),
         ),

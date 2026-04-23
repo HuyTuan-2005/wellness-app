@@ -11,7 +11,7 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  int _currentIndex = 1;
+  int _currentIndex = 3;
 
   final List<Widget> _page = [
     Container(),
