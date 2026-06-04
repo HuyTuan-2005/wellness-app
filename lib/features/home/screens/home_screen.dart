@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:wellness_app/features/appointment/screens/appointment_list_screen.dart';
 import 'package:wellness_app/features/blood_pressure/screens/blood_pressure_tracking_screen.dart';
+import 'package:wellness_app/features/medication/screens/medication_list_screen.dart';
 import '../../../core/theme/app_colors.dart';
 import 'package:wellness_app/features/profile/screens/profile_screen.dart';
 import 'package:wellness_app/features/BMI/screens/BMI_screen.dart';
@@ -42,7 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             const SizedBox(height: 10),
             const Text(
-              'Hôm nay bạn khỏe mạnh chứ?',
+              'Hôm nay bạn khỏe chứ?',
               style: TextStyle(
                 fontSize: 23,
                 fontWeight: FontWeight.bold,
@@ -127,6 +129,40 @@ class _HomeScreenState extends State<HomeScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (_) => const BloodPressureTrackingScreen(),
+                  ),
+                );
+              },
+            ),
+
+            const SizedBox(height: 14),
+
+            _FeatureCard(
+              title: 'Lịch uống thuốc',
+              subtitle: 'Ghi nhận thời gian và liều lượng thuốc',
+              icon: Icons.medication_outlined,
+              color: const Color(0xFF0288D1),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const MedicationListScreen(),
+                  ),
+                );
+              },
+            ),
+
+            const SizedBox(height: 14),
+
+            _FeatureCard(
+              title: 'Lịch hẹn bác sĩ',
+              subtitle: 'Ghi nhận thời gian và địa điểm hẹn',
+              icon: Icons.calendar_today_outlined,
+              color: const Color(0xFF0288D1),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const AppointmentListScreen(),
                   ),
                 );
               },

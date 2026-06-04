@@ -1,36 +1,69 @@
-import 'package:wellness_app/core/theme/constants/enums.dart';
+class MedicationModel {
+  int? id;
+  String name;
+  String dosage;
+  String time;
+  String frequency;
+  int durationDays;
+  int totalQuantity;
+  int takenQuantity;
+  String notes;
+  String status;
 
-class Medication {
-  final String id;
-  final String name;
-  final String dosage;
-  final String time;
-  ReminderStatus status;
+  // 3 TRƯỜNG MỚI ĐỂ QUẢN LÝ NGÀY
+  String startDate;
+  String? lastTakenDate;
+  String? nextDoseDate;
 
-  Medication({
-    required this.id,
+  MedicationModel({
+    this.id,
     required this.name,
     required this.dosage,
     required this.time,
-    this.status =
-        ReminderStatus.upcoming, // Mặc định khi mới thêm thuốc là "Sắp đến"
+    required this.frequency,
+    required this.durationDays,
+    required this.totalQuantity,
+    required this.takenQuantity,
+    required this.notes,
+    required this.status,
+    required this.startDate,
+    this.lastTakenDate,
+    this.nextDoseDate,
   });
-}
 
-// Dữ liệu giả để test UI
-List<Medication> mockMedications = [
-  Medication(
-    id: '1',
-    name: 'Paracetamol 500mg',
-    dosage: '1 viên',
-    time: '08:00 AM',
-    status: ReminderStatus.upcoming,
-  ),
-  Medication(
-    id: '2',
-    name: 'Vitamin C',
-    dosage: '2 viên',
-    time: '14:00 PM',
-    status: ReminderStatus.upcoming,
-  ),
-];
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'dosage': dosage,
+      'time': time,
+      'frequency': frequency,
+      'durationDays': durationDays,
+      'totalQuantity': totalQuantity,
+      'takenQuantity': takenQuantity,
+      'notes': notes,
+      'status': status,
+      'startDate': startDate,
+      'lastTakenDate': lastTakenDate,
+      'nextDoseDate': nextDoseDate,
+    };
+  }
+
+  factory MedicationModel.fromMap(Map<String, dynamic> map) {
+    return MedicationModel(
+      id: map['id'],
+      name: map['name'],
+      dosage: map['dosage'],
+      time: map['time'],
+      frequency: map['frequency'],
+      durationDays: map['durationDays'],
+      totalQuantity: map['totalQuantity'],
+      takenQuantity: map['takenQuantity'],
+      notes: map['notes'],
+      status: map['status'],
+      startDate: map['startDate'],
+      lastTakenDate: map['lastTakenDate'],
+      nextDoseDate: map['nextDoseDate'],
+    );
+  }
+}

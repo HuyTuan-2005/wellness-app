@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:wellness_app/core/theme/constants/enums.dart';
 
 class AppointmentCard extends StatelessWidget {
   final String doctorName;
   final String location;
   final String date;
   final String time;
-  final ReminderStatus status;
+  final String status;
   final VoidCallback onViewDetails;
 
   const AppointmentCard({
@@ -26,17 +25,17 @@ class AppointmentCard extends StatelessWidget {
     Color statusBgColor;
 
     switch (status) {
-      case ReminderStatus.completed:
+      case "completed":
         statusText = "Đã khám";
         statusColor = Colors.grey[700]!;
         statusBgColor = Colors.grey[200]!;
         break;
-      case ReminderStatus.overdue:
+      case "overdue":
         statusText = "Bị nhỡ";
         statusColor = const Color(0xFFE53935);
         statusBgColor = const Color(0xFFFFEBEE);
         break;
-      case ReminderStatus.upcoming:
+      case "upcoming":
       default:
         statusText = "Sắp đến";
         statusColor = const Color(0xFF246BFD);
@@ -49,7 +48,7 @@ class AppointmentCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: status == ReminderStatus.upcoming
+        border: status == "upcoming"
             ? Border.all(color: const Color(0xFFE0F2F1), width: 1.5)
             : null,
         boxShadow: [
@@ -108,9 +107,7 @@ class AppointmentCard extends StatelessWidget {
                 ),
                 child: Icon(
                   Icons.person,
-                  color: status == ReminderStatus.completed
-                      ? Colors.grey
-                      : Colors.black87,
+                  color: status == "completed" ? Colors.grey : Colors.black87,
                 ),
               ),
               const SizedBox(width: 16),
@@ -123,7 +120,7 @@ class AppointmentCard extends StatelessWidget {
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
-                        color: status == ReminderStatus.completed
+                        color: status == "completed"
                             ? Colors.grey
                             : Colors.black,
                       ),

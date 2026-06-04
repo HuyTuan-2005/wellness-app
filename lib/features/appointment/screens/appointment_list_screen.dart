@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:wellness_app/data/models/appointment.dart';
-import 'package:wellness_app/features/appointment/screens/appointment_detail_screen.dart';
+import 'package:wellness_app/data/models/local/database_helper.dart';
 import 'package:wellness_app/features/appointment/widgets/appointment_card.dart';
+import 'appointment_detail_screen.dart';
 import 'add_appointment_screen.dart';
 
 class AppointmentListScreen extends StatefulWidget {
@@ -12,6 +13,25 @@ class AppointmentListScreen extends StatefulWidget {
 }
 
 class _AppointmentListScreenState extends State<AppointmentListScreen> {
+  List<AppointmentModel> _appointments = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAppointments();
+  }
+
+  // Hàm tải dữ liệu lịch hẹn từ Database
+  Future<void> _loadAppointments() async {
+    setState(() => _isLoading = true);
+    final data = await DatabaseHelper.instance.getAllAppointments();
+    setState(() {
+      _appointments = data;
+      _isLoading = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,57 +45,82 @@ class _AppointmentListScreenState extends State<AppointmentListScreen> {
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: mockAppointments.length,
-        itemBuilder: (context, index) {
-          final appt = mockAppointments[index];
+      body: _isLoading
+          ? const Center(
+              child: CircularProgressIndicator(color: Color(0xFF009688)),
+            )
+          : _appointments.isEmpty
+          ? const Center(child: Text("Bạn chưa có lịch hẹn nào."))
+          : ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: _appointments.length,
+              itemBuilder: (context, index) {
+                final appt = _appointments[index];
 
-          return GestureDetector(
-            onTap: () {
-              // Bấm vào vùng trống của thẻ cũng chuyển sang chi tiết
-              _navigateToDetail(context, appt);
-            },
-            child: AppointmentCard(
-              doctorName: appt.doctorName,
-              location: appt.location,
-              date: appt.date,
-              time: appt.time,
-              status: appt.status,
-              onViewDetails: () {
-                // Bấm vào chữ "Xem chi tiết" cũng chuyển trang
-                _navigateToDetail(context, appt);
+                // Tách chuỗi dateTime thành Date và Time để hiển thị lên Card
+                // Giả sử dateTime lưu dạng "20/04/2026 22:08" hoặc ISO8601
+                String displayDate = appt.dateTime.split(
+                  ' ',
+                )[0]; // Cắt lấy phần ngày
+                String displayTime = appt.dateTime.contains(' ')
+                    ? appt.dateTime.split(' ')[1]
+                    : appt.dateTime; // Cắt lấy giờ
+
+                return GestureDetector(
+                  onTap: () => _navigateToDetail(
+                    context,
+                    appt,
+                    displayDate,
+                    displayTime,
+                  ),
+                  child: AppointmentCard(
+                    doctorName: appt.doctorName,
+                    location: appt.location,
+                    date: displayDate,
+                    time: displayTime,
+                    status: appt.status,
+                    onViewDetails: () => _navigateToDetail(
+                      context,
+                      appt,
+                      displayDate,
+                      displayTime,
+                    ),
+                  ),
+                );
               },
             ),
-          );
-        },
-      ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
+        onPressed: () async {
+          await Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => const AddAppointmentScreen(),
             ),
           );
+          // Tải lại danh sách sau khi thêm mới thành công
+          _loadAppointments();
         },
-        backgroundColor: const Color(0xFF246BFD),
+        backgroundColor: const Color(0xFF009688),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
 
-  // Hàm chuyển trang được tách ra để code gọn gàng, có thể dùng lại ở nhiều chỗ
-  void _navigateToDetail(BuildContext context, Appointment appt) {
+  void _navigateToDetail(
+    BuildContext context,
+    AppointmentModel appt,
+    String displayDate,
+    String displayTime,
+  ) {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => AppointmentDetailScreen(
           doctorName: appt.doctorName,
           location: appt.location,
-          date: appt.date,
-          time: appt.time,
+          date: displayDate,
+          time: displayTime,
           status: appt.status,
         ),
       ),

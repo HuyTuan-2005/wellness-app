@@ -1,38 +1,43 @@
-import 'package:wellness_app/core/theme/constants/enums.dart';
+class AppointmentModel {
+  String? id;
+  String doctorName;
+  String location;
+  String dateTime; // ISO8601 String (Kết hợp ngày và giờ)
+  int reminderOffset; // Số phút báo trước (vd: 60 = 1 tiếng)
+  String notes;
+  String status;
 
-class Appointment {
-  final String id;
-  final String doctorName;
-  final String location;
-  final String date;
-  final String time;
-  ReminderStatus status;
-
-  Appointment({
-    required this.id,
+  AppointmentModel({
+    this.id,
     required this.doctorName,
     required this.location,
-    required this.date,
-    required this.time,
-    this.status = ReminderStatus.upcoming,
+    required this.dateTime,
+    required this.reminderOffset,
+    this.notes = "",
+    this.status = "upcoming",
   });
-}
 
-List<Appointment> mockAppointments = [
-  Appointment(
-    id: '1',
-    doctorName: 'Dr. Nguyễn Văn A',
-    location: 'Bệnh viện Đa khoa Quốc tế',
-    date: '25/10/2026',
-    time: '09:00 AM',
-    status: ReminderStatus.upcoming,
-  ),
-  Appointment(
-    id: '2',
-    doctorName: 'Dr. Trần Thị B',
-    location: 'Phòng khám Da liễu',
-    date: '28/10/2026',
-    time: '15:30 PM',
-    status: ReminderStatus.completed,
-  ),
-];
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'doctorName': doctorName,
+      'location': location,
+      'dateTime': dateTime,
+      'reminderOffset': reminderOffset,
+      'notes': notes,
+      'status': status,
+    };
+  }
+
+  factory AppointmentModel.fromMap(Map<String, dynamic> map) {
+    return AppointmentModel(
+      id: map['id'].toString(),
+      doctorName: map['doctorName'],
+      location: map['location'],
+      dateTime: map['dateTime'],
+      reminderOffset: map['reminderOffset'],
+      notes: map['notes'],
+      status: map['status'],
+    );
+  }
+}

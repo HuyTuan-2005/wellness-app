@@ -12,6 +12,7 @@ class WellnessApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint("==== BƯỚC 3: ĐANG VẼ GIAO DIỆN ====");
     return MaterialApp(
       title: 'Wellness App',
       debugShowCheckedModeBanner: false,
@@ -19,9 +20,10 @@ class WellnessApp extends StatelessWidget {
       // darkTheme: AppTheme.darkTheme,
       theme: AppTheme.lightTheme,
 
-      home: const DashboardScreen(),
-      // home: const MedicationListScreen(),
-      // home: const HomeScreen(),
+      //home: const DashboardScreen(),
+      //home: const AppointmentListScreen(),
+      home: const MedicationListScreen(),
+      //home: const HomeScreen(),
     );
   }
 }

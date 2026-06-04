@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:wellness_app/core/theme/constants/enums.dart';
 
 class AppointmentDetailScreen extends StatelessWidget {
   final String doctorName;
   final String location;
   final String date;
   final String time;
-  final ReminderStatus status;
+  final String status;
 
   const AppointmentDetailScreen({
     super.key,
