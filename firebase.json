@@ -1,0 +1,21 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "wellness-app-f70b7",
+          "appId": "1:299427485193:android:4ca06b8b76b89eb4c1cad8",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "wellness-app-f70b7",
+          "configurations": {
+            "android": "1:299427485193:android:4ca06b8b76b89eb4c1cad8"
+          }
+        }
+      }
+    }
+  }
+}
