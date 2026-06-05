@@ -12,7 +12,6 @@ class WellnessApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint("==== BƯỚC 3: ĐANG VẼ GIAO DIỆN ====");
     return MaterialApp(
       title: 'Wellness App',
       debugShowCheckedModeBanner: false,

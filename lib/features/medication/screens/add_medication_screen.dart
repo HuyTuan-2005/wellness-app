@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:wellness_app/controller/medication_controller.dart';
+import 'package:wellness_app/features/medication/controller/medication_controller.dart';
 
 class AddMedicationScreen extends StatefulWidget {
   const AddMedicationScreen({super.key});
