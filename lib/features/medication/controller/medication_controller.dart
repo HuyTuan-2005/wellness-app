@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wellness_app/data/models/local/database_helper.dart';
-import 'package:wellness_app/data/models/medication.dart';
+import 'package:wellness_app/features/medication/models/medication.dart';
 
 class MedicationController {
   // Hàm xử lý logic thêm lịch uống thuốc
