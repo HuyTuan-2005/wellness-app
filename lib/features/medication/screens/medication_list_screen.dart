@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wellness_app/data/models/local/database_helper.dart';
 import 'package:wellness_app/data/models/medication.dart';
-import 'package:wellness_app/features/medication/screens/medication_detail_screen.dart';
 import 'package:wellness_app/features/medication/widget/medication_card.dart';
 import 'add_medication_screen.dart';
 

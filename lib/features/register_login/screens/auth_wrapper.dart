@@ -5,7 +5,6 @@ import 'package:wellness_app/core/theme/app_colors.dart';
 import 'package:wellness_app/data/services/auth_service.dart';
 import 'package:wellness_app/features/home/screens/home_screen.dart';
 import 'package:wellness_app/features/register_login/screens/login_screen.dart';
-import 'package:wellness_app/core/theme/app_theme.dart';
 
 class AuthWrapper extends StatefulWidget {
   const AuthWrapper({super.key});
