@@ -4,7 +4,7 @@ class MedicationDetailScreen extends StatelessWidget {
   final String name;
   final String dosage;
   final String time;
-  final String status;
+  final String status; // "upcoming", "completed", "overdue"
   final String frequency;
   final String notes;
   final int takenQuantity;
@@ -27,8 +27,31 @@ class MedicationDetailScreen extends StatelessWidget {
     double progress = totalQuantity > 0 ? (takenQuantity / totalQuantity) : 0;
     Color primaryTeal = const Color(0xFF009688);
 
+    // XỬ LÝ MÀU SẮC & TEXT THEO 3 TRẠNG THÁI
+    String badgeText;
+    Color statusColor;
+    Color statusBgColor;
+    String timelineTitle;
+
+    if (status == "completed") {
+      badgeText = "Đã uống hôm nay";
+      statusColor = Colors.green;
+      statusBgColor = Colors.green.withOpacity(0.1);
+      timelineTitle = "Đã uống ($time)";
+    } else if (status == "overdue") {
+      badgeText = "Bỏ lỡ liều";
+      statusColor = const Color(0xFFE53935); // Đỏ
+      statusBgColor = const Color(0xFFFFEBEE);
+      timelineTitle = "Đã lỡ hẹn ($time)";
+    } else {
+      badgeText = "Đang điều trị";
+      statusColor = primaryTeal;
+      statusBgColor = primaryTeal.withOpacity(0.1);
+      timelineTitle = "Sắp tới ($time)";
+    }
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC), // Nền xám nhạt
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: const Text(
           "Chi tiết thuốc",
@@ -50,17 +73,17 @@ class MedicationDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. HEADER LỚN NHƯ THIẾT KẾ CỦA BẠN
+            // 1. HEADER
             Center(
               child: Column(
                 children: [
                   Container(
                     padding: const EdgeInsets.all(28),
                     decoration: BoxDecoration(
-                      color: primaryTeal.withOpacity(0.1),
+                      color: statusBgColor,
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(Icons.medication, size: 56, color: primaryTeal),
+                    child: Icon(Icons.medication, size: 56, color: statusColor),
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -78,13 +101,13 @@ class MedicationDetailScreen extends StatelessWidget {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: primaryTeal.withOpacity(0.1),
+                      color: statusBgColor,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      "Đang điều trị",
+                      badgeText,
                       style: TextStyle(
-                        color: primaryTeal,
+                        color: statusColor,
                         fontWeight: FontWeight.bold,
                         fontSize: 13,
                       ),
@@ -95,7 +118,7 @@ class MedicationDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 40),
 
-            // 2. THẺ TIẾN ĐỘ ĐIỀU TRỊ
+            // 2. THẺ TIẾN ĐỘ
             const Text(
               "Tiến độ liệu trình",
               style: TextStyle(
@@ -146,7 +169,9 @@ class MedicationDetailScreen extends StatelessWidget {
                     child: LinearProgressIndicator(
                       value: progress,
                       backgroundColor: Colors.grey[100],
-                      valueColor: AlwaysStoppedAnimation<Color>(primaryTeal),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        status == 'completed' ? Colors.green : primaryTeal,
+                      ),
                       minHeight: 12,
                     ),
                   ),
@@ -196,7 +221,7 @@ class MedicationDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 32),
 
-            // 4. LỊCH SỬ UỐNG THUỐC (UI MOCKUP)
+            // 4. LỊCH SỬ UỐNG THUỐC (Timeline)
             const Text(
               "Lịch sử hôm nay",
               style: TextStyle(
@@ -206,11 +231,7 @@ class MedicationDetailScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            _buildTimelineItem(
-              time,
-              status == "completed" ? "Đã uống" : "Sắp tới",
-              isCompleted: status == "completed",
-            ),
+            _buildTimelineItem(time, timelineTitle, statusColor, statusBgColor),
           ],
         ),
       ),
@@ -248,10 +269,10 @@ class MedicationDetailScreen extends StatelessWidget {
 
   Widget _buildTimelineItem(
     String time,
-    String title, {
-    required bool isCompleted,
-  }) {
-    Color color = isCompleted ? Colors.green : Colors.grey[400]!;
+    String title,
+    Color statusColor,
+    Color statusBgColor,
+  ) {
     return Row(
       children: [
         Text(
@@ -263,7 +284,7 @@ class MedicationDetailScreen extends StatelessWidget {
           height: 16,
           width: 16,
           decoration: BoxDecoration(
-            color: color,
+            color: statusColor,
             shape: BoxShape.circle,
             border: Border.all(color: Colors.white, width: 3),
           ),
@@ -273,16 +294,15 @@ class MedicationDetailScreen extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: isCompleted ? Colors.green.withOpacity(0.1) : Colors.white,
+              color: statusBgColor,
               borderRadius: BorderRadius.circular(16),
-              border: isCompleted ? null : Border.all(color: Colors.grey[200]!),
+              border: statusColor == const Color(0xFF009688)
+                  ? Border.all(color: Colors.grey[200]!)
+                  : null,
             ),
             child: Text(
               title,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: isCompleted ? Colors.green : Colors.grey[600],
-              ),
+              style: TextStyle(fontWeight: FontWeight.bold, color: statusColor),
             ),
           ),
         ),
