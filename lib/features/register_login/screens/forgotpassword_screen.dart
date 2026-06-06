@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:wellness_app/features/register_login/screens/login_screen.dart';
-import 'package:wellness_app/features/register_login/widgets/widget.dart';
+import 'package:wellness_app/core/widgets/auth_widgets.dart';
 import '../../../core/theme/app_colors.dart';
+import 'package:wellness_app/core/utils/app_helpers.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -35,12 +36,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       await Future.delayed(const Duration(seconds: 1)); // Giả lập loading
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Cập nhật mật khẩu mới thành công!'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        AppHelpers.showSnackBar(context, 'Cập nhật mật khẩu mới thành công!');
 
         // Chuyển về màn hình Đăng nhập và xóa hết stack
         Navigator.pushAndRemoveUntil(
@@ -201,3 +197,4 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     );
   }
 }
+

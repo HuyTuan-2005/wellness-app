@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../controllers/water_controller.dart';
-import '../../utils/circular_progress_painter.dart';
-import '../../utils/date_helper.dart';
+import 'package:wellness_app/core/utils/circular_progress_painter.dart';
+import 'package:wellness_app/core/utils/date_helper.dart';
+import 'package:wellness_app/core/utils/app_helpers.dart';
 
 class WaterTrackingScreen extends StatefulWidget {
   const WaterTrackingScreen({super.key});
@@ -33,9 +34,7 @@ class _WaterTrackingScreenState extends State<WaterTrackingScreen> {
   void _addWaterAndNotify(int ml) {
     final reachedGoal = _controller.addWater(ml);
     if (reachedGoal && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Chúc mừng! Bạn đã đạt mục tiêu nước uống hôm nay.')),
-      );
+      AppHelpers.showSnackBar(context, 'Chúc mừng! Bạn đã đạt mục tiêu nước uống hôm nay.');
     }
   }
 
@@ -78,9 +77,7 @@ class _WaterTrackingScreenState extends State<WaterTrackingScreen> {
 
     final ok = _controller.updateGoal(result);
     if (!ok) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Mục tiêu không hợp lệ. Vui lòng nhập từ 500ml trở lên.')),
-      );
+      AppHelpers.showSnackBar(context, 'Mục tiêu không hợp lệ. Vui lòng nhập từ 500ml trở lên.');
     }
   }
 
@@ -341,3 +338,5 @@ class _WaterTrackingScreenState extends State<WaterTrackingScreen> {
     );
   }
 }
+
+

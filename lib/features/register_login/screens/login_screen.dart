@@ -3,8 +3,9 @@ import 'package:wellness_app/data/services/auth_service.dart';
 import 'package:wellness_app/features/home/screens/home_screen.dart';
 import 'package:wellness_app/features/register_login/screens/forgotpassword_screen.dart';
 import 'package:wellness_app/features/register_login/screens/register_screen.dart';
-import 'package:wellness_app/features/register_login/widgets/widget.dart';
+import 'package:wellness_app/core/widgets/auth_widgets.dart';
 import '../../../core/theme/app_colors.dart';
+import 'package:wellness_app/core/utils/app_helpers.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -48,14 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
       // userCredential == null nghĩa là user đã huỷ, không cần xử lý gì
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Đăng nhập Google thất bại: $e'),
-          backgroundColor: AppColors.error,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
-      );
+      AppHelpers.showSnackBar(context, 'Đăng nhập Google thất bại: $e');
     } finally {
       if (mounted) {
         setState(() => _isGoogleLoading = false);
@@ -373,3 +367,4 @@ class _GoogleLogoPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
+

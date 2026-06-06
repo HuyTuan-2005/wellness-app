@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wellness_app/core/utils/app_helpers.dart';
 
 class AddAppointmentScreen extends StatefulWidget {
   const AddAppointmentScreen({super.key});
@@ -137,11 +138,7 @@ class _AddAppointmentScreenState extends State<AddAppointmentScreen> {
                 child: ElevatedButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Đã lưu lịch hẹn (Test UI)'),
-                        ),
-                      );
+                      AppHelpers.showSnackBar(context, 'Đã lưu lịch hẹn (Test UI)');
                       Navigator.pop(context);
                     }
                   },

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wellness_app/features/profile/utils/data_helper.dart';
 import '../../../core/theme/app_colors.dart';
+import 'package:wellness_app/core/utils/app_helpers.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -96,12 +97,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         newExerciseGoal: _exerciseGoalController.text.trim(),
       );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Đã lưu thông tin thành công!'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      AppHelpers.showSnackBar(context, 'Đã lưu thông tin thành công!');
 
       Navigator.pop(context);
     }
