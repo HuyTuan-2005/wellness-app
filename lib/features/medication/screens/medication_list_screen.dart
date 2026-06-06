@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:wellness_app/data/models/local/database_helper.dart';
-import 'package:wellness_app/data/models/medication.dart';
+import 'package:wellness_app/features/medication/models/medication.dart';
+import 'package:wellness_app/features/medication/screens/medication_detail_screen.dart';
 import 'package:wellness_app/features/medication/widget/medication_card.dart';
 import 'add_medication_screen.dart';
 
@@ -14,11 +16,23 @@ class MedicationListScreen extends StatefulWidget {
 class _MedicationListScreenState extends State<MedicationListScreen> {
   List<MedicationModel> _medications = [];
   bool _isLoading = true;
+  Timer? _timer; // BIẾN ĐẾM THỜI GIAN ĐỂ REFRESH TRẠNG THÁI QUÁ GIỜ
 
   @override
   void initState() {
     super.initState();
     _loadMedications();
+
+    // Cứ 15 giây tự động làm mới giao diện 1 lần để check xem đã Quá giờ chưa
+    _timer = Timer.periodic(const Duration(seconds: 15), (timer) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel(); // Phải hủy Timer khi đóng màn hình
+    super.dispose();
   }
 
   Future<void> _loadMedications() async {
@@ -34,7 +48,7 @@ class _MedicationListScreenState extends State<MedicationListScreen> {
         _isLoading = false;
       });
 
-      debugPrint("Load thành công ${data.length} thuốc");
+      //debugPrint("Load thành công ${data.length} thuốc");
     } catch (e, stack) {
       debugPrint("===== SQLITE ERROR =====");
       debugPrint(e.toString());
@@ -179,39 +193,26 @@ class _MedicationListScreenState extends State<MedicationListScreen> {
                               doseAmount = int.parse(match.group(0)!);
 
                             int maxDosesWeHave =
-                                med.totalQuantity ~/
-                                doseAmount; // Số lần uống tối đa có thể với số thuốc hiện tại
-                            int dosesTaken =
-                                med.takenQuantity ~/
-                                doseAmount; // Số lần đã uống
-                            int dosesLeft =
-                                maxDosesWeHave -
-                                dosesTaken; // Số lần uống còn lại
+                                med.totalQuantity ~/ doseAmount;
+                            int dosesTaken = med.takenQuantity ~/ doseAmount;
+                            int dosesLeft = maxDosesWeHave - dosesTaken;
 
                             // 2. KIỂM TRA ĐÃ HOÀN THÀNH LIỆU TRÌNH CHƯA (Dựa vào Số ngày uống)
                             bool isFullyCompleted = med.status == 'completed';
                             if (dosesTaken >= med.durationDays &&
                                 !isFullyCompleted) {
-                              // Đã uống đủ số ngày quy định -> Tự động đánh dấu hoàn thành
                               med.status = 'completed';
                               isFullyCompleted = true;
-                              DatabaseHelper.instance.updateMedication(
-                                med,
-                              ); // Lưu xuống DB ngầm
+                              DatabaseHelper.instance.updateMedication(med);
                             }
 
                             // 3. LOGIC CẢNH BÁO SẮP HẾT THUỐC
                             bool isWarning = false;
                             String warningMsg = "";
 
-                            // Số lần uống CẦN THIẾT để hoàn thành liệu trình
                             int dosesNeededToFinish =
                                 med.durationDays - dosesTaken;
 
-                            // CHỈ cảnh báo khi:
-                            // - Chưa hoàn thành liệu trình
-                            // - VÀ Số thuốc còn lại KHÔNG ĐỦ để kết thúc liệu trình (dosesLeft < dosesNeededToFinish)
-                            // - VÀ Số thuốc còn lại chạm mức báo động (<= 1 lần uống)
                             if (!isFullyCompleted &&
                                 dosesLeft < dosesNeededToFinish &&
                                 dosesLeft <= 1) {
@@ -220,6 +221,7 @@ class _MedicationListScreenState extends State<MedicationListScreen> {
                                   ? "Đã hết thuốc! Cần mua thêm."
                                   : "Chỉ còn đủ 1 lần uống!";
                             }
+
                             bool isTakenToday = med.lastTakenDate == todayStr;
                             String displayStatus = "upcoming";
 
@@ -243,6 +245,7 @@ class _MedicationListScreenState extends State<MedicationListScreen> {
                                 displayStatus = "overdue";
                               }
                             }
+
                             if (isFullyCompleted || isTakenToday)
                               displayStatus = "completed";
 
@@ -252,8 +255,26 @@ class _MedicationListScreenState extends State<MedicationListScreen> {
                                 vertical: 8.0,
                               ),
                               child: GestureDetector(
+                                // --- FIX LỖI Ở ĐÂY: THÊM LOGIC NHẢY SANG MÀN HÌNH CHI TIẾT ---
                                 onTap: () {
-                                  // Code Navigator (Giữ nguyên)
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          MedicationDetailScreen(
+                                            name: med.name,
+                                            dosage: med.dosage,
+                                            time: med.time,
+                                            status: displayStatus,
+                                            frequency: med.frequency,
+                                            notes: med.notes,
+                                            takenQuantity: med.takenQuantity,
+                                            totalQuantity: med.totalQuantity,
+                                          ),
+                                    ),
+                                  ).then(
+                                    (_) => _loadMedications(),
+                                  ); // Refresh lại danh sách khi quay về
                                 },
                                 child: MedicationCard(
                                   name: med.name,
@@ -262,11 +283,8 @@ class _MedicationListScreenState extends State<MedicationListScreen> {
                                   status: displayStatus,
                                   takenQuantity: med.takenQuantity,
                                   totalQuantity: med.totalQuantity,
-
-                                  // Truyền 2 biến cảnh báo mới sang Card
                                   isWarning: isWarning,
                                   warningMsg: warningMsg,
-
                                   onMarkAsTaken: () async {
                                     if (isTakenToday || isFullyCompleted)
                                       return;
