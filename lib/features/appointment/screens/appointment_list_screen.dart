@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:wellness_app/data/models/local/database_helper.dart';
+import 'package:wellness_app/core/database/database_helper.dart';
 import 'package:wellness_app/features/appointment/models/appointment.dart';
 import 'package:wellness_app/features/appointment/widgets/appointment_card.dart';
 import 'appointment_detail_screen.dart';
@@ -127,3 +127,4 @@ class _AppointmentListScreenState extends State<AppointmentListScreen> {
     );
   }
 }
+

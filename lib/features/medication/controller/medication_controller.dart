@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:wellness_app/data/models/local/database_helper.dart';
+import 'package:wellness_app/core/database/database_helper.dart';
 import 'package:wellness_app/features/medication/models/medication.dart';
 import 'package:wellness_app/service/notification_service.dart';
 
@@ -72,3 +72,4 @@ class MedicationController {
     }
   }
 }
+

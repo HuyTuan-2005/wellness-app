@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wellness_app/features/register_login/screens/login_screen.dart';
-import 'package:wellness_app/features/register_login/widgets/widget.dart';
+import 'package:wellness_app/core/widgets/auth_widgets.dart';
 import '../../../core/theme/app_colors.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -213,3 +213,4 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 }
+

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../controllers/sleep_controller.dart';
-import '../../utils/date_helper.dart';
+import 'package:wellness_app/core/utils/date_helper.dart';
+import 'package:wellness_app/core/utils/app_helpers.dart';
 
 class SleepTrackingScreen extends StatefulWidget {
   const SleepTrackingScreen({super.key});
@@ -46,9 +47,7 @@ class _SleepTrackingScreenState extends State<SleepTrackingScreen> {
     final result = _controller.addSleepSession(bedTime: _bedTime, wakeTime: _wakeTime);
     if (!mounted) return;
     if (result == SleepSessionResult.success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Đã lưu phiên ngủ vào lịch sử.')),
-      );
+      AppHelpers.showSnackBar(context, 'Đã lưu phiên ngủ vào lịch sử.');
       return;
     }
 
@@ -263,3 +262,4 @@ class _SleepTrackingScreenState extends State<SleepTrackingScreen> {
     );
   }
 }
+

@@ -1,6 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:wellness_app/features/profile/utils/data_helper.dart';
 import '../../../core/theme/app_colors.dart';
+import 'package:wellness_app/core/utils/app_helpers.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -96,12 +98,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         newExerciseGoal: _exerciseGoalController.text.trim(),
       );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Đã lưu thông tin thành công!'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      AppHelpers.showSnackBar(context, 'Đã lưu thông tin thành công!');
 
       Navigator.pop(context);
     }
@@ -167,6 +164,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 _emailController,
                 Icons.email_outlined,
                 keyboardType: TextInputType.emailAddress,
+                enabled: false,
               ),
 
               const SizedBox(height: 20),
@@ -179,7 +177,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       'Tuổi',
                       _ageController,
                       Icons.cake_outlined,
-                      keyboardType: TextInputType.number,
+                      readOnly: true,
+                      onTap: () {
+                        _showPicker(
+                          'Tuổi',
+                          List.generate(120, (index) => (index + 1).toString()),
+                          _ageController.text.isNotEmpty ? _ageController.text : '20',
+                          (val) => setState(() => _ageController.text = val),
+                        );
+                      },
                     ),
                   ),
                 ],
@@ -193,7 +199,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       'Chiều cao (cm)',
                       _heightController,
                       Icons.height,
-                      keyboardType: TextInputType.number,
+                      readOnly: true,
+                      onTap: () {
+                        String current = '170.0';
+                        if (_heightController.text.isNotEmpty) {
+                          final parsed = double.tryParse(_heightController.text);
+                          if (parsed != null) current = parsed.toStringAsFixed(1);
+                        }
+                        _showPicker(
+                          'Chiều cao (cm)',
+                          List.generate(151, (index) => (100.0 + index).toStringAsFixed(1)),
+                          current,
+                          (val) => setState(() => _heightController.text = val),
+                        );
+                      },
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -202,7 +221,24 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       'Cân nặng (kg)',
                       _weightController,
                       Icons.monitor_weight_outlined,
-                      keyboardType: TextInputType.number,
+                      readOnly: true,
+                      onTap: () {
+                        List<String> weights = [];
+                        for (double i = 30.0; i <= 150.0; i += 0.5) {
+                          weights.add(i.toStringAsFixed(1));
+                        }
+                        String current = '60.0';
+                        if (_weightController.text.isNotEmpty) {
+                          final parsed = double.tryParse(_weightController.text);
+                          if (parsed != null) current = parsed.toStringAsFixed(1);
+                        }
+                        _showPicker(
+                          'Cân nặng (kg)',
+                          weights,
+                          current,
+                          (val) => setState(() => _weightController.text = val),
+                        );
+                      },
                     ),
                   ),
                 ],
@@ -216,7 +252,24 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 'Mục tiêu cân nặng (kg)',
                 _targetWeightController,
                 Icons.flag_outlined,
-                keyboardType: TextInputType.number,
+                readOnly: true,
+                onTap: () {
+                  List<String> weights = [];
+                  for (double i = 30.0; i <= 150.0; i += 0.5) {
+                    weights.add(i.toStringAsFixed(1));
+                  }
+                  String current = '60.0';
+                  if (_targetWeightController.text.isNotEmpty) {
+                    final parsed = double.tryParse(_targetWeightController.text);
+                    if (parsed != null) current = parsed.toStringAsFixed(1);
+                  }
+                  _showPicker(
+                    'Mục tiêu cân nặng (kg)',
+                    weights,
+                    current,
+                    (val) => setState(() => _targetWeightController.text = val),
+                  );
+                },
               ),
               const SizedBox(height: 20),
 
@@ -224,7 +277,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 'Lượng nước mục tiêu (ml/ngày)',
                 _waterGoalController,
                 Icons.water_drop_outlined,
-                keyboardType: TextInputType.number,
+                readOnly: true,
+                onTap: () {
+                  _showPicker(
+                    'Lượng nước (ml)',
+                    List.generate(41, (index) => (1000 + index * 100).toString()),
+                    _waterGoalController.text.isNotEmpty ? _waterGoalController.text : '2000',
+                    (val) => setState(() => _waterGoalController.text = val),
+                  );
+                },
               ),
               const SizedBox(height: 20),
 
@@ -267,16 +328,80 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
+  void _showPicker(
+    String title,
+    List<String> items,
+    String initialValue,
+    ValueChanged<String> onSelectedItemChanged,
+  ) {
+    int initialIndex = items.indexOf(initialValue);
+    if (initialIndex < 0) initialIndex = 0;
+    String selectedValue = items[initialIndex];
+
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          height: 250,
+          color: Colors.white,
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                color: Colors.grey[200],
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Hủy'),
+                    ),
+                    Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    TextButton(
+                      onPressed: () {
+                        onSelectedItemChanged(selectedValue);
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Xong'),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: CupertinoPicker(
+                  itemExtent: 32.0,
+                  scrollController: FixedExtentScrollController(initialItem: initialIndex),
+                  onSelectedItemChanged: (int index) {
+                    selectedValue = items[index];
+                  },
+                  children: items.map((String item) {
+                    return Center(child: Text(item));
+                  }).toList(),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   // ==================== WIDGET HỖ TRỢ ====================
   Widget _buildTextField(
     String label,
     TextEditingController controller,
     IconData icon, {
     TextInputType keyboardType = TextInputType.text,
+    bool enabled = true,
+    bool readOnly = false,
+    VoidCallback? onTap,
   }) {
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
+      enabled: enabled,
+      readOnly: readOnly,
+      onTap: onTap,
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon, color: AppColors.textSecondary),

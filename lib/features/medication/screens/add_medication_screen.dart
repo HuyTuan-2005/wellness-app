@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wellness_app/features/medication/controller/medication_controller.dart';
+import 'package:wellness_app/core/utils/app_helpers.dart';
 
 class AddMedicationScreen extends StatefulWidget {
   const AddMedicationScreen({super.key});
@@ -249,38 +250,19 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
 
                       // Kiểm tra 1: Phải lớn hơn 0
                       if (duration <= 0 || total <= 0) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              "Số ngày và Tổng số viên phải lớn hơn 0!",
-                            ),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
+                        AppHelpers.showSnackBar(context, "Số ngày và Tổng số viên phải lớn hơn 0!", isError: true);
                         return; // Dừng lại, không cho lưu
                       }
 
                       // Kiểm tra 2: Tổng thuốc phải >= Liều lượng 1 lần uống
                       if (total < doseAmount) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              "Vô lý! Tổng số viên ($total) không thể nhỏ hơn liều lượng 1 lần uống ($doseAmount).",
-                            ),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
+                        AppHelpers.showSnackBar(context, "Vô lý! Tổng số viên ($total) không thể nhỏ hơn liều lượng 1 lần uống ($doseAmount).", isError: true);
                         return; // Dừng lại, không cho lưu
                       }
                       // --- KẾT THÚC VALIDATION ---
 
                       // --- 2. GỌI CONTROLLER LƯU DỮ LIỆU ---
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Đang lưu dữ liệu..."),
-                          duration: Duration(seconds: 1),
-                        ),
-                      );
+                      AppHelpers.showSnackBar(context, "Đang lưu dữ liệu...");
 
                       bool isSuccess = await MedicationController.addMedication(
                         name: _nameController.text,
@@ -294,22 +276,12 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
 
                       if (isSuccess) {
                         if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("Lưu lịch uống thuốc thành công!"),
-                              backgroundColor: Color(0xFF009688),
-                            ),
-                          );
+                          AppHelpers.showSnackBar(context, "Lưu lịch uống thuốc thành công!");
                           Navigator.pop(context);
                         }
                       } else {
                         if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("Lưu thất bại. Vui lòng thử lại!"),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
+                          AppHelpers.showSnackBar(context, "Lưu thất bại. Vui lòng thử lại!", isError: true);
                         }
                       }
                     }
