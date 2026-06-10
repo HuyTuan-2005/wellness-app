@@ -2,6 +2,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:wellness_app/features/appointment/models/appointment.dart';
 import 'package:wellness_app/features/medication/models/medication.dart';
+import 'package:wellness_app/features/weight/models/weight_record.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
@@ -19,7 +20,24 @@ class DatabaseHelper {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
 
-    return await openDatabase(path, version: 1, onCreate: _createDB);
+    return await openDatabase(
+      path,
+      version: 2,
+      onCreate: _createDB,
+      onUpgrade: _upgradeDB,
+    );
+  }
+
+  Future _upgradeDB(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute('''
+        CREATE TABLE weight_records (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          weight REAL NOT NULL,
+          date TEXT NOT NULL
+        )
+      ''');
+    }
   }
 
   // Chạy lệnh SQL để tạo 2 bảng cho phần của bạn
@@ -53,6 +71,15 @@ class DatabaseHelper {
         reminderOffset INTEGER NOT NULL,
         notes TEXT,
         status TEXT NOT NULL
+      )
+    ''');
+
+    // 3. Bảng Cân nặng
+    await db.execute('''
+      CREATE TABLE weight_records (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        weight REAL NOT NULL,
+        date TEXT NOT NULL
       )
     ''');
   }
@@ -96,5 +123,17 @@ class DatabaseHelper {
   Future<int> deleteMedication(int id) async {
     final db = await instance.database;
     return await db.delete('medications', where: 'id = ?', whereArgs: [id]);
+  }
+
+  // ================= CÁC HÀM CRUD CHO CÂN NẶNG =================
+  Future<int> insertWeightRecord(WeightRecord record) async {
+    final db = await instance.database;
+    return await db.insert('weight_records', record.toMap());
+  }
+
+  Future<List<WeightRecord>> getAllWeightRecords() async {
+    final db = await instance.database;
+    final result = await db.query('weight_records', orderBy: 'date ASC');
+    return result.map((json) => WeightRecord.fromMap(json)).toList();
   }
 }

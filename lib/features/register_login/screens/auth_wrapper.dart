@@ -3,9 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:wellness_app/core/theme/app_colors.dart';
 import 'package:wellness_app/data/services/auth_service.dart';
-import 'package:wellness_app/features/home/screens/home_screen.dart';
+import 'package:wellness_app/features/home/screens/main_navigation_screen.dart';
 import 'package:wellness_app/features/register_login/screens/login_screen.dart';
-import 'package:wellness_app/core/theme/app_theme.dart';
+import 'package:wellness_app/features/admin/screens/admin_dashboard_screen.dart';
 
 class AuthWrapper extends StatefulWidget {
   const AuthWrapper({super.key});
@@ -128,6 +128,7 @@ class _AuthWrapperState extends State<AuthWrapper> with WidgetsBindingObserver {
               final userData =
                   userSnapshot.data!.data() as Map<String, dynamic>?;
               final bool isLocked = userData?['isLocked'] ?? false;
+              final String role = userData?['role'] ?? 'user';
 
               // Nếu bị khóa, gọi hàm ép đăng xuất sau khi frame hiện tại vẽ xong
               if (isLocked) {
@@ -139,10 +140,14 @@ class _AuthWrapperState extends State<AuthWrapper> with WidgetsBindingObserver {
                   body: Center(child: CircularProgressIndicator()),
                 );
               }
+
+              if (role == 'admin') {
+                return const AdminDashboardScreen();
+              }
             }
 
-            // Nếu mọi thứ ổn, hiển thị màn hình chính
-            return const HomeScreen();
+            // Nếu mọi thứ ổn, hiển thị màn hình chính cho user
+            return const MainNavigationScreen();
           },
         );
       },
