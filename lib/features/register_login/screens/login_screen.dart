@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:wellness_app/data/services/auth_service.dart';
-import 'package:wellness_app/features/home/screens/home_screen.dart';
+import 'package:wellness_app/features/home/screens/main_navigation_screen.dart';
 import 'package:wellness_app/features/register_login/screens/forgotpassword_screen.dart';
 import 'package:wellness_app/features/register_login/screens/register_screen.dart';
+import 'package:wellness_app/features/admin/screens/admin_dashboard_screen.dart';
 import 'package:wellness_app/core/widgets/auth_widgets.dart';
 import '../../../core/theme/app_colors.dart';
 import 'package:wellness_app/core/utils/app_helpers.dart';
@@ -42,7 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
         // Đăng nhập thành công → điều hướng về HomeScreen
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
           (route) => false,
         );
       }
@@ -179,18 +180,38 @@ class _LoginScreenState extends State<LoginScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () {
-                      // if (_formKey.currentState!.validate()) {
-                      //   // TODO: Xử lý đăng nhập
-                      // }
-
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const HomeScreen(),
-                        ),
-                        (route) => false, // Xóa hết màn hình trước đó
-                      );
+                    onPressed: () async {
+                      if (_formKey.currentState!.validate()) {
+                        AppHelpers.showLoading(context);
+                        final credential = await _authService.signInWithEmailAndPassword(
+                          _emailController.text.trim(),
+                          _passwordController.text.trim(),
+                        );
+                        if (context.mounted) {
+                          AppHelpers.hideLoading(context);
+                          if (credential != null && credential.user != null) {
+                            // Thành công, kiểm tra role
+                            final role = await _authService.getUserRole(credential.user!.uid);
+                            if (context.mounted) {
+                              if (role == 'admin') {
+                                Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const AdminDashboardScreen()),
+                                  (route) => false,
+                                );
+                              } else {
+                                Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
+                                  (route) => false,
+                                );
+                              }
+                            }
+                          } else {
+                            AppHelpers.showErrorSnackBar(context, 'Đăng nhập thất bại. Vui lòng kiểm tra lại email/mật khẩu.');
+                          }
+                        }
+                      }
                     },
                     child: const Text(
                       'Đăng nhập',
@@ -367,4 +388,3 @@ class _GoogleLogoPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
-

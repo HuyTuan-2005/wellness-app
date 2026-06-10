@@ -10,4 +10,21 @@ class AppHelpers {
       ),
     );
   }
+  static void showErrorSnackBar(BuildContext context, String message) {
+    showSnackBar(context, message, isError: true);
+  }
+
+  static void showLoading(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+  }
+
+  static void hideLoading(BuildContext context) {
+    if (Navigator.canPop(context)) {
+      Navigator.of(context, rootNavigator: true).pop();
+    }
+  }
 }

@@ -43,6 +43,20 @@ class UserProfile {
     if (newExerciseGoal != null) exerciseGoal = newExerciseGoal;
   }
 
+  static void updateProfileFromMap(Map<String, dynamic> data) {
+    if (data['displayName'] != null) userName = data['displayName'];
+    if (data['email'] != null) email = data['email'];
+    if (data['age'] != null) age = data['age'];
+    if (data['gender'] != null) gender = data['gender'];
+    if (data['height'] != null) height = (data['height'] as num).toDouble();
+    if (data['weight'] != null) weight = (data['weight'] as num).toDouble();
+    if (data['targetWeight'] != null) targetWeight = (data['targetWeight'] as num).toDouble();
+    if (data['bloodType'] != null) bloodType = data['bloodType'];
+    if (data['allergies'] != null) allergies = data['allergies'];
+    if (data['dailyWaterGoal'] != null) dailyWaterGoal = data['dailyWaterGoal'];
+    if (data['exerciseGoal'] != null) exerciseGoal = data['exerciseGoal'];
+  }
+
   // Reset về giá trị mặc định (nếu cần)
   static void resetToDefault() {
     userName = "Nguyễn Quốc Trường";
