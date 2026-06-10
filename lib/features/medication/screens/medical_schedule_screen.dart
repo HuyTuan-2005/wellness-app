@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:wellness_app/service/notification_service.dart';
 
 import 'package:wellness_app/core/theme/app_colors.dart';
 import 'package:wellness_app/core/database/database_helper.dart';
@@ -292,6 +293,28 @@ class _MedicalScheduleScreenState extends State<MedicalScheduleScreen> {
                 }
               });
               await DatabaseHelper.instance.updateMedication(med);
+
+              // --- ĐỒNG BỘ NOTIFICATION KHI BẤM "UỐNG" ---
+              await NotificationService().cancelNotification(med.id!);
+
+              if (med.status != 'completed') {
+                DateTime nextDate = DateTime.parse(med.nextDoseDate!);
+                List<String> timeParts = med.time.split(':');
+                DateTime nextDoseTime = DateTime(
+                  nextDate.year,
+                  nextDate.month,
+                  nextDate.day,
+                  int.parse(timeParts[0]),
+                  int.parse(timeParts[1]),
+                );
+
+                await NotificationService().scheduleNotification(
+                  id: med.id!,
+                  title: "💊 Đã đến giờ uống thuốc!",
+                  body: "Đến giờ uống ${med.dosage} ${med.name} rồi. Nhớ uống đúng giờ nhé!",
+                  scheduledTime: nextDoseTime,
+                );
+              }
             },
             onDelete: () =>
                 _showDeleteMedicationConfirm(context, med.id!, med.name),
@@ -380,6 +403,7 @@ class _MedicalScheduleScreenState extends State<MedicalScheduleScreen> {
             onPressed: () async {
               Navigator.pop(ctx);
               await DatabaseHelper.instance.deleteMedication(id);
+              await NotificationService().cancelNotification(id); // Xóa cả báo thức khi xóa thuốc
               _loadAllData();
             },
             child: const Text("Xóa", style: TextStyle(color: Colors.white)),
