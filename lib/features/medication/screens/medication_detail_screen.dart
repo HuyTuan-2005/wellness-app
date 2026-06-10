@@ -4,7 +4,8 @@ class MedicationDetailScreen extends StatelessWidget {
   final String name;
   final String dosage;
   final String time;
-  final String status; // "upcoming", "completed", "overdue"
+  final String
+  status; // Nhận diện 3 trạng thái: "upcoming", "completed", "overdue"
   final String frequency;
   final String notes;
   final int takenQuantity;
@@ -27,7 +28,7 @@ class MedicationDetailScreen extends StatelessWidget {
     double progress = totalQuantity > 0 ? (takenQuantity / totalQuantity) : 0;
     Color primaryTeal = const Color(0xFF009688);
 
-    // XỬ LÝ MÀU SẮC & TEXT THEO 3 TRẠNG THÁI
+    // --- LOGIC XỬ LÝ 3 MÀU SẮC THEO TRẠNG THÁI ---
     String badgeText;
     Color statusColor;
     Color statusBgColor;
@@ -40,12 +41,12 @@ class MedicationDetailScreen extends StatelessWidget {
       timelineTitle = "Đã uống ($time)";
     } else if (status == "overdue") {
       badgeText = "Bỏ lỡ liều";
-      statusColor = const Color(0xFFE53935); // Đỏ
+      statusColor = const Color(0xFFE53935); // Báo Đỏ
       statusBgColor = const Color(0xFFFFEBEE);
       timelineTitle = "Đã lỡ hẹn ($time)";
     } else {
       badgeText = "Đang điều trị";
-      statusColor = primaryTeal;
+      statusColor = primaryTeal; // Màu mặc định
       statusBgColor = primaryTeal.withOpacity(0.1);
       timelineTitle = "Sắp tới ($time)";
     }
@@ -118,7 +119,7 @@ class MedicationDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 40),
 
-            // 2. THẺ TIẾN ĐỘ
+            // 2. THẺ TIẾN ĐỘ ĐIỀU TRỊ
             const Text(
               "Tiến độ liệu trình",
               style: TextStyle(
@@ -221,9 +222,9 @@ class MedicationDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 32),
 
-            // 4. LỊCH SỬ UỐNG THUỐC (Timeline)
+            // 4. LỊCH TRÌNH HÔM NAY
             const Text(
-              "Lịch sử hôm nay",
+              "Lịch trình hôm nay",
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
