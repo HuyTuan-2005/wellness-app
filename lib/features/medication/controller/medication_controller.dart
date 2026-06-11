@@ -4,6 +4,8 @@ import 'package:wellness_app/features/medication/models/medication.dart';
 import 'package:wellness_app/service/notification_service.dart';
 
 class MedicationController {
+  // ==================== THÊM THUỐC MỚI ====================
+
   static Future<bool> addMedication({
     required String name,
     required String dosage,
@@ -38,7 +40,7 @@ class MedicationController {
       // Lưu xuống Database
       int id = await DatabaseHelper.instance.insertMedication(newMedication);
 
-      // --- LOGIC MỚI: HẸN GIỜ BÁO THỨC LIỀU ĐẦU TIÊN ---
+      // Hẹn giờ báo thức liều đầu tiên
       if (id > 0) {
         DateTime now = DateTime.now();
         DateTime firstDoseTime = DateTime(
@@ -49,15 +51,13 @@ class MedicationController {
           time.minute,
         );
 
-        // Nếu giờ nhập vào nhỏ hơn giờ hiện tại (VD: Bây giờ là 14h, nhập 08h sáng)
-        // thì đẩy báo thức sang 08h sáng ngày mai
+        // Nếu giờ nhập nhỏ hơn hiện tại → đẩy sang ngày mai
         if (firstDoseTime.isBefore(now)) {
           firstDoseTime = firstDoseTime.add(const Duration(days: 1));
         }
 
-        // Gọi dịch vụ hẹn giờ
         await NotificationService().scheduleNotification(
-          id: id, // Dùng chính ID của SQLite làm ID báo thức để dễ quản lý
+          id: id,
           title: "💊 Đã đến giờ uống thuốc!",
           body:
               "Bạn có lịch uống ${newMedication.dosage} ${newMedication.name}. Nhớ uống đúng giờ nhé!",
@@ -71,5 +71,149 @@ class MedicationController {
       return false;
     }
   }
-}
 
+  // ==================== LOGIC TÍNH TOÁN NGHIỆP VỤ ====================
+
+  /// Parse số liều từ chuỗi dosage (VD: "2 viên" → 2)
+  static int parseDoseAmount(String dosage) {
+    final match = RegExp(r'\d+').firstMatch(dosage);
+    return match != null ? int.parse(match.group(0)!) : 1;
+  }
+
+  /// Xác định trạng thái hiển thị: "upcoming" / "overdue" / "completed"
+  static String calculateDisplayStatus(MedicationModel med) {
+    String todayStr = DateTime.now().toIso8601String().split('T')[0];
+    DateTime now = DateTime.now();
+
+    int doseAmount = parseDoseAmount(med.dosage);
+    int dosesTaken = med.takenQuantity ~/ doseAmount;
+
+    bool isFullyCompleted =
+        med.status == 'completed' || dosesTaken >= med.durationDays;
+    bool isTakenToday = med.lastTakenDate == todayStr;
+
+    if (isFullyCompleted || isTakenToday) return "completed";
+
+    // Kiểm tra quá giờ uống
+    if (!isTakenToday && med.nextDoseDate != null) {
+      try {
+        DateTime nextDate = DateTime.parse(med.nextDoseDate!);
+        List<String> timeParts = med.time.split(':');
+        DateTime medDateTime = DateTime(
+          nextDate.year,
+          nextDate.month,
+          nextDate.day,
+          int.parse(timeParts[0]),
+          int.parse(timeParts[1]),
+        );
+        if (now.isAfter(medDateTime)) return "overdue";
+      } catch (_) {
+        // Bỏ qua lỗi parse date/time không hợp lệ
+      }
+    }
+
+    return "upcoming";
+  }
+
+  /// Kiểm tra cảnh báo hết thuốc, trả về {isWarning, warningMsg}
+  static Map<String, dynamic> calculateWarning(MedicationModel med) {
+    int doseAmount = parseDoseAmount(med.dosage);
+    int maxDoses = med.totalQuantity ~/ doseAmount;
+    int dosesTaken = med.takenQuantity ~/ doseAmount;
+    int dosesLeft = maxDoses - dosesTaken;
+
+    bool isFullyCompleted =
+        med.status == 'completed' || dosesTaken >= med.durationDays;
+
+    if (isFullyCompleted) return {'isWarning': false, 'warningMsg': ''};
+
+    int dosesNeededToFinish = med.durationDays - dosesTaken;
+    if (dosesLeft < dosesNeededToFinish && dosesLeft <= 1) {
+      return {
+        'isWarning': true,
+        'warningMsg': dosesLeft == 0
+            ? "Đã hết thuốc! Cần mua thêm."
+            : "Chỉ còn đủ 1 lần uống!",
+      };
+    }
+
+    return {'isWarning': false, 'warningMsg': ''};
+  }
+
+  /// Kiểm tra và cập nhật trạng thái hoàn thành liệu trình.
+  /// Gọi sau khi load dữ liệu từ DB — thay vì kiểm tra trong build()
+  static Future<void> checkAndUpdateCompletionStatus(
+    List<MedicationModel> medications,
+  ) async {
+    for (final med in medications) {
+      int doseAmount = parseDoseAmount(med.dosage);
+      int dosesTaken = med.takenQuantity ~/ doseAmount;
+      if (dosesTaken >= med.durationDays && med.status != 'completed') {
+        med.status = 'completed';
+        await DatabaseHelper.instance.updateMedication(med);
+      }
+    }
+  }
+
+  /// Tính ngày uống tiếp theo theo tần suất
+  static String calculateNextDoseDate(String frequency) {
+    DateTime now = DateTime.now();
+    int daysToAdd;
+    switch (frequency) {
+      case 'Cách 1 ngày':
+        daysToAdd = 2;
+        break;
+      case 'Cách 2 ngày':
+        daysToAdd = 3;
+        break;
+      default:
+        daysToAdd = 1;
+    }
+    return now.add(Duration(days: daysToAdd)).toIso8601String().split('T')[0];
+  }
+
+  /// Xử lý logic bấm "Uống": cập nhật model → ghi DB → đồng bộ notification
+  static Future<void> markAsTaken(MedicationModel med) async {
+    String todayStr = DateTime.now().toIso8601String().split('T')[0];
+    int doseAmount = parseDoseAmount(med.dosage);
+
+    // Cập nhật model in-memory
+    med.takenQuantity += doseAmount;
+    if (med.takenQuantity > med.totalQuantity) {
+      med.takenQuantity = med.totalQuantity;
+    }
+    med.lastTakenDate = todayStr;
+    med.nextDoseDate = calculateNextDoseDate(med.frequency);
+
+    // Ghi xuống DB
+    await DatabaseHelper.instance.updateMedication(med);
+
+    // Hủy báo thức hôm nay
+    await NotificationService().cancelNotification(med.id!);
+
+    // Hẹn giờ liều tiếp theo (nếu chưa hoàn thành liệu trình)
+    if (med.status != 'completed') {
+      try {
+        DateTime nextDate = DateTime.parse(med.nextDoseDate!);
+        List<String> timeParts = med.time.split(':');
+        DateTime nextDoseTime = DateTime(
+          nextDate.year,
+          nextDate.month,
+          nextDate.day,
+          int.parse(timeParts[0]),
+          int.parse(timeParts[1]),
+        );
+
+        await NotificationService().scheduleNotification(
+          id: med.id!,
+          title: "💊 Đã đến giờ uống thuốc!",
+          body:
+              "Đến giờ uống ${med.dosage} ${med.name} rồi. Nhớ uống đúng giờ nhé!",
+          scheduledTime: nextDoseTime,
+        );
+      } catch (_) {
+        // Bỏ qua lỗi parse nếu time format không hợp lệ
+      }
+    }
+  }
+}

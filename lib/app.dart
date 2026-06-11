@@ -16,7 +16,7 @@ class WellnessApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
 
       //home: const AuthWrapper(),
-      home : const MedicationListScreen(),
+      home: const MedicationListScreen(),
     );
   }
 }

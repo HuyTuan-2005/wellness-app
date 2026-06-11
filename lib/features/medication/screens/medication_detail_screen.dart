@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:wellness_app/core/theme/app_colors.dart';
 
 class MedicationDetailScreen extends StatelessWidget {
   final String name;
   final String dosage;
   final String time;
-  final String
-  status; // Nhận diện 3 trạng thái: "upcoming", "completed", "overdue"
+  final String status;
   final String frequency;
   final String notes;
   final int takenQuantity;
@@ -26,9 +26,8 @@ class MedicationDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double progress = totalQuantity > 0 ? (takenQuantity / totalQuantity) : 0;
-    Color primaryTeal = const Color(0xFF009688);
 
-    // --- LOGIC XỬ LÝ 3 MÀU SẮC THEO TRẠNG THÁI ---
+    // Xác định màu sắc và text theo trạng thái
     String badgeText;
     Color statusColor;
     Color statusBgColor;
@@ -36,34 +35,38 @@ class MedicationDetailScreen extends StatelessWidget {
 
     if (status == "completed") {
       badgeText = "Đã uống hôm nay";
-      statusColor = Colors.green;
-      statusBgColor = Colors.green.withOpacity(0.1);
+      statusColor = AppColors.success;
+      statusBgColor = AppColors.success.withOpacity(0.1);
       timelineTitle = "Đã uống ($time)";
     } else if (status == "overdue") {
       badgeText = "Bỏ lỡ liều";
-      statusColor = const Color(0xFFE53935); // Báo Đỏ
-      statusBgColor = const Color(0xFFFFEBEE);
+      statusColor = AppColors.error;
+      statusBgColor = AppColors.error.withOpacity(0.08);
       timelineTitle = "Đã lỡ hẹn ($time)";
     } else {
       badgeText = "Đang điều trị";
-      statusColor = primaryTeal; // Màu mặc định
-      statusBgColor = primaryTeal.withOpacity(0.1);
+      statusColor = AppColors.primary;
+      statusBgColor = AppColors.primary.withOpacity(0.1);
       timelineTitle = "Sắp tới ($time)";
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           "Chi tiết thuốc",
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+            color: AppColors.textDark,
+          ),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.edit_outlined, color: Color(0xFF009688)),
+            icon: Icon(Icons.edit_outlined, color: AppColors.primary),
             onPressed: () {},
           ),
         ],
@@ -74,7 +77,7 @@ class MedicationDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. HEADER
+            // 1. Header — Icon + Tên thuốc + Badge trạng thái
             Center(
               child: Column(
                 children: [
@@ -89,10 +92,10 @@ class MedicationDetailScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   Text(
                     name,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.w900,
-                      color: Color(0xFF1E293B),
+                      color: AppColors.textDark,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -119,20 +122,20 @@ class MedicationDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 40),
 
-            // 2. THẺ TIẾN ĐỘ ĐIỀU TRỊ
-            const Text(
+            // 2. Tiến độ liệu trình
+            Text(
               "Tiến độ liệu trình",
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF1E293B),
+                color: AppColors.textDark,
               ),
             ),
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
@@ -150,14 +153,14 @@ class MedicationDetailScreen extends StatelessWidget {
                       Text(
                         "${(progress * 100).toInt()}% Hoàn thành",
                         style: TextStyle(
-                          color: Colors.grey[600],
+                          color: AppColors.textSecondary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                       Text(
                         "$takenQuantity / $totalQuantity viên",
                         style: TextStyle(
-                          color: primaryTeal,
+                          color: AppColors.primary,
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
                         ),
@@ -169,9 +172,11 @@ class MedicationDetailScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                     child: LinearProgressIndicator(
                       value: progress,
-                      backgroundColor: Colors.grey[100],
+                      backgroundColor: AppColors.border,
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        status == 'completed' ? Colors.green : primaryTeal,
+                        status == 'completed'
+                            ? AppColors.success
+                            : AppColors.primary,
                       ),
                       minHeight: 12,
                     ),
@@ -181,20 +186,20 @@ class MedicationDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 32),
 
-            // 3. THÔNG TIN CHI TIẾT
-            const Text(
+            // 3. Thông tin đơn thuốc
+            Text(
               "Thông tin đơn thuốc",
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF1E293B),
+                color: AppColors.textDark,
               ),
             ),
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
@@ -207,28 +212,28 @@ class MedicationDetailScreen extends StatelessWidget {
               child: Column(
                 children: [
                   _buildInfoRow(Icons.scale_outlined, "Liều lượng", dosage),
-                  const Divider(height: 32, color: Color(0xFFF1F5F9)),
+                  Divider(height: 32, color: AppColors.border),
                   _buildInfoRow(Icons.schedule, "Giờ uống", time),
-                  const Divider(height: 32, color: Color(0xFFF1F5F9)),
+                  Divider(height: 32, color: AppColors.border),
                   _buildInfoRow(
                     Icons.calendar_month_outlined,
                     "Tần suất",
                     frequency,
                   ),
-                  const Divider(height: 32, color: Color(0xFFF1F5F9)),
+                  Divider(height: 32, color: AppColors.border),
                   _buildInfoRow(Icons.info_outline, "Ghi chú", notes),
                 ],
               ),
             ),
             const SizedBox(height: 32),
 
-            // 4. LỊCH TRÌNH HÔM NAY
-            const Text(
+            // 4. Lịch trình hôm nay
+            Text(
               "Lịch trình hôm nay",
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF1E293B),
+                color: AppColors.textDark,
               ),
             ),
             const SizedBox(height: 16),
@@ -245,23 +250,26 @@ class MedicationDetailScreen extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: const Color(0xFFF1F5F9),
+            color: AppColors.background,
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Icon(icon, color: const Color(0xFF64748B), size: 20),
+          child: Icon(icon, color: AppColors.textSecondary, size: 20),
         ),
         const SizedBox(width: 16),
         Text(
           title,
-          style: const TextStyle(fontSize: 15, color: Color(0xFF64748B)),
+          style: TextStyle(fontSize: 15, color: AppColors.textSecondary),
         ),
         const Spacer(),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF1E293B),
+        Flexible(
+          child: Text(
+            value,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textDark,
+            ),
+            textAlign: TextAlign.end,
           ),
         ),
       ],
@@ -278,7 +286,11 @@ class MedicationDetailScreen extends StatelessWidget {
       children: [
         Text(
           time,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+            color: AppColors.textDark,
+          ),
         ),
         const SizedBox(width: 16),
         Container(
@@ -287,7 +299,7 @@ class MedicationDetailScreen extends StatelessWidget {
           decoration: BoxDecoration(
             color: statusColor,
             shape: BoxShape.circle,
-            border: Border.all(color: Colors.white, width: 3),
+            border: Border.all(color: AppColors.surface, width: 3),
           ),
         ),
         const SizedBox(width: 16),
@@ -297,8 +309,9 @@ class MedicationDetailScreen extends StatelessWidget {
             decoration: BoxDecoration(
               color: statusBgColor,
               borderRadius: BorderRadius.circular(16),
-              border: statusColor == const Color(0xFF009688)
-                  ? Border.all(color: Colors.grey[200]!)
+              // Viền nhẹ cho trạng thái upcoming
+              border: statusColor == AppColors.primary
+                  ? Border.all(color: AppColors.border)
                   : null,
             ),
             child: Text(

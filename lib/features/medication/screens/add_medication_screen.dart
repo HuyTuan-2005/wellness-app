@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wellness_app/core/theme/app_colors.dart';
 import 'package:wellness_app/features/medication/controller/medication_controller.dart';
 import 'package:wellness_app/core/utils/app_helpers.dart';
 
@@ -42,29 +43,28 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC), // Nền xám nhạt chuẩn Premium
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           "Thêm lịch uống thuốc",
           style: TextStyle(
-            color: Color(0xFF1E293B),
+            color: AppColors.textDark,
             fontWeight: FontWeight.bold,
           ),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-        iconTheme: const IconThemeData(color: Color(0xFF1E293B)),
+        iconTheme: IconThemeData(color: AppColors.textDark),
       ),
       body: SingleChildScrollView(
-        // Dùng SingleChildScrollView kết hợp Column để UI mượt hơn
         physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.all(24.0),
         child: Form(
           key: _formKey,
           child: Column(
             children: [
-              // SECTION 1: Thông tin cơ bản
+              // Section 1: Thông tin cơ bản
               _buildSectionCard(
                 title: "Thông tin cơ bản",
                 children: [
@@ -83,11 +83,11 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
               ),
               const SizedBox(height: 24),
 
-              // SECTION 2: Lịch trình uống
+              // Section 2: Lịch trình uống
               _buildSectionCard(
                 title: "Lịch trình uống",
                 children: [
-                  // Chọn Giờ uống
+                  // Chọn giờ uống
                   InkWell(
                     onTap: () async {
                       final time = await showTimePicker(
@@ -103,29 +103,29 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                         vertical: 16,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF1F5F9),
+                        color: AppColors.background,
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Row(
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.access_time,
-                            color: Color(0xFF94A3B8),
+                            color: AppColors.textSecondary,
                             size: 22,
                           ),
                           const SizedBox(width: 12),
                           Text(
                             "Giờ uống: ${_selectedTime.format(context)}",
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 16,
-                              color: Color(0xFF1E293B),
+                              color: AppColors.textDark,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
                           const Spacer(),
-                          const Icon(
+                          Icon(
                             Icons.edit_outlined,
-                            color: Color(0xFF009688),
+                            color: AppColors.primary,
                             size: 20,
                           ),
                         ],
@@ -134,21 +134,21 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Chọn Tần suất
+                  // Chọn tần suất
                   DropdownButtonFormField<String>(
                     value: _selectedFrequency,
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.keyboard_arrow_down_rounded,
-                      color: Color(0xFF009688),
+                      color: AppColors.primary,
                     ),
                     decoration: InputDecoration(
-                      prefixIcon: const Icon(
+                      prefixIcon: Icon(
                         Icons.calendar_month_outlined,
-                        color: Color(0xFF94A3B8),
+                        color: AppColors.textSecondary,
                         size: 22,
                       ),
                       filled: true,
-                      fillColor: const Color(0xFFF1F5F9),
+                      fillColor: AppColors.background,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 16,
@@ -174,7 +174,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
               ),
               const SizedBox(height: 24),
 
-              // SECTION 3: Chi tiết liều trình
+              // Section 3: Chi tiết liều trình
               _buildSectionCard(
                 title: "Chi tiết liều trình",
                 children: [
@@ -204,27 +204,30 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                     controller: _notesController,
                     hint: "Ghi chú (Ví dụ: Uống sau khi ăn no)",
                     icon: Icons.info_outline,
-                    isRequired: false, // Ghi chú không bắt buộc
+                    isRequired: false,
                   ),
                 ],
               ),
 
               const SizedBox(height: 40),
 
-              // NÚT LƯU GRADIENT PREMIUM
+              // Nút lưu gradient
               Container(
                 width: double.infinity,
                 height: 56,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF009688), Color(0xFF26A69A)],
+                  gradient: LinearGradient(
+                    colors: [
+                      AppColors.primary,
+                      AppColors.primary.withOpacity(0.75),
+                    ],
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
                   ),
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF009688).withOpacity(0.3),
+                      color: AppColors.primary.withOpacity(0.3),
                       blurRadius: 15,
                       offset: const Offset(0, 5),
                     ),
@@ -233,38 +236,40 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                 child: ElevatedButton(
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
-                      // --- 1. VALIDATION NGHIỆP VỤ Y TẾ ---
+                      // Validation nghiệp vụ y tế
                       int duration =
                           int.tryParse(_durationController.text) ?? 0;
                       int total =
                           int.tryParse(_totalQuantityController.text) ?? 0;
 
-                      // Trích xuất con số từ chuỗi liều lượng (VD: "3 viên" -> 3)
-                      int doseAmount = 1;
-                      final match = RegExp(
-                        r'\d+',
-                      ).firstMatch(_dosageController.text);
-                      if (match != null) {
-                        doseAmount = int.parse(match.group(0)!);
-                      }
+                      // Dùng Controller để parse liều lượng (tránh trùng lặp regex)
+                      int doseAmount = MedicationController.parseDoseAmount(
+                        _dosageController.text,
+                      );
 
-                      // Kiểm tra 1: Phải lớn hơn 0
                       if (duration <= 0 || total <= 0) {
-                        AppHelpers.showSnackBar(context, "Số ngày và Tổng số viên phải lớn hơn 0!", isError: true);
-                        return; // Dừng lại, không cho lưu
+                        AppHelpers.showSnackBar(
+                          context,
+                          "Số ngày và Tổng số viên phải lớn hơn 0!",
+                          isError: true,
+                        );
+                        return;
                       }
 
-                      // Kiểm tra 2: Tổng thuốc phải >= Liều lượng 1 lần uống
                       if (total < doseAmount) {
-                        AppHelpers.showSnackBar(context, "Vô lý! Tổng số viên ($total) không thể nhỏ hơn liều lượng 1 lần uống ($doseAmount).", isError: true);
-                        return; // Dừng lại, không cho lưu
+                        AppHelpers.showSnackBar(
+                          context,
+                          "Vô lý! Tổng số viên ($total) không thể nhỏ hơn liều lượng 1 lần uống ($doseAmount).",
+                          isError: true,
+                        );
+                        return;
                       }
-                      // --- KẾT THÚC VALIDATION ---
 
-                      // --- 2. GỌI CONTROLLER LƯU DỮ LIỆU ---
+                      // Gọi Controller lưu dữ liệu
                       AppHelpers.showSnackBar(context, "Đang lưu dữ liệu...");
 
-                      bool isSuccess = await MedicationController.addMedication(
+                      bool isSuccess =
+                          await MedicationController.addMedication(
                         name: _nameController.text,
                         dosage: _dosageController.text,
                         time: _selectedTime,
@@ -276,12 +281,19 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
 
                       if (isSuccess) {
                         if (context.mounted) {
-                          AppHelpers.showSnackBar(context, "Lưu lịch uống thuốc thành công!");
+                          AppHelpers.showSnackBar(
+                            context,
+                            "Lưu lịch uống thuốc thành công!",
+                          );
                           Navigator.pop(context);
                         }
                       } else {
                         if (context.mounted) {
-                          AppHelpers.showSnackBar(context, "Lưu thất bại. Vui lòng thử lại!", isError: true);
+                          AppHelpers.showSnackBar(
+                            context,
+                            "Lưu thất bại. Vui lòng thử lại!",
+                            isError: true,
+                          );
                         }
                       }
                     }
@@ -293,11 +305,11 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                   ),
-                  child: const Text(
+                  child: Text(
                     "Lưu lịch uống",
                     style: TextStyle(
                       fontSize: 16,
-                      color: Colors.white,
+                      color: AppColors.surface,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -311,9 +323,9 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
     );
   }
 
-  // --- HÀM PHỤ TRỢ XÂY DỰNG GIAO DIỆN PREMIUM ---
+  // --- HÀM PHỤ TRỢ XÂY DỰNG GIAO DIỆN ---
 
-  // 1. Tạo khối Card bo tròn cho từng Section
+  /// Tạo khối Card bo tròn cho từng Section
   Widget _buildSectionCard({
     required String title,
     required List<Widget> children,
@@ -321,7 +333,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
@@ -336,10 +348,10 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
         children: [
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF1E293B),
+              color: AppColors.textDark,
             ),
           ),
           const SizedBox(height: 20),
@@ -349,7 +361,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
     );
   }
 
-  // 2. Tạo ô nhập liệu (TextField) hiện đại
+  /// Tạo ô nhập liệu (TextField) hiện đại
   Widget _buildModernInput({
     required TextEditingController controller,
     required String hint,
@@ -364,19 +376,19 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
         if (isRequired && (value == null || value.isEmpty)) return 'Bắt buộc';
         return null;
       },
-      style: const TextStyle(
+      style: TextStyle(
         fontWeight: FontWeight.w600,
-        color: Color(0xFF1E293B),
+        color: AppColors.textDark,
       ),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(
-          color: Color(0xFF94A3B8),
+        hintStyle: TextStyle(
+          color: AppColors.textSecondary,
           fontWeight: FontWeight.normal,
         ),
-        prefixIcon: Icon(icon, color: const Color(0xFF94A3B8), size: 22),
+        prefixIcon: Icon(icon, color: AppColors.textSecondary, size: 22),
         filled: true,
-        fillColor: const Color(0xFFF1F5F9),
+        fillColor: AppColors.background,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 16,
@@ -387,7 +399,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: Color(0xFF009688), width: 1.5),
+          borderSide: BorderSide(color: AppColors.primary, width: 1.5),
         ),
         errorStyle: const TextStyle(height: 0.8),
       ),
