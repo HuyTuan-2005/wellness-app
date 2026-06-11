@@ -48,3 +48,38 @@ class AppColors {
     0xFFF44336,
   ); // Cảnh báo chỉ số nguy hiểm (nhịp tim cao)
 }
+
+// import 'package:flutter/material.dart';
+
+// // Dark mode - Orange Theme
+// class AppColors {
+//   // Màu chủ đạo (Primary) - Màu cam nổi bật, năng động
+//   static const Color primary = Color(0xFFFF6D00); // Cam rực rỡ (Deep Orange)
+
+//   // Màu phụ (Secondary) - Cam nhạt / Nâu trầm dùng làm nền phụ hoặc hiệu ứng nhấn
+//   static const Color secondary = Color(0xFF3E2723);
+
+//   // Hệ thống màu nền (Background & Surface)
+//   static const Color background = Color(
+//     0xFF121212,
+//   ); // Màu nền của toàn bộ màn hình (Đen nhạt)
+
+//   static const Color surface = Color(
+//     0xFF1E1E1E,
+//   ); // Màu nền của các thẻ (Card) nổi lên
+
+//   // Màu đường viền
+//   static const Color border = Color(0xFF2C2C2C); // Đường viền mờ cho Dark Mode
+
+//   // Hệ thống màu chữ (Text)
+//   static const Color textPrimary = Color(0xFFE0E0E0); // Chữ tiêu đề (Trắng xám)
+//   static const Color textSecondary = Color(0xFF9E9E9E); // Chữ chú thích
+//   static const Color textDark = Color(
+//     0xFFF5F5F5,
+//   ); // Chữ chính, trước kia là đen nay đổi thành sáng
+
+//   // Màu trạng thái (Semantic) - Giữ tone sáng để dễ nhìn trên nền tối
+//   static const Color success = Color(0xFF00E676); // Đạt mục tiêu
+//   static const Color warning = Color(0xFFFFCA28); // Nhắc nhở
+//   static const Color error = Color(0xFFEF5350); // Cảnh báo
+// }

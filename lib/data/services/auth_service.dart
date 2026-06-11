@@ -24,20 +24,20 @@ class AuthService {
   Future<UserCredential?> signInWithGoogle() async {
     try {
       // Bước 1: Mở Google Sign-In flow (initialize đã gọi trong main.dart)
-      final GoogleSignInAccount googleUser =
-          await GoogleSignIn.instance.authenticate();
+      final GoogleSignInAccount googleUser = await GoogleSignIn.instance
+          .authenticate();
 
       // Bước 3: Lấy idToken từ authentication (sync getter trong v7.x)
-      final GoogleSignInAuthentication googleAuth =
-          googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
 
       final OAuthCredential credential = GoogleAuthProvider.credential(
         idToken: googleAuth.idToken,
       );
 
       // Bước 4: Đăng nhập vào Firebase Auth
-      final UserCredential userCredential =
-          await _auth.signInWithCredential(credential);
+      final UserCredential userCredential = await _auth.signInWithCredential(
+        credential,
+      );
 
       final User? user = userCredential.user;
 
@@ -61,20 +61,21 @@ class AuthService {
   }
 
   /// Đăng nhập bằng Email và Password
-  Future<UserCredential?> signInWithEmailAndPassword(String email, String password) async {
+  Future<UserCredential?> signInWithEmailAndPassword(
+    String email,
+    String password,
+  ) async {
     try {
-      final UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-      
+      final UserCredential userCredential = await _auth
+          .signInWithEmailAndPassword(email: email, password: password);
+
       final User? user = userCredential.user;
       if (user != null) {
         // Cập nhật lastActive trong Firestore
         await _syncUserToFirestore(user);
         print('[AuthService] Đăng nhập Email thành công: ${user.email}');
       }
-      
+
       return userCredential;
     } on FirebaseAuthException catch (e) {
       print('[AuthService] Lỗi FirebaseAuth: ${e.code} - ${e.message}');
@@ -101,8 +102,9 @@ class AuthService {
   /// Kiểm tra user trong Firestore và tạo mới hoặc cập nhật
   Future<void> _syncUserToFirestore(User user) async {
     try {
-      final DocumentReference userDoc =
-          _firestore.collection('users').doc(user.uid);
+      final DocumentReference userDoc = _firestore
+          .collection('users')
+          .doc(user.uid);
 
       final DocumentSnapshot snapshot = await userDoc.get();
 

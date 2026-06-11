@@ -29,6 +29,7 @@ class MedicationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Color primaryTeal = const Color(0xFF009688);
     final bool isCompleted = status == "completed";
     final bool isOverdue = status == "overdue";
 
@@ -47,8 +48,8 @@ class MedicationCard extends StatelessWidget {
       iconBgColor = AppColors.error.withOpacity(0.08);
       iconColor = AppColors.error;
     } else {
-      iconBgColor = AppColors.primary.withOpacity(0.08);
-      iconColor = AppColors.primary;
+      iconBgColor = primaryTeal.withValues(alpha: 0.1);
+      iconColor = primaryTeal;
     }
 
     double progress = totalQuantity > 0 ? (takenQuantity / totalQuantity) : 0;
@@ -65,9 +66,8 @@ class MedicationCard extends StatelessWidget {
         border: isOverdue
             ? Border.all(color: AppColors.error.withOpacity(0.2), width: 2)
             : isCompleted
-                ? Border.all(
-                    color: AppColors.success.withOpacity(0.15), width: 1.5)
-                : null,
+            ? Border.all(color: AppColors.success.withOpacity(0.15), width: 1.5)
+            : null,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.04),
@@ -162,8 +162,8 @@ class MedicationCard extends StatelessWidget {
                         color: isOverdue
                             ? AppColors.error.withOpacity(0.08)
                             : isCompleted
-                                ? AppColors.success.withOpacity(0.08)
-                                : AppColors.border.withOpacity(0.5),
+                            ? AppColors.success.withOpacity(0.08)
+                            : AppColors.border.withOpacity(0.5),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
@@ -177,8 +177,8 @@ class MedicationCard extends StatelessWidget {
                             color: isOverdue
                                 ? AppColors.error
                                 : isCompleted
-                                    ? AppColors.success
-                                    : AppColors.textSecondary,
+                                ? AppColors.success
+                                : AppColors.textSecondary,
                           ),
                           const SizedBox(width: 4),
                           Text(
@@ -188,8 +188,8 @@ class MedicationCard extends StatelessWidget {
                               color: isOverdue
                                   ? AppColors.error
                                   : isCompleted
-                                      ? AppColors.success
-                                      : AppColors.textSecondary,
+                                  ? AppColors.success
+                                  : AppColors.textSecondary,
                               fontSize: 12,
                             ),
                           ),

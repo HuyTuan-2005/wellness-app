@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:wellness_app/core/theme/app_colors.dart';
-
+import 'package:wellness_app/features/system_notifications/widgets/notification_icon_badge.dart';
 import 'package:wellness_app/features/water/controllers/water_controller.dart';
 import 'package:wellness_app/features/sleep/controllers/sleep_controller.dart';
 import 'package:wellness_app/features/blood_pressure/controllers/blood_pressure_controller.dart';
@@ -35,25 +35,25 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
     final waterValue = '${_waterController.currentMl} ml';
     final sleepValue = '${_sleepController.todayHours.toStringAsFixed(1)} giờ';
     final bpLatest = _bpController.latest;
-    final bpValue = bpLatest != null ? '${bpLatest.systolic}/${bpLatest.diastolic}' : '--';
-    
+    final bpValue = bpLatest != null
+        ? '${bpLatest.systolic}/${bpLatest.diastolic}'
+        : '--';
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text(
           'Tổng quan Sức khỏe',
-          style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+          ),
         ),
         backgroundColor: AppColors.background,
         elevation: 0,
         centerTitle: true,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_none, color: AppColors.textPrimary),
-            onPressed: () {
-              // TODO: Chuyển hướng tới màn hình thông báo
-            },
-          ),
+          const NotificationIconBadge(),
         ],
       ),
       body: SingleChildScrollView(
@@ -94,17 +94,23 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
             alignment: Alignment.centerLeft,
             child: Text(
               'Tổng quan trong ngày',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
             ),
           ),
           const SizedBox(height: 30),
-          
+
           // Donut Chart cho Dinh dưỡng
           GestureDetector(
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const NutritionTrackingScreen()),
+                MaterialPageRoute(
+                  builder: (_) => const NutritionTrackingScreen(),
+                ),
               ).then((_) => setState(() {}));
             },
             child: SizedBox(
@@ -126,7 +132,9 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                         ),
                         PieChartSectionData(
                           color: Colors.grey.withValues(alpha: 0.2),
-                          value: (targetCalo - currentCalo) > 0 ? (targetCalo - currentCalo) : 0,
+                          value: (targetCalo - currentCalo) > 0
+                              ? (targetCalo - currentCalo)
+                              : 0,
                           title: '',
                           radius: 12,
                         ),
@@ -136,15 +144,26 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                   Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.local_fire_department, color: Colors.orange, size: 28),
+                      const Icon(
+                        Icons.local_fire_department,
+                        color: Colors.orange,
+                        size: 28,
+                      ),
                       const SizedBox(height: 4),
                       Text(
                         '${currentCalo.toInt()}',
-                        style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                        style: const TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
                       Text(
                         '/ ${targetCalo.toInt()} kcal',
-                        style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: AppColors.textSecondary,
+                        ),
                       ),
                     ],
                   ),
@@ -153,7 +172,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
             ),
           ),
           const SizedBox(height: 30),
-          
+
           // Thanh chỉ số BMI
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -161,8 +180,21 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Chỉ số BMI', style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
-                  Text(bmi.toStringAsFixed(1), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary)),
+                  const Text(
+                    'Chỉ số BMI',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  Text(
+                    bmi.toStringAsFixed(1),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 15),
@@ -172,7 +204,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                   double percentage = (bmi - 15) / 25;
                   if (percentage < 0) percentage = 0.05;
                   if (percentage > 1) percentage = 0.95;
-                  
+
                   return Stack(
                     clipBehavior: Clip.none,
                     children: [
@@ -183,18 +215,42 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                         ),
                         child: Row(
                           children: [
-                            Expanded(child: Container(decoration: const BoxDecoration(color: Colors.blue, borderRadius: BorderRadius.horizontal(left: Radius.circular(5))))),
+                            Expanded(
+                              child: Container(
+                                decoration: const BoxDecoration(
+                                  color: Colors.blue,
+                                  borderRadius: BorderRadius.horizontal(
+                                    left: Radius.circular(5),
+                                  ),
+                                ),
+                              ),
+                            ),
                             Expanded(child: Container(color: Colors.green)),
                             Expanded(child: Container(color: Colors.orange)),
-                            Expanded(child: Container(decoration: const BoxDecoration(color: Colors.red, borderRadius: BorderRadius.horizontal(right: Radius.circular(5))))),
+                            Expanded(
+                              child: Container(
+                                decoration: const BoxDecoration(
+                                  color: Colors.red,
+                                  borderRadius: BorderRadius.horizontal(
+                                    right: Radius.circular(5),
+                                  ),
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                       ),
                       // Mũi tên chỉ báo
                       Positioned(
-                        left: (constraints.maxWidth * percentage) - 12, // 12 là nửa chiều rộng của icon
+                        left:
+                            (constraints.maxWidth * percentage) -
+                            12, // 12 là nửa chiều rộng của icon
                         top: -18,
-                        child: const Icon(Icons.arrow_drop_down, size: 24, color: AppColors.textPrimary),
+                        child: const Icon(
+                          Icons.arrow_drop_down,
+                          size: 24,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
                     ],
                   );
@@ -204,10 +260,38 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
               const Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Thiếu cân', style: TextStyle(fontSize: 11, color: Colors.blue, fontWeight: FontWeight.w500)),
-                  Text('Bình thường', style: TextStyle(fontSize: 11, color: Colors.green, fontWeight: FontWeight.w500)),
-                  Text('Thừa cân', style: TextStyle(fontSize: 11, color: Colors.orange, fontWeight: FontWeight.w500)),
-                  Text('Béo phì', style: TextStyle(fontSize: 11, color: Colors.red, fontWeight: FontWeight.w500)),
+                  Text(
+                    'Thiếu cân',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.blue,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Text(
+                    'Bình thường',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.green,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Text(
+                    'Thừa cân',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.orange,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Text(
+                    'Béo phì',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.red,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -217,7 +301,12 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
     );
   }
 
-  Widget _buildCardsSection(BuildContext context, String waterValue, String sleepValue, String bpValue) {
+  Widget _buildCardsSection(
+    BuildContext context,
+    String waterValue,
+    String sleepValue,
+    String bpValue,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -246,7 +335,9 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const WaterTrackingScreen()),
+                  MaterialPageRoute(
+                    builder: (_) => const WaterTrackingScreen(),
+                  ),
                 ).then((_) => setState(() {}));
               },
             ),
@@ -258,7 +349,9 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const SleepTrackingScreen()),
+                  MaterialPageRoute(
+                    builder: (_) => const SleepTrackingScreen(),
+                  ),
                 ).then((_) => setState(() {}));
               },
             ),
@@ -270,7 +363,9 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const BloodPressureTrackingScreen()),
+                  MaterialPageRoute(
+                    builder: (_) => const BloodPressureTrackingScreen(),
+                  ),
                 ).then((_) => setState(() {}));
               },
             ),
@@ -282,7 +377,9 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const WeightTrackingScreen()),
+                  MaterialPageRoute(
+                    builder: (_) => const WeightTrackingScreen(),
+                  ),
                 ).then((_) => setState(() {}));
               },
             ),
@@ -294,7 +391,9 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const MentalHealthTrackingScreen()),
+                  MaterialPageRoute(
+                    builder: (_) => const MentalHealthTrackingScreen(),
+                  ),
                 ).then((_) => setState(() {}));
               },
             ),

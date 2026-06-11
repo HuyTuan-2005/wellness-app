@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../data/food_database.dart';
 import '../models/nutrition_entry.dart';
 
 class AddFoodResult {
@@ -115,7 +114,9 @@ class _AddFoodDialogState extends State<AddFoodDialog> {
   void _selectSuggestion(FoodItem food) {
     _isSelectingSuggestion = true;
     _nameController.text = food.name;
-    _nameController.selection = TextSelection.collapsed(offset: _nameController.text.length);
+    _nameController.selection = TextSelection.collapsed(
+      offset: _nameController.text.length,
+    );
     setState(() {
       _selectedFood = food;
       _suggestions = [];
@@ -183,10 +184,13 @@ class _AddFoodDialogState extends State<AddFoodDialog> {
                       TextField(
                         controller: _nameController,
                         onChanged: _onNameChanged,
-                        decoration: const InputDecoration(labelText: 'Tên món ăn'),
+                        decoration: const InputDecoration(
+                          labelText: 'Tên món ăn',
+                        ),
                       ),
                       const SizedBox(height: 8),
-                      if (_suggestions.isNotEmpty && _nameController.text.isNotEmpty)
+                      if (_suggestions.isNotEmpty &&
+                          _nameController.text.isNotEmpty)
                         SizedBox(
                           height: 120,
                           child: ListView.builder(
@@ -205,23 +209,37 @@ class _AddFoodDialogState extends State<AddFoodDialog> {
                       TextField(
                         controller: _quantityController,
                         keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(labelText: 'Số lượng (g)'),
+                        decoration: const InputDecoration(
+                          labelText: 'Số lượng (g)',
+                        ),
                       ),
                       if (_selectedFood == null) ...[
                         TextField(
                           controller: _caloController,
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          decoration: const InputDecoration(labelText: 'Calo/100g'),
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          decoration: const InputDecoration(
+                            labelText: 'Calo/100g',
+                          ),
                         ),
                         TextField(
                           controller: _proteinController,
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          decoration: const InputDecoration(labelText: 'Protein/100g'),
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          decoration: const InputDecoration(
+                            labelText: 'Protein/100g',
+                          ),
                         ),
                         TextField(
                           controller: _carbController,
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          decoration: const InputDecoration(labelText: 'Carb/100g'),
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          decoration: const InputDecoration(
+                            labelText: 'Carb/100g',
+                          ),
                         ),
                       ],
                     ],
@@ -232,7 +250,10 @@ class _AddFoodDialogState extends State<AddFoodDialog> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Hủy')),
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Hủy'),
+                  ),
                   const SizedBox(width: 8),
                   FilledButton(onPressed: _submit, child: const Text('Thêm')),
                 ],
