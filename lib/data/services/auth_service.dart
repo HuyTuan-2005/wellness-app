@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:wellness_app/core/services/data_sync_service.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -68,6 +69,9 @@ class AuthService {
       // Bước 5: Kiểm tra & đồng bộ user trong Firestore
       await _syncUserToFirestore(user);
 
+      // Kéo dữ liệu từ Cloud về SQLite
+      await DataSyncService.pullCloudToLocal();
+
       print('[AuthService] Đăng nhập thành công: ${user.email}');
       return userCredential;
     } on FirebaseAuthException catch (e) {
@@ -92,6 +96,10 @@ class AuthService {
       if (user != null) {
         // Cập nhật lastActive trong Firestore
         await _syncUserToFirestore(user);
+        
+        // Kéo dữ liệu từ Cloud về SQLite
+        await DataSyncService.pullCloudToLocal();
+        
         print('[AuthService] Đăng nhập Email thành công: ${user.email}');
       }
 

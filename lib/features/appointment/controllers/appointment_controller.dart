@@ -3,6 +3,7 @@ import 'package:wellness_app/core/database/database_helper.dart';
 import 'package:wellness_app/features/appointment/models/appointment.dart';
 import 'package:wellness_app/service/notification_service.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:wellness_app/core/services/data_sync_service.dart';
 
 class AppointmentController {
   // ==================== THÊM LỊCH KHÁM MỚI ====================
@@ -47,6 +48,8 @@ class AppointmentController {
             scheduledTime: notificationTime,
           );
         }
+        
+        DataSyncService.syncLocalToCloud(); // Không cần await để UI không bị giật
         return true;
       }
       return false;
@@ -87,6 +90,8 @@ class AppointmentController {
       // Hủy báo thức nếu vẫn chưa kêu
       int notificationId = int.parse(appointment.id!) + 10000;
       await NotificationService().cancelNotification(notificationId);
+
+      DataSyncService.syncLocalToCloud(); // Không cần await để UI không bị giật
     } catch (e) {
       debugPrint("Lỗi khi đánh dấu hoàn thành lịch khám: $e");
     }
@@ -103,6 +108,8 @@ class AppointmentController {
         // Hủy báo thức
         int notificationId = id + 10000;
         await NotificationService().cancelNotification(notificationId);
+
+        DataSyncService.syncLocalToCloud(); // Không cần await để UI không bị giật
       }
     } catch (e) {
       debugPrint("Lỗi khi xóa lịch khám: $e");
