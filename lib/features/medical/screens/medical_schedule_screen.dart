@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wellness_app/core/theme/app_colors.dart';
 import 'package:wellness_app/features/medication/screens/medication_list_screen.dart';
-// TODO: Import AppointmentListScreen khi hoàn thành module Lịch khám
-// import 'package:wellness_app/features/appointment/screens/appointment_list_screen.dart';
+import 'package:wellness_app/features/appointment/screens/appointment_list_screen.dart';
 
 class MedicalScheduleScreen extends StatelessWidget {
   const MedicalScheduleScreen({super.key});
@@ -34,32 +33,12 @@ class MedicalScheduleScreen extends StatelessWidget {
             ],
           ),
         ),
-        body: TabBarView(
+        body: const TabBarView(
           children: [
-            // Tab 1: Gọi nguyên MedicationListScreen (giữ toàn bộ logic + UI + FAB)
-            const MedicationListScreen(),
-
-            // Tab 2: Placeholder chờ triển khai module Lịch khám
-            Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.medical_services_outlined,
-                    size: 64,
-                    color: AppColors.border,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    "Màn hình Lịch khám đang xây dựng",
-                    style: TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 16,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            // Tab 1: Màn hình Thuốc
+            MedicationListScreen(),
+            // Tab 2: Màn hình Lịch khám
+            AppointmentListScreen(),
           ],
         ),
       ),

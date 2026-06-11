@@ -108,6 +108,21 @@ class DatabaseHelper {
     return result.map((json) => AppointmentModel.fromMap(json)).toList();
   }
 
+  Future<int> updateAppointment(AppointmentModel appointment) async {
+    final db = await instance.database;
+    return await db.update(
+      'appointments',
+      appointment.toMap(),
+      where: 'id = ?',
+      whereArgs: [appointment.id],
+    );
+  }
+
+  Future<int> deleteAppointment(int id) async {
+    final db = await instance.database;
+    return await db.delete('appointments', where: 'id = ?', whereArgs: [id]);
+  }
+
   // Cập nhật trạng thái và số lượng thuốc đã uống
   Future<int> updateMedication(MedicationModel medication) async {
     final db = await instance.database;

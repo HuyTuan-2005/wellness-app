@@ -80,28 +80,13 @@ class _MedicationListScreenState extends State<MedicationListScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            "Xin chào 👋",
-                            style: TextStyle(
-                              color: AppColors.textSecondary,
-                              fontSize: 16,
-                            ),
-                          ),
-                          Text(
-                            "Trung Tính",
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textDark,
-                            ),
-                          ),
-                          const SizedBox(height: 24),
+
                           // Thẻ thống kê tổng quan hôm nay
                           Row(
                             children: [
                               Expanded(
                                 child: _buildStatCard(
-                                  "Thuốc hôm nay",
+                                  "Tổng số thuốc",
                                   total.toString(),
                                   Icons.medication,
                                   AppColors.primary,
