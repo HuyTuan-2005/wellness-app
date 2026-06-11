@@ -200,10 +200,19 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
               const SizedBox(height: 15),
               LayoutBuilder(
                 builder: (context, constraints) {
-                  // Mốc 15 đến 40
-                  double percentage = (bmi - 15) / 25;
-                  if (percentage < 0) percentage = 0.05;
-                  if (percentage > 1) percentage = 0.95;
+                  double percentage;
+                  if (bmi < 18.5) {
+                    percentage = (bmi - 15) / (18.5 - 15) * 0.25;
+                  } else if (bmi < 23.0) {
+                    percentage = 0.25 + (bmi - 18.5) / (23.0 - 18.5) * 0.25;
+                  } else if (bmi < 25.0) {
+                    percentage = 0.5 + (bmi - 23.0) / (25.0 - 23.0) * 0.25;
+                  } else {
+                    percentage = 0.75 + (bmi - 25.0) / (30.0 - 25.0) * 0.25;
+                  }
+                  
+                  if (percentage < 0.02) percentage = 0.02;
+                  if (percentage > 0.98) percentage = 0.98;
 
                   return Stack(
                     clipBehavior: Clip.none,
