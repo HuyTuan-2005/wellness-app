@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:wellness_app/core/database/database_helper.dart';
 import 'package:wellness_app/features/medication/models/medication.dart';
 import 'package:wellness_app/service/notification_service.dart';
+import 'package:wellness_app/core/services/data_sync_service.dart';
 
 class MedicationController {
   // ==================== THÊM THUỐC MỚI ====================
@@ -63,6 +64,8 @@ class MedicationController {
               "Bạn có lịch uống ${newMedication.dosage} ${newMedication.name}. Nhớ uống đúng giờ nhé!",
           scheduledTime: firstDoseTime,
         );
+        
+        DataSyncService.syncLocalToCloud(); // Không cần await để UI không bị giật
         return true;
       }
       return false;
@@ -145,13 +148,18 @@ class MedicationController {
   static Future<void> checkAndUpdateCompletionStatus(
     List<MedicationModel> medications,
   ) async {
+    bool hasChanged = false;
     for (final med in medications) {
       int doseAmount = parseDoseAmount(med.dosage);
       int dosesTaken = med.takenQuantity ~/ doseAmount;
       if (dosesTaken >= med.durationDays && med.status != 'completed') {
         med.status = 'completed';
         await DatabaseHelper.instance.updateMedication(med);
+        hasChanged = true;
       }
+    }
+    if (hasChanged) {
+      DataSyncService.syncLocalToCloud(); // Không cần await để UI không bị giật
     }
   }
 
@@ -215,5 +223,7 @@ class MedicationController {
         // Bỏ qua lỗi parse nếu time format không hợp lệ
       }
     }
+
+    DataSyncService.syncLocalToCloud(); // Không cần await để UI không bị giật
   }
 }
