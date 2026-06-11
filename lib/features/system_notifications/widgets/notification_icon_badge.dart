@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/notification_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wellness_app/core/theme/app_colors.dart';
@@ -12,6 +13,7 @@ class NotificationIconBadge extends StatefulWidget {
 }
 
 class _NotificationIconBadgeState extends State<NotificationIconBadge> {
+  final NotificationService _notificationService = NotificationService();
   DateTime? _lastReadTime;
 
   @override
@@ -43,7 +45,7 @@ class _NotificationIconBadgeState extends State<NotificationIconBadge> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance.collection('notifications').snapshots(),
+      stream: _notificationService.getNotificationsCountStream(),
       builder: (context, snapshot) {
         int unreadCount = 0;
 
@@ -81,7 +83,7 @@ class _NotificationIconBadgeState extends State<NotificationIconBadge> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => const UserNotificationScreen(),
+                builder: (_) => UserNotificationScreen(),
               ),
             );
           },

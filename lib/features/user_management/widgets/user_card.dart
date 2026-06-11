@@ -7,7 +7,8 @@ class UserCard extends StatelessWidget {
   final String name;
   final String email;
   final bool isActive;
-  final String role;
+  final String? lockReason;
+  final VoidCallback? onTap;
 
   const UserCard({
     super.key,
@@ -15,28 +16,31 @@ class UserCard extends StatelessWidget {
     required this.name,
     required this.email,
     required this.isActive,
-    this.role = 'Người dùng',
+    this.lockReason,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        child: Row(
-          children: [
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary.withValues(alpha: 0.04),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          child: Row(
+            children: [
             // Avatar
             _buildAvatar(),
             const SizedBox(width: 12),
@@ -50,39 +54,19 @@ class UserCard extends StatelessWidget {
                     name,
                     style: const TextStyle(
                       fontWeight: FontWeight.w700,
-                      fontSize: 14,
+                      fontSize: 16,
                       color: AppColors.textDark,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 4),
                   Text(
                     email,
                     style: const TextStyle(
-                      fontSize: 12,
+                      fontSize: 13,
                       color: AppColors.textSecondary,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  // Role tag
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.secondary,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      role,
-                      style: const TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.primary,
-                      ),
-                    ),
                   ),
                 ],
               ),
@@ -90,11 +74,27 @@ class UserCard extends StatelessWidget {
             const SizedBox(width: 8),
 
             // Badge trạng thái
-            _buildStatusBadge(),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                _buildStatusBadge(),
+                if (!isActive && lockReason != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    'Lý do: $lockReason',
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: AppColors.error,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ],
         ),
       ),
-    );
+    ));
   }
 
   Widget _buildAvatar() {
@@ -105,14 +105,13 @@ class UserCard extends StatelessWidget {
           backgroundImage: NetworkImage(avatarUrl!),
         );
       }
-      return CircleAvatar(
-        radius: 20,
-        backgroundImage: AssetImage(avatarUrl!),
-      );
+      return CircleAvatar(radius: 20, backgroundImage: AssetImage(avatarUrl!));
     }
 
     // Avatar mặc định: chữ cái đầu
-    final initial = name.isNotEmpty ? name.trim().split(' ').last[0].toUpperCase() : '?';
+    final initial = name.isNotEmpty
+        ? name.trim().split(' ').last[0].toUpperCase()
+        : '?';
     return CircleAvatar(
       radius: 20,
       backgroundColor: AppColors.primary.withValues(alpha: 0.1),
@@ -130,7 +129,9 @@ class UserCard extends StatelessWidget {
   Widget _buildStatusBadge() {
     final Color badgeColor = isActive ? AppColors.success : AppColors.error;
     final String statusText = isActive ? 'Hoạt động' : 'Bị khóa';
-    final IconData statusIcon = isActive ? Icons.check_circle_rounded : Icons.block_rounded;
+    final IconData statusIcon = isActive
+        ? Icons.check_circle_rounded
+        : Icons.block_rounded;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

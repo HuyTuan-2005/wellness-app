@@ -14,7 +14,7 @@ class MedicalScheduleScreen extends StatelessWidget {
       child: Scaffold(
         backgroundColor: AppColors.background,
         appBar: AppBar(
-          title: Text(
+          title: const Text(
             'Y tế',
             style: TextStyle(
               fontWeight: FontWeight.bold,
@@ -24,11 +24,11 @@ class MedicalScheduleScreen extends StatelessWidget {
           backgroundColor: AppColors.background,
           elevation: 0,
           centerTitle: true,
-          bottom: TabBar(
+          bottom: const TabBar(
             labelColor: AppColors.primary,
             unselectedLabelColor: AppColors.textSecondary,
             indicatorColor: AppColors.primary,
-            tabs: const [
+            tabs: [
               Tab(icon: Icon(Icons.medication), text: 'Lịch uống thuốc'),
               Tab(icon: Icon(Icons.medical_services), text: 'Lịch khám'),
             ],

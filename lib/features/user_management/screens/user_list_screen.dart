@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:wellness_app/features/admin/services/admin_user_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:wellness_app/core/theme/app_colors.dart';
 import 'package:wellness_app/features/user_management/widgets/user_card.dart';
+import 'package:wellness_app/features/user_management/utils/user_dialog_helper.dart';
 
 /// Trang quản lý người dùng – search bar cố định + danh sách cuộn.
 class UserListScreen extends StatefulWidget {
@@ -14,12 +16,45 @@ class UserListScreen extends StatefulWidget {
 class _UserListScreenState extends State<UserListScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final AdminUserService _userService = AdminUserService();
 
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  /// Hàm cập nhật trạng thái khóa tài khoản
+  Future<void> _toggleLockStatus(String uid, bool currentStatus) async {
+    String? lockReason;
+
+    if (!currentStatus) {
+      final reason = await UserDialogHelper.showLockUserDialog(context);
+      if (reason == null) return; // Hủy
+      lockReason = reason;
+    } else {
+      final confirmUnlock = await UserDialogHelper.showUnlockUserDialog(context);
+      if (confirmUnlock != true) return; // Hủy
+    }
+
+    try {
+      await _userService.toggleLockStatus(uid, currentStatus, reason: lockReason);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(!currentStatus ? 'Đã khóa tài khoản' : 'Đã mở khóa tài khoản'),
+            backgroundColor: !currentStatus ? AppColors.error : Colors.green,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lỗi cập nhật: $e'), backgroundColor: AppColors.error),
+        );
+      }
+    }
   }
 
   @override
@@ -108,10 +143,7 @@ class _UserListScreenState extends State<UserListScreen> {
             // ─── Danh sách người dùng (scrollable) ──
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
-                stream: _firestore
-                    .collection('users')
-                    .where('role', isNotEqualTo: 'admin')
-                    .snapshots(),
+                stream: _userService.getUsersStream(),
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
                     return Center(child: Text('Đã xảy ra lỗi: ${snapshot.error}'));
@@ -182,14 +214,16 @@ class _UserListScreenState extends State<UserListScreen> {
                             final name = data['displayName'] ?? 'Người dùng';
                             final photoUrl = data['photoURL'];
                             final isLocked = data['isLocked'] ?? false;
-                            final role = data['role'] ?? 'Người dùng';
+
+                            final lockReason = data['lockReason'] as String?;
 
                             return UserCard(
                               name: name,
                               email: email,
                               isActive: !isLocked,
-                              role: role,
                               avatarUrl: photoUrl,
+                              lockReason: lockReason,
+                              onTap: () => _toggleLockStatus(doc.id, isLocked),
                             );
                           },
                         ),

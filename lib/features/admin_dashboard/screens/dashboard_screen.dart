@@ -17,9 +17,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   int _currentIndex = 0;
 
   // ── 3 trang con được giữ trong IndexedStack (đã xóa Lịch hẹn) ──
-  final List<Widget> _pages = const [
+  final List<Widget> _pages = [
     DashboardContentPage(), // Tab 0: Tổng quan
-    UserListScreen(), // Tab 1: Người dùng
+    const UserListScreen(), // Tab 1: Người dùng
     AdminNotificationScreen(), // Tab 2: Thông báo
   ];
 

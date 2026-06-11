@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:wellness_app/core/theme/app_colors.dart';
+import '../services/notification_service.dart';
 
 class CreateNotificationScreen extends StatefulWidget {
   const CreateNotificationScreen({super.key});
@@ -13,6 +13,7 @@ class CreateNotificationScreen extends StatefulWidget {
 class _CreateNotificationScreenState extends State<CreateNotificationScreen> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
+  final NotificationService _notificationService = NotificationService();
   String _selectedCategory = 'general';
   bool _isLoading = false;
 
@@ -43,12 +44,11 @@ class _CreateNotificationScreenState extends State<CreateNotificationScreen> {
     setState(() => _isLoading = true);
 
     try {
-      await FirebaseFirestore.instance.collection('notifications').add({
-        'title': _titleController.text.trim(),
-        'content': _contentController.text.trim(),
-        'category': _selectedCategory,
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+      await _notificationService.createNotification(
+        title: _titleController.text.trim(),
+        content: _contentController.text.trim(),
+        category: _selectedCategory,
+      );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/notification_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:wellness_app/core/theme/app_colors.dart';
@@ -6,7 +7,9 @@ import '../widgets/user_notification_item.dart';
 
 /// Trang xem thông báo hệ thống dành cho người dùng.
 class UserNotificationScreen extends StatelessWidget {
-  const UserNotificationScreen({super.key});
+  UserNotificationScreen({super.key});
+
+  final NotificationService _notificationService = NotificationService();
 
   @override
   Widget build(BuildContext context) {
@@ -26,10 +29,7 @@ class UserNotificationScreen extends StatelessWidget {
         iconTheme: const IconThemeData(color: AppColors.textDark),
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('notifications')
-            .orderBy('createdAt', descending: true)
-            .snapshots(),
+        stream: _notificationService.getNotificationsStream(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());

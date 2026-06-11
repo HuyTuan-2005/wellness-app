@@ -12,6 +12,25 @@ class AuthService {
   /// Stream theo dõi trạng thái đăng nhập
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
+  /// Stream lấy dữ liệu user từ Firestore
+  Stream<DocumentSnapshot> getUserStream(String uid) {
+    return _firestore.collection('users').doc(uid).snapshots();
+  }
+
+  /// Cập nhật thời gian hoạt động cuối cùng của user
+  Future<void> updateUserActivity() async {
+    final user = _auth.currentUser;
+    if (user != null) {
+      try {
+        await _firestore.collection('users').doc(user.uid).update({
+          'lastActive': FieldValue.serverTimestamp(),
+        });
+      } catch (e) {
+        print('[AuthService] Lỗi khi cập nhật lastActive: $e');
+      }
+    }
+  }
+
   /// Đăng nhập bằng Google (google_sign_in v7.x)
   ///
   /// Flow:

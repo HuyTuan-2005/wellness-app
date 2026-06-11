@@ -4,10 +4,13 @@ import 'package:intl/intl.dart';
 import 'package:wellness_app/core/theme/app_colors.dart';
 import '../widgets/notification_item.dart';
 import 'create_notification_screen.dart';
+import '../services/notification_service.dart';
 
 /// Trang quản lý thông báo hệ thống dành cho Admin.
 class AdminNotificationScreen extends StatelessWidget {
-  const AdminNotificationScreen({super.key});
+  AdminNotificationScreen({super.key});
+
+  final NotificationService _notificationService = NotificationService();
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +37,7 @@ class AdminNotificationScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   StreamBuilder<QuerySnapshot>(
-                    stream: FirebaseFirestore.instance.collection('notifications').snapshots(),
+                    stream: _notificationService.getNotificationsCountStream(),
                     builder: (context, snapshot) {
                       int count = snapshot.hasData ? snapshot.data!.docs.length : 0;
                       return Text(
@@ -53,10 +56,7 @@ class AdminNotificationScreen extends StatelessWidget {
             // ─── Danh sách thông báo ────
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection('notifications')
-                    .orderBy('createdAt', descending: true)
-                    .snapshots(),
+                stream: _notificationService.getNotificationsStream(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/profile_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:wellness_app/features/profile/utils/data_helper.dart';
@@ -18,6 +19,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final User? currentUser = FirebaseAuth.instance.currentUser;
+  final ProfileService _profileService = ProfileService();
 
   @override
   Widget build(BuildContext context) {
@@ -40,11 +42,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         centerTitle: true,
       ),
       body: StreamBuilder<DocumentSnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('users')
-            .doc(currentUser!.uid)
-            .snapshots(),
-        builder: (context, snapshot) {
+        stream: _profileService.getUserProfileStream(currentUser!.uid),
+        builder: (context, AsyncSnapshot snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -161,7 +160,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => const UserNotificationScreen(),
+                                builder: (_) => UserNotificationScreen(),
                               ),
                             );
                           },

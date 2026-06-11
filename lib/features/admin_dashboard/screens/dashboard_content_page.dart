@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/dashboard_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:wellness_app/core/theme/app_colors.dart';
 import 'package:wellness_app/features/admin_dashboard/widgets/report_card.dart';
@@ -8,7 +9,9 @@ import 'package:wellness_app/features/home/screens/main_navigation_screen.dart';
 /// Trang nội dung Dashboard – hiển thị thẻ báo cáo số liệu và biểu đồ.
 /// Đây là nội dung bên trong tab "Tổng quan".
 class DashboardContentPage extends StatelessWidget {
-  const DashboardContentPage({super.key});
+  DashboardContentPage({super.key});
+
+  final DashboardService _dashboardService = DashboardService();
 
   @override
   Widget build(BuildContext context) {
@@ -75,10 +78,7 @@ class DashboardContentPage extends StatelessWidget {
 
                 // ─── Report Cards ──────────────
                 StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance
-                      .collection('users')
-                      .where('role', isNotEqualTo: 'admin')
-                      .snapshots(),
+                  stream: _dashboardService.getUsersStream(),
                   builder: (context, userSnapshot) {
                     int totalUsers = 0;
                     int todayActive = 0;
@@ -109,7 +109,8 @@ class DashboardContentPage extends StatelessWidget {
                       }
 
                       if (totalUsers > 0) {
-                        activeRate = ((weeklyActive / totalUsers) * 100).round();
+                        activeRate = ((weeklyActive / totalUsers) * 100)
+                            .round();
                       }
                     }
 
@@ -143,11 +144,13 @@ class DashboardContentPage extends StatelessWidget {
                           children: [
                             Expanded(
                               child: StreamBuilder<QuerySnapshot>(
-                                stream: FirebaseFirestore.instance.collection('notifications').snapshots(),
+                                stream: _dashboardService
+                                    .getNotificationsCountStream(),
                                 builder: (context, notifSnapshot) {
                                   int totalNotifs = 0;
                                   if (notifSnapshot.hasData) {
-                                    totalNotifs = notifSnapshot.data!.docs.length;
+                                    totalNotifs =
+                                        notifSnapshot.data!.docs.length;
                                   }
                                   return ReportCard(
                                     icon: Icons.notifications_active_rounded,
@@ -155,7 +158,7 @@ class DashboardContentPage extends StatelessWidget {
                                     label: 'Thông báo đã phát',
                                     accentColor: AppColors.warning,
                                   );
-                                }
+                                },
                               ),
                             ),
                             const SizedBox(width: 14),
@@ -173,13 +176,12 @@ class DashboardContentPage extends StatelessWidget {
                     );
                   },
                 ),
-                
+
                 const SizedBox(height: 24),
 
                 // ─── Chart Section ──────────────────
                 const WeeklyBarChart(),
                 const SizedBox(height: 24),
-
               ],
             ),
           ),
