@@ -72,7 +72,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
 
   Widget _buildOverviewSection(BuildContext context) {
     double currentCalo = _nutritionController.totalCalo;
-    double targetCalo = 2000.0;
+    double targetCalo = _nutritionController.goalCalo.toDouble();
     double bmi = UserProfile.bmi;
 
     return Container(

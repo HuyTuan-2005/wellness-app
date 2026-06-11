@@ -26,7 +26,6 @@ class _NutritionTrackingScreenState extends State<NutritionTrackingScreen> {
   @override
   void dispose() {
     _controller.removeListener(_onChanged);
-    _controller.dispose();
     super.dispose();
   }
 
@@ -35,6 +34,7 @@ class _NutritionTrackingScreenState extends State<NutritionTrackingScreen> {
   }
 
   Future<void> _showGoalDialog() async {
+    final suggested = _controller.getSuggestedCalories();
     final textController = TextEditingController(text: _controller.goalCalo.toString());
 
     final result = await showDialog<int>(
@@ -42,13 +42,61 @@ class _NutritionTrackingScreenState extends State<NutritionTrackingScreen> {
       builder: (dialogContext) {
         return AlertDialog(
           title: const Text('Mục tiêu calo'),
-          content: TextField(
-            controller: textController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              labelText: 'Nhập kcal mong muốn',
-              suffixText: 'kcal',
-            ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextField(
+                controller: textController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Nhập kcal mong muốn',
+                  suffixText: 'kcal',
+                ),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.green.shade50,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, color: Colors.green.shade700),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Gợi ý từ tỉ lệ cơ thể: $suggested kcal',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                              color: Colors.green.shade800,
+                            ),
+                          ),
+                          const Text(
+                            '(Theo chiều cao, cân nặng, tuổi và giới tính của bạn)',
+                            style: TextStyle(fontSize: 11, color: Colors.black54),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+              Center(
+                child: OutlinedButton(
+                  onPressed: () {
+                    textController.text = suggested.toString();
+                  },
+                  child: const Text('Sử dụng mức calo gợi ý'),
+                ),
+              ),
+            ],
           ),
           actions: [
             TextButton(

@@ -202,17 +202,42 @@ class _BloodPressureTrackingScreenState extends State<BloodPressureTrackingScree
                       'Mục tiêu: ${_controller.targetSystolic}/${_controller.targetDiastolic} mmHg',
                       style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
                     ),
-                    const SizedBox(height: 12),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: LinearProgressIndicator(
-                        value: _controller.pressureScore,
-                        minHeight: 10,
-                        backgroundColor: Colors.grey.shade200,
-                        valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFEF5350)),
+                    if (latest != null) ...[
+                      const SizedBox(height: 16),
+                      _buildComparisonBar(
+                        label: 'Tâm thu (sys)',
+                        currentValue: latest.systolic.toDouble(),
+                        minValue: 70,
+                        maxValue: 180,
+                        lowThreshold: 90,
+                        highThreshold: 140,
+                        lowLabel: 'Thấp (<90)',
+                        normalLabel: 'Bình thường (90-140)',
+                        highLabel: 'Cao (≥140)',
+                        activeColor: _controller.statusColorFor(latest),
                       ),
-                    ),
-                    const SizedBox(height: 8),
+                      const SizedBox(height: 20),
+                      _buildComparisonBar(
+                        label: 'Tâm trương (dia)',
+                        currentValue: latest.diastolic.toDouble(),
+                        minValue: 40,
+                        maxValue: 120,
+                        lowThreshold: 60,
+                        highThreshold: 90,
+                        lowLabel: 'Thấp (<60)',
+                        normalLabel: 'Bình thường (60-90)',
+                        highLabel: 'Cao (≥90)',
+                        activeColor: _controller.statusColorFor(latest),
+                      ),
+                      const SizedBox(height: 16),
+                    ] else ...[
+                      const SizedBox(height: 12),
+                      const Text(
+                        'Chưa có dữ liệu đo huyết áp để hiển thị thanh so sánh chỉ số.',
+                        style: TextStyle(fontSize: 13, fontStyle: FontStyle.italic, color: Colors.grey),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
                     Text(
                       'Trạng thái: ${_controller.statusText}',
                       style: TextStyle(
@@ -340,6 +365,117 @@ class _BloodPressureTrackingScreenState extends State<BloodPressureTrackingScree
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildComparisonBar({
+    required String label,
+    required double currentValue,
+    required double minValue,
+    required double maxValue,
+    required double lowThreshold,
+    required double highThreshold,
+    required String lowLabel,
+    required String normalLabel,
+    required String highLabel,
+    required Color activeColor,
+  }) {
+    final zoneColor = currentValue < lowThreshold
+        ? Colors.orange.shade700
+        : (currentValue >= highThreshold ? Colors.red.shade700 : Colors.green.shade700);
+
+    double range = maxValue - minValue;
+    double percentage = (currentValue - minValue) / range;
+    percentage = percentage.clamp(0.02, 0.98);
+
+    double lowPart = (lowThreshold - minValue) / range;
+    double normalPart = (highThreshold - lowThreshold) / range;
+    double highPart = (maxValue - highThreshold) / range;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black87),
+            ),
+            Text(
+              '${currentValue.toInt()} mmHg',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: zoneColor),
+            ),
+          ],
+        ),
+        const SizedBox(height: 18),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            return Stack(
+              clipBehavior: Clip.none,
+              children: [
+                // 3-Color Bar
+                Container(
+                  height: 10,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: Row(
+                    children: [
+                      // Low Zone (Orange)
+                      Expanded(
+                        flex: (lowPart * 100).round(),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.orange.shade400,
+                            borderRadius: const BorderRadius.horizontal(left: Radius.circular(5)),
+                          ),
+                        ),
+                      ),
+                      // Normal Zone (Green)
+                      Expanded(
+                        flex: (normalPart * 100).round(),
+                        child: Container(
+                          color: Colors.green.shade400,
+                        ),
+                      ),
+                      // High Zone (Red)
+                      Expanded(
+                        flex: (highPart * 100).round(),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.red.shade400,
+                            borderRadius: const BorderRadius.horizontal(right: Radius.circular(5)),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Indicator Arrow
+                Positioned(
+                  left: (constraints.maxWidth * percentage) - 12,
+                  top: -18,
+                  child: Icon(
+                    Icons.arrow_drop_down,
+                    size: 24,
+                    color: zoneColor,
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+        const SizedBox(height: 6),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(lowLabel, style: TextStyle(fontSize: 10, color: Colors.orange.shade800, fontWeight: FontWeight.w500)),
+            Text(normalLabel, style: TextStyle(fontSize: 10, color: Colors.green.shade800, fontWeight: FontWeight.w500)),
+            Text(highLabel, style: TextStyle(fontSize: 10, color: Colors.red.shade800, fontWeight: FontWeight.w500)),
+          ],
+        ),
+      ],
     );
   }
 }

@@ -14,6 +14,7 @@ class UserProfile {
   static String bloodType = "O+";
   static String allergies = "Không có";
   static int dailyWaterGoal = 2500; // ml
+  static int dailyCaloGoal = 2000; // kcal
   static String exerciseGoal = "Tập gym 5 buổi/tuần";
 
   // ==================== HÀM CẬP NHẬT DỮ LIỆU ====================
@@ -28,6 +29,7 @@ class UserProfile {
     String? newBloodType,
     String? newAllergies,
     int? newWaterGoal,
+    int? newCaloGoal,
     String? newExerciseGoal,
   }) {
     if (newName != null) userName = newName;
@@ -40,6 +42,7 @@ class UserProfile {
     if (newBloodType != null) bloodType = newBloodType;
     if (newAllergies != null) allergies = newAllergies;
     if (newWaterGoal != null) dailyWaterGoal = newWaterGoal;
+    if (newCaloGoal != null) dailyCaloGoal = newCaloGoal;
     if (newExerciseGoal != null) exerciseGoal = newExerciseGoal;
   }
 
@@ -54,6 +57,7 @@ class UserProfile {
     if (data['bloodType'] != null) bloodType = data['bloodType'];
     if (data['allergies'] != null) allergies = data['allergies'];
     if (data['dailyWaterGoal'] != null) dailyWaterGoal = data['dailyWaterGoal'];
+    if (data['dailyCaloGoal'] != null) dailyCaloGoal = data['dailyCaloGoal'];
     if (data['exerciseGoal'] != null) exerciseGoal = data['exerciseGoal'];
   }
 
@@ -69,6 +73,7 @@ class UserProfile {
     bloodType = "O+";
     allergies = "Không có";
     dailyWaterGoal = 2500;
+    dailyCaloGoal = 2000;
     exerciseGoal = "Tập gym 5 buổi/tuần";
   }
 
