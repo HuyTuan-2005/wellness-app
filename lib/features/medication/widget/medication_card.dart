@@ -29,6 +29,7 @@ class MedicationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Color primaryTeal = const Color(0xFF009688);
     final bool isCompleted = status == "completed";
     final bool isOverdue = status == "overdue";
 
