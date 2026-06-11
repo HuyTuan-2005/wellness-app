@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+
+import 'package:wellness_app/core/utils/app_helpers.dart';
+import 'package:wellness_app/core/widgets/auth_widgets.dart';
 import 'package:wellness_app/data/services/auth_service.dart';
-import 'package:wellness_app/features/home/screens/main_navigation_screen.dart';
+import 'package:wellness_app/features/register_login/screens/auth_wrapper.dart';
 import 'package:wellness_app/features/register_login/screens/forgotpassword_screen.dart';
 import 'package:wellness_app/features/register_login/screens/register_screen.dart';
-import 'package:wellness_app/features/admin/screens/admin_dashboard_screen.dart';
-import 'package:wellness_app/core/widgets/auth_widgets.dart';
+
 import '../../../core/theme/app_colors.dart';
-import 'package:wellness_app/core/utils/app_helpers.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -40,10 +42,10 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!mounted) return;
 
       if (userCredential != null) {
-        // Đăng nhập thành công → điều hướng về HomeScreen
+        // Đăng nhập thành công → AuthWrapper sẽ điều hướng
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
+          MaterialPageRoute(builder: (context) => const AuthWrapper()),
           (route) => false,
         );
       }
@@ -56,15 +58,6 @@ class _LoginScreenState extends State<LoginScreen> {
         setState(() => _isGoogleLoading = false);
       }
     }
-  }
-
-  /// Widget hiển thị logo Google "G" bằng CustomPaint
-  Widget _buildGoogleLogo() {
-    return SizedBox(
-      height: 22,
-      width: 22,
-      child: CustomPaint(painter: _GoogleLogoPainter()),
-    );
   }
 
   @override
@@ -183,32 +176,27 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
                         AppHelpers.showLoading(context);
-                        final credential = await _authService.signInWithEmailAndPassword(
-                          _emailController.text.trim(),
-                          _passwordController.text.trim(),
-                        );
+                        final credential = await _authService
+                            .signInWithEmailAndPassword(
+                              _emailController.text.trim(),
+                              _passwordController.text.trim(),
+                            );
                         if (context.mounted) {
                           AppHelpers.hideLoading(context);
                           if (credential != null && credential.user != null) {
-                            // Thành công, kiểm tra role
-                            final role = await _authService.getUserRole(credential.user!.uid);
-                            if (context.mounted) {
-                              if (role == 'admin') {
-                                Navigator.pushAndRemoveUntil(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => const AdminDashboardScreen()),
-                                  (route) => false,
-                                );
-                              } else {
-                                Navigator.pushAndRemoveUntil(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
-                                  (route) => false,
-                                );
-                              }
-                            }
+                            // AuthWrapper sẽ tự động xử lý chuyển hướng
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const AuthWrapper(),
+                              ),
+                              (route) => false,
+                            );
                           } else {
-                            AppHelpers.showErrorSnackBar(context, 'Đăng nhập thất bại. Vui lòng kiểm tra lại email/mật khẩu.');
+                            AppHelpers.showErrorSnackBar(
+                              context,
+                              'Đăng nhập thất bại. Vui lòng kiểm tra lại email/mật khẩu.',
+                            );
                           }
                         }
                       }
@@ -267,7 +255,11 @@ class _LoginScreenState extends State<LoginScreen> {
                         : Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              _buildGoogleLogo(),
+                              SvgPicture.asset(
+                                "assets/icons/google-icon-logo.svg",
+                                height: 20,
+                                width: 20,
+                              ),
                               const SizedBox(width: 12),
                               Text(
                                 'Đăng nhập bằng Google',
@@ -317,74 +309,4 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
-}
-
-/// CustomPainter vẽ logo Google "G" với 4 màu đặc trưng
-class _GoogleLogoPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final double w = size.width;
-    final double h = size.height;
-    final double cx = w / 2;
-    final double cy = h / 2;
-    final double r = w / 2;
-    final double strokeWidth = w * 0.2;
-
-    final Paint paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.butt;
-
-    // Xanh dương (trên phải) - 0° đến -90° (tức 270° đến 360°)
-    paint.color = const Color(0xFF4285F4);
-    canvas.drawArc(
-      Rect.fromCircle(center: Offset(cx, cy), radius: r - strokeWidth / 2),
-      -0.52, // ~-30°
-      -1.57, // ~-90°
-      false,
-      paint,
-    );
-
-    // Xanh lá (dưới phải)
-    paint.color = const Color(0xFF34A853);
-    canvas.drawArc(
-      Rect.fromCircle(center: Offset(cx, cy), radius: r - strokeWidth / 2),
-      1.57, // ~90°
-      -1.05, // ~-60°
-      false,
-      paint,
-    );
-
-    // Vàng (dưới trái)
-    paint.color = const Color(0xFFFBBC05);
-    canvas.drawArc(
-      Rect.fromCircle(center: Offset(cx, cy), radius: r - strokeWidth / 2),
-      1.57, // ~90°
-      1.05, // ~60°
-      false,
-      paint,
-    );
-
-    // Đỏ (trên trái)
-    paint.color = const Color(0xFFEA4335);
-    canvas.drawArc(
-      Rect.fromCircle(center: Offset(cx, cy), radius: r - strokeWidth / 2),
-      2.62, // ~150°
-      1.05, // ~60°
-      false,
-      paint,
-    );
-
-    // Thanh ngang của chữ G (màu xanh dương)
-    final Paint barPaint = Paint()
-      ..color = const Color(0xFF4285F4)
-      ..style = PaintingStyle.fill;
-    canvas.drawRect(
-      Rect.fromLTWH(cx, cy - strokeWidth / 2, r * 0.5, strokeWidth),
-      barPaint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
