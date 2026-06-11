@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:wellness_app/data/services/data_sync_service.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -68,6 +69,9 @@ class AuthService {
       // Bước 5: Kiểm tra & đồng bộ user trong Firestore
       await _syncUserToFirestore(user);
 
+      // Kéo dữ liệu từ Cloud về SQLite
+      await DataSyncService.pullCloudToLocal();
+
       print('[AuthService] Đăng nhập thành công: ${user.email}');
       return userCredential;
     } on FirebaseAuthException catch (e) {
@@ -92,6 +96,10 @@ class AuthService {
       if (user != null) {
         // Cập nhật lastActive trong Firestore
         await _syncUserToFirestore(user);
+        
+        // Kéo dữ liệu từ Cloud về SQLite
+        await DataSyncService.pullCloudToLocal();
+        
         print('[AuthService] Đăng nhập Email thành công: ${user.email}');
       }
 
@@ -105,6 +113,41 @@ class AuthService {
     }
   }
 
+  /// Đăng ký tài khoản bằng Email, Password và Name
+  Future<UserCredential?> registerWithEmailAndPassword(
+    String email,
+    String password,
+    String name,
+  ) async {
+    try {
+      final UserCredential userCredential = await _auth
+          .createUserWithEmailAndPassword(email: email, password: password);
+
+      final User? user = userCredential.user;
+      if (user != null) {
+        // Cập nhật Display Name trên Firebase Auth
+        await user.updateDisplayName(name);
+        await user.reload(); // Bắt buộc tải lại để lấy name vừa update
+
+        final updatedUser = _auth.currentUser;
+        if (updatedUser != null) {
+          // Lưu xuống Firestore
+          await _syncUserToFirestore(updatedUser);
+          print('[AuthService] Đăng ký thành công: ${updatedUser.email}');
+        }
+      }
+
+      return userCredential;
+    } on FirebaseAuthException catch (e) {
+      print(
+        '[AuthService] Lỗi Firebase Auth (Đăng ký): ${e.code} - ${e.message}',
+      );
+      throw e; // Ném lỗi để UI bắt và hiển thị
+    } catch (e) {
+      print('[AuthService] Lỗi không xác định khi đăng ký: $e');
+      throw e;
+    }
+  }
 
   /// Lấy Role của User từ Firestore
   Future<String?> getUserRole(String uid) async {

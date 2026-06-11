@@ -28,8 +28,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController _waterGoalController;
   late TextEditingController _exerciseGoalController;
 
-  String _selectedGender = "Nam";
-  String _selectedBloodType = "O+";
+  String? _selectedGender;
+  String? _selectedBloodType;
 
   final List<String> genders = ["Nam", "Nữ", "Khác"];
   final List<String> bloodTypes = [
@@ -43,31 +43,83 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     "O-",
   ];
 
+  bool _isLoading = true;
+
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: UserProfile.userName);
-    _emailController = TextEditingController(text: UserProfile.email);
-    _ageController = TextEditingController(text: UserProfile.age.toString());
-    _heightController = TextEditingController(
-      text: UserProfile.height.toString(),
-    );
-    _weightController = TextEditingController(
-      text: UserProfile.weight.toString(),
-    );
-    _targetWeightController = TextEditingController(
-      text: UserProfile.targetWeight.toString(),
-    );
-    _allergiesController = TextEditingController(text: UserProfile.allergies);
-    _waterGoalController = TextEditingController(
-      text: UserProfile.dailyWaterGoal.toString(),
-    );
-    _exerciseGoalController = TextEditingController(
-      text: UserProfile.exerciseGoal,
-    );
+    _nameController = TextEditingController();
+    _emailController = TextEditingController();
+    _ageController = TextEditingController();
+    _heightController = TextEditingController();
+    _weightController = TextEditingController();
+    _targetWeightController = TextEditingController();
+    _allergiesController = TextEditingController();
+    _waterGoalController = TextEditingController();
+    _exerciseGoalController = TextEditingController();
 
-    _selectedGender = UserProfile.gender;
-    _selectedBloodType = UserProfile.bloodType;
+    _loadProfileData();
+  }
+
+  Future<void> _loadProfileData() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        final doc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+        if (doc.exists && mounted) {
+          final data = doc.data() as Map<String, dynamic>;
+          setState(() {
+            _nameController.text = data['displayName'] ?? '';
+            _emailController.text = data['email'] ?? '';
+            _ageController.text = data['age']?.toString() ?? '';
+            _heightController.text = data['height']?.toString() ?? '';
+            _weightController.text = data['weight']?.toString() ?? '';
+            _targetWeightController.text =
+                data['targetWeight']?.toString() ?? '';
+            _allergiesController.text = data['allergies'] ?? '';
+            _waterGoalController.text =
+                data['dailyWaterGoal']?.toString() ?? '';
+            _exerciseGoalController.text = data['exerciseGoal'] ?? '';
+
+            _selectedGender = data['gender'] as String?;
+            if (_selectedGender != null && !genders.contains(_selectedGender)) {
+              _selectedGender = null;
+            }
+
+            _selectedBloodType = data['bloodType'] as String?;
+            if (_selectedBloodType != null &&
+                !bloodTypes.contains(_selectedBloodType)) {
+              _selectedBloodType = null;
+            }
+            _isLoading = false;
+          });
+          return;
+        }
+      } catch (e) {
+        debugPrint("Lỗi load profile: $e");
+      }
+    }
+
+    // Nếu lỗi hoặc không có user, dùng tạm dữ liệu từ UserProfile
+    if (mounted) {
+      setState(() {
+        _nameController.text = UserProfile.userName;
+        _emailController.text = UserProfile.email;
+        _ageController.text = UserProfile.age.toString();
+        _heightController.text = UserProfile.height.toString();
+        _weightController.text = UserProfile.weight.toString();
+        _targetWeightController.text = UserProfile.targetWeight.toString();
+        _allergiesController.text = UserProfile.allergies;
+        _waterGoalController.text = UserProfile.dailyWaterGoal.toString();
+        _exerciseGoalController.text = UserProfile.exerciseGoal;
+        _selectedGender = null;
+        _selectedBloodType = null;
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -90,7 +142,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       double? newWeightVal = double.tryParse(_weightController.text);
       double? newHeightVal = double.tryParse(_heightController.text);
       int? newAgeVal = int.tryParse(_ageController.text);
-      String newGenderVal = _selectedGender;
+      String newGenderVal = _selectedGender ?? UserProfile.gender;
 
       int? caloGoal;
       if (newWeightVal != null && newHeightVal != null && newAgeVal != null) {
@@ -141,7 +193,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           await FirebaseFirestore.instance
               .collection('users')
               .doc(user.uid)
-              .update(profileData);
+              .set(profileData, SetOptions(merge: true));
 
           UserProfile.updateProfileFromMap(profileData);
 
@@ -153,7 +205,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         } catch (e) {
           if (mounted) {
             AppHelpers.hideLoading(context);
-            AppHelpers.showSnackBar(context, 'Lỗi khi lưu thông tin lên Firestore: $e');
+            AppHelpers.showSnackBar(
+              context,
+              'Lỗi khi lưu thông tin lên Firestore: $e',
+            );
           }
         }
       } else {
@@ -182,7 +237,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           newCaloGoal: caloGoal,
           newExerciseGoal: _exerciseGoalController.text.trim(),
         );
-        AppHelpers.showSnackBar(context, 'Đã lưu thông tin thành công (cục bộ)!');
+        AppHelpers.showSnackBar(
+          context,
+          'Đã lưu thông tin thành công (cục bộ)!',
+        );
         Navigator.pop(context);
       }
     }
@@ -190,6 +248,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        backgroundColor: AppColors.background,
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -207,31 +272,22 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
               // Avatar
               Center(
-                child: Stack(
-                  children: [
-                    CircleAvatar(
-                      radius: 55,
-                      backgroundColor: AppColors.primary.withOpacity(0.15),
-                      child: const Icon(
-                        Icons.person,
-                        size: 65,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: CircleAvatar(
-                        radius: 18,
-                        backgroundColor: AppColors.primary,
-                        child: const Icon(
-                          Icons.camera_alt,
-                          size: 18,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ],
+                child: CircleAvatar(
+                  radius: 55,
+                  backgroundColor: AppColors.primary.withValues(alpha: 0.15),
+                  backgroundImage:
+                      FirebaseAuth.instance.currentUser?.photoURL != null
+                      ? NetworkImage(
+                          FirebaseAuth.instance.currentUser!.photoURL!,
+                        )
+                      : null,
+                  child: FirebaseAuth.instance.currentUser?.photoURL == null
+                      ? const Icon(
+                          Icons.person,
+                          size: 65,
+                          color: AppColors.primary,
+                        )
+                      : null,
                 ),
               ),
 
@@ -262,11 +318,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       _ageController,
                       Icons.cake_outlined,
                       readOnly: true,
+                      isRequired: true,
                       onTap: () {
                         _showPicker(
                           'Tuổi',
-                          List.generate(120, (index) => (index + 1).toString()),
-                          _ageController.text.isNotEmpty ? _ageController.text : '20',
+                          List.generate(
+                            100,
+                            (index) => (index + 1).toString(),
+                          ), // 1 - 100
+                          _ageController.text.isNotEmpty
+                              ? _ageController.text
+                              : '20',
                           (val) => setState(() => _ageController.text = val),
                         );
                       },
@@ -284,15 +346,22 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       _heightController,
                       Icons.height,
                       readOnly: true,
+                      isRequired: true,
                       onTap: () {
                         String current = '170.0';
                         if (_heightController.text.isNotEmpty) {
-                          final parsed = double.tryParse(_heightController.text);
-                          if (parsed != null) current = parsed.toStringAsFixed(1);
+                          final parsed = double.tryParse(
+                            _heightController.text,
+                          );
+                          if (parsed != null)
+                            current = parsed.toStringAsFixed(1);
                         }
                         _showPicker(
                           'Chiều cao (cm)',
-                          List.generate(151, (index) => (100.0 + index).toStringAsFixed(1)),
+                          List.generate(
+                            201,
+                            (index) => (50.0 + index).toStringAsFixed(1),
+                          ), // 50.0 - 250.0
                           current,
                           (val) => setState(() => _heightController.text = val),
                         );
@@ -306,15 +375,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       _weightController,
                       Icons.monitor_weight_outlined,
                       readOnly: true,
+                      isRequired: true,
                       onTap: () {
                         List<String> weights = [];
-                        for (double i = 30.0; i <= 150.0; i += 0.5) {
+                        for (double i = 10.0; i <= 300.0; i += 0.5) {
+                          // 10.0 - 300.0
                           weights.add(i.toStringAsFixed(1));
                         }
                         String current = '60.0';
                         if (_weightController.text.isNotEmpty) {
-                          final parsed = double.tryParse(_weightController.text);
-                          if (parsed != null) current = parsed.toStringAsFixed(1);
+                          final parsed = double.tryParse(
+                            _weightController.text,
+                          );
+                          if (parsed != null)
+                            current = parsed.toStringAsFixed(1);
                         }
                         _showPicker(
                           'Cân nặng (kg)',
@@ -339,12 +413,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 readOnly: true,
                 onTap: () {
                   List<String> weights = [];
-                  for (double i = 30.0; i <= 150.0; i += 0.5) {
+                  for (double i = 10.0; i <= 300.0; i += 0.5) {
+                    // 10.0 - 300.0
                     weights.add(i.toStringAsFixed(1));
                   }
                   String current = '60.0';
                   if (_targetWeightController.text.isNotEmpty) {
-                    final parsed = double.tryParse(_targetWeightController.text);
+                    final parsed = double.tryParse(
+                      _targetWeightController.text,
+                    );
                     if (parsed != null) current = parsed.toStringAsFixed(1);
                   }
                   _showPicker(
@@ -365,8 +442,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 onTap: () {
                   _showPicker(
                     'Lượng nước (ml)',
-                    List.generate(41, (index) => (1000 + index * 100).toString()),
-                    _waterGoalController.text.isNotEmpty ? _waterGoalController.text : '2000',
+                    List.generate(
+                      41,
+                      (index) => (1000 + index * 100).toString(),
+                    ),
+                    _waterGoalController.text.isNotEmpty
+                        ? _waterGoalController.text
+                        : '2000',
                     (val) => setState(() => _waterGoalController.text = val),
                   );
                 },
@@ -431,7 +513,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           child: Column(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 color: Colors.grey[200],
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -440,7 +525,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       onPressed: () => Navigator.pop(context),
                       child: const Text('Hủy'),
                     ),
-                    Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    Text(
+                      title,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
                     TextButton(
                       onPressed: () {
                         onSelectedItemChanged(selectedValue);
@@ -454,7 +542,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               Expanded(
                 child: CupertinoPicker(
                   itemExtent: 32.0,
-                  scrollController: FixedExtentScrollController(initialItem: initialIndex),
+                  scrollController: FixedExtentScrollController(
+                    initialItem: initialIndex,
+                  ),
                   onSelectedItemChanged: (int index) {
                     selectedValue = items[index];
                   },
@@ -478,6 +568,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     TextInputType keyboardType = TextInputType.text,
     bool enabled = true,
     bool readOnly = false,
+    bool isRequired = false,
     VoidCallback? onTap,
   }) {
     return TextFormField(
@@ -499,8 +590,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           borderSide: BorderSide(color: AppColors.primary, width: 2),
         ),
       ),
-      validator: (value) =>
-          value == null || value.isEmpty ? 'Vui lòng nhập $label' : null,
+      validator: (value) {
+        if (isRequired && (value == null || value.isEmpty)) {
+          return 'Vui lòng nhập $label';
+        }
+        return null;
+      },
     );
   }
 

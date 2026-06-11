@@ -1,124 +1,177 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:wellness_app/core/database/database_helper.dart';
 import 'package:wellness_app/features/weight/models/weight_record.dart';
-import 'package:wellness_app/features/medication/models/medication.dart';
-import 'package:wellness_app/features/appointment/models/appointment.dart';
 
 class DataSyncService {
   static final DataSyncService _instance = DataSyncService._internal();
   factory DataSyncService() => _instance;
   DataSyncService._internal();
 
-  bool _isSyncing = false;
+  static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  static final FirebaseAuth _auth = FirebaseAuth.instance;
+  static bool _isSyncing = false;
 
+  // Instance method used by auth_wrapper
   Future<void> syncOnLogin(String uid) async {
-    if (_isSyncing) return;
-    _isSyncing = true;
-    debugPrint("[DataSyncService] Bắt đầu đồng bộ dữ liệu khi đăng nhập cho user: $uid");
+    debugPrint("[DataSyncService] syncOnLogin called for: $uid");
+    await pullCloudToLocal();
+    await syncLocalToCloud();
+  }
+
+  /// Quét SQLite và đẩy các bản ghi chưa đồng bộ (isSynced = 0) lên Firestore
+  static Future<void> syncLocalToCloud() async {
+    final User? user = _auth.currentUser;
+    if (user == null) {
+      debugPrint("DataSyncService: Chưa đăng nhập, không thể đồng bộ.");
+      return;
+    }
+    final String uid = user.uid;
 
     try {
-      final db = DatabaseHelper.instance;
+      debugPrint("DataSyncService: Đang quét dữ liệu chưa đồng bộ dưới SQLite...");
 
-      // 1. Đồng bộ Cân nặng (2 chiều)
-      final localWeights = await db.getAllWeightRecords();
-      final localWeightIds = localWeights.map((w) => w.id).toSet();
+      // 1. Đồng bộ bảng Thuốc (Medications)
+      final unsyncedMeds = await DatabaseHelper.instance.getUnsyncedMedications();
+      for (var med in unsyncedMeds) {
+        String docId = med['id'].toString();
+        
+        Map<String, dynamic> dataToSync = Map<String, dynamic>.from(med);
+        dataToSync['userId'] = uid;
+        dataToSync['isSynced'] = 1;
 
-      final weightSnapshot = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(uid)
-          .collection('weight_records')
-          .get();
-      final remoteWeightIds = weightSnapshot.docs.map((doc) => int.tryParse(doc.id)).toSet();
+        await _firestore
+            .collection('users')
+            .doc(uid)
+            .collection('medications')
+            .doc(docId)
+            .set(dataToSync, SetOptions(merge: true));
 
-      // Tải từ Firestore về SQLite cục bộ
-      for (var doc in weightSnapshot.docs) {
-        final record = WeightRecord.fromMap(doc.data());
-        if (!localWeightIds.contains(record.id)) {
-          await db.insertWeightRecord(record);
-          debugPrint("[DataSyncService] Đã khôi phục cân nặng từ Firestore: ${record.weight} kg");
-        }
+        await DatabaseHelper.instance.markAsSynced('medications', med['id'] as int);
+        debugPrint("DataSyncService: Đã đẩy Thuốc ID ${med['id']} lên Cloud.");
       }
 
-      // Tải từ SQLite cục bộ lên Firestore
-      final weightRef = FirebaseFirestore.instance
+      // 2. Đồng bộ bảng Lịch khám (Appointments)
+      final unsyncedAppts = await DatabaseHelper.instance.getUnsyncedAppointments();
+      for (var appt in unsyncedAppts) {
+        String docId = appt['id'].toString();
+        
+        Map<String, dynamic> dataToSync = Map<String, dynamic>.from(appt);
+        dataToSync['userId'] = uid;
+        dataToSync['isSynced'] = 1;
+
+        await _firestore
+            .collection('users')
+            .doc(uid)
+            .collection('appointments')
+            .doc(docId)
+            .set(dataToSync, SetOptions(merge: true));
+
+        await DatabaseHelper.instance.markAsSynced('appointments', appt['id'] as int);
+        debugPrint("DataSyncService: Đã đẩy Lịch khám ID ${appt['id']} lên Cloud.");
+      }
+
+      // 3. Đồng bộ Cân nặng (WeightRecords) - So sánh danh sách ID
+      final localWeights = await DatabaseHelper.instance.getAllWeightRecords();
+      final weightRef = _firestore
           .collection('users')
           .doc(uid)
           .collection('weight_records');
+
+      final weightSnapshot = await weightRef.get();
+      final remoteWeightIds = weightSnapshot.docs.map((doc) => int.tryParse(doc.id)).toSet();
+
       for (var localRecord in localWeights) {
         if (localRecord.id != null && !remoteWeightIds.contains(localRecord.id)) {
           await weightRef.doc(localRecord.id.toString()).set(localRecord.toMap());
-          debugPrint("[DataSyncService] Đã tải lên cân nặng từ SQLite: ${localRecord.weight} kg");
+          debugPrint("DataSyncService: Đã tải lên cân nặng từ SQLite: ${localRecord.weight} kg");
         }
       }
 
-      // 2. Đồng bộ Lịch uống thuốc (2 chiều)
-      final localMedications = await db.getAllMedications();
-      final localMedicationIds = localMedications.map((m) => m.id).toSet();
+      debugPrint("DataSyncService: Hoàn tất syncLocalToCloud.");
+    } catch (e) {
+      debugPrint("DataSyncService: Lỗi trong quá trình syncLocalToCloud - $e");
+    }
+  }
 
-      final medicationSnapshot = await FirebaseFirestore.instance
+  /// Tải dữ liệu từ Firestore xuống SQLite (Ví dụ khi đăng nhập thiết bị mới)
+  static Future<void> pullCloudToLocal() async {
+    if (_isSyncing) return;
+    _isSyncing = true;
+
+    final User? user = _auth.currentUser;
+    if (user == null) {
+      debugPrint("DataSyncService: Chưa đăng nhập, không thể tải dữ liệu.");
+      _isSyncing = false;
+      return;
+    }
+
+    final String uid = user.uid;
+    final db = await DatabaseHelper.instance.database;
+
+    try {
+      debugPrint("DataSyncService: Bắt đầu tải dữ liệu từ Cloud về máy...");
+
+      // 1. Tải Medications
+      final medsSnapshot = await _firestore
           .collection('users')
           .doc(uid)
           .collection('medications')
           .get();
-      final remoteMedicationIds = medicationSnapshot.docs.map((doc) => int.tryParse(doc.id)).toSet();
 
-      // Tải từ Firestore về SQLite cục bộ
-      for (var doc in medicationSnapshot.docs) {
-        final record = MedicationModel.fromMap(doc.data());
-        if (!localMedicationIds.contains(record.id)) {
-          await db.insertMedication(record);
-          debugPrint("[DataSyncService] Đã khôi phục lịch uống thuốc từ Firestore: ${record.name}");
-        }
+      for (var doc in medsSnapshot.docs) {
+        final data = doc.data();
+        data['isSynced'] = 1; // Đánh dấu đã sync vì lấy từ cloud về
+
+        int id = int.parse(doc.id);
+        data['id'] = id; // Bổ sung ID nguyên thủy
+        
+        await db.insert('medications', data, conflictAlgorithm: ConflictAlgorithm.replace);
+        debugPrint("DataSyncService: Đã tải Thuốc ID $id về máy.");
       }
 
-      // Tải từ SQLite cục bộ lên Firestore
-      final medicationRef = FirebaseFirestore.instance
-          .collection('users')
-          .doc(uid)
-          .collection('medications');
-      for (var localRecord in localMedications) {
-        if (localRecord.id != null && !remoteMedicationIds.contains(localRecord.id)) {
-          await medicationRef.doc(localRecord.id.toString()).set(localRecord.toMap());
-          debugPrint("[DataSyncService] Đã tải lên lịch uống thuốc từ SQLite: ${localRecord.name}");
-        }
-      }
-
-      // 3. Đồng bộ Lịch khám (2 chiều)
-      final localAppointments = await db.getAllAppointments();
-      final localAppointmentIds = localAppointments.map((a) => a.id).toSet();
-
-      final appointmentSnapshot = await FirebaseFirestore.instance
+      // 2. Tải Appointments
+      final apptsSnapshot = await _firestore
           .collection('users')
           .doc(uid)
           .collection('appointments')
           .get();
-      final remoteAppointmentIds = appointmentSnapshot.docs.map((doc) => doc.id).toSet();
 
-      // Tải từ Firestore về SQLite cục bộ
-      for (var doc in appointmentSnapshot.docs) {
-        final record = AppointmentModel.fromMap(doc.data());
-        if (!localAppointmentIds.contains(record.id)) {
-          await db.insertAppointment(record);
-          debugPrint("[DataSyncService] Đã khôi phục lịch khám bác sĩ từ Firestore: ${record.doctorName}");
-        }
+      for (var doc in apptsSnapshot.docs) {
+        final data = doc.data();
+        data['isSynced'] = 1;
+
+        int id = int.parse(doc.id);
+        data['id'] = id;
+
+        await db.insert('appointments', data, conflictAlgorithm: ConflictAlgorithm.replace);
+        debugPrint("DataSyncService: Đã tải Lịch khám ID $id về máy.");
       }
 
-      // Tải từ SQLite cục bộ lên Firestore
-      final appointmentRef = FirebaseFirestore.instance
+      // 3. Tải Cân nặng
+      final weightSnapshot = await _firestore
           .collection('users')
           .doc(uid)
-          .collection('appointments');
-      for (var localRecord in localAppointments) {
-        if (localRecord.id != null && !remoteAppointmentIds.contains(localRecord.id)) {
-          await appointmentRef.doc(localRecord.id!).set(localRecord.toMap());
-          debugPrint("[DataSyncService] Đã tải lên lịch khám từ SQLite: ${localRecord.doctorName}");
+          .collection('weight_records')
+          .get();
+
+      final localWeights = await DatabaseHelper.instance.getAllWeightRecords();
+      final localWeightIds = localWeights.map((w) => w.id).toSet();
+
+      for (var doc in weightSnapshot.docs) {
+        final data = doc.data();
+        final record = WeightRecord.fromMap(data);
+        if (!localWeightIds.contains(record.id)) {
+          await DatabaseHelper.instance.insertWeightRecord(record);
+          debugPrint("DataSyncService: Đã khôi phục cân nặng từ Firestore: ${record.weight} kg");
         }
       }
 
-      debugPrint("[DataSyncService] Đồng bộ dữ liệu thành công!");
+      debugPrint("DataSyncService: Hoàn tất pullCloudToLocal.");
     } catch (e) {
-      debugPrint("[DataSyncService] Lỗi khi đồng bộ dữ liệu: $e");
+      debugPrint("DataSyncService: Lỗi trong quá trình pullCloudToLocal - $e");
     } finally {
       _isSyncing = false;
     }

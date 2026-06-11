@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:wellness_app/features/register_login/screens/login_screen.dart';
 import 'package:wellness_app/core/widgets/auth_widgets.dart';
+import 'package:wellness_app/data/services/auth_service.dart';
+import 'package:wellness_app/core/utils/app_helpers.dart';
+import 'package:wellness_app/features/register_login/screens/auth_wrapper.dart';
 import '../../../core/theme/app_colors.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -16,6 +19,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final AuthService _authService = AuthService();
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
 
@@ -162,9 +166,41 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        // TODO: Xử lý đăng ký
+                        AppHelpers.showLoading(context);
+                        try {
+                          final credential = await _authService.registerWithEmailAndPassword(
+                            _emailController.text.trim(),
+                            _passwordController.text.trim(),
+                            _nameController.text.trim(),
+                          );
+                          if (context.mounted) {
+                            AppHelpers.hideLoading(context);
+                            if (credential != null && credential.user != null) {
+                              Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const AuthWrapper(),
+                                ),
+                                (route) => false,
+                              );
+                            } else {
+                              AppHelpers.showErrorSnackBar(
+                                context,
+                                'Đăng ký thất bại. Vui lòng thử lại.',
+                              );
+                            }
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            AppHelpers.hideLoading(context);
+                            AppHelpers.showErrorSnackBar(
+                              context,
+                              e.toString(),
+                            );
+                          }
+                        }
                       }
                     },
                     child: const Text(

@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:wellness_app/core/theme/app_colors.dart';
 import 'package:wellness_app/features/admin_dashboard/widgets/report_card.dart';
 import 'package:wellness_app/features/admin_dashboard/widgets/weekly_bar_chart.dart';
+import 'package:wellness_app/features/admin_dashboard/controllers/dashboard_controller.dart';
 import 'package:wellness_app/features/home/screens/main_navigation_screen.dart';
 
 /// Trang nội dung Dashboard – hiển thị thẻ báo cáo số liệu và biểu đồ.
@@ -86,32 +87,11 @@ class DashboardContentPage extends StatelessWidget {
 
                     if (userSnapshot.hasData) {
                       final docs = userSnapshot.data!.docs;
-                      totalUsers = docs.length;
-
-                      final now = DateTime.now();
-                      final todayStart = DateTime(now.year, now.month, now.day);
-                      final weekStart = now.subtract(const Duration(days: 7));
-
-                      int weeklyActive = 0;
-
-                      for (var doc in docs) {
-                        final data = doc.data() as Map<String, dynamic>;
-                        final lastActiveTs = data['lastActive'] as Timestamp?;
-                        if (lastActiveTs != null) {
-                          final lastActiveDate = lastActiveTs.toDate();
-                          if (lastActiveDate.isAfter(todayStart)) {
-                            todayActive++;
-                          }
-                          if (lastActiveDate.isAfter(weekStart)) {
-                            weeklyActive++;
-                          }
-                        }
-                      }
-
-                      if (totalUsers > 0) {
-                        activeRate = ((weeklyActive / totalUsers) * 100)
-                            .round();
-                      }
+                      final stats = DashboardController.calculateUserStats(docs);
+                      
+                      totalUsers = stats['totalUsers']!;
+                      todayActive = stats['todayActive']!;
+                      activeRate = stats['activeRate']!;
                     }
 
                     return Column(

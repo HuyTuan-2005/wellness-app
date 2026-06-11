@@ -3,7 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:wellness_app/app.dart';
 import 'package:wellness_app/firebase_options.dart';
-import 'package:wellness_app/service/notification_service.dart';
+import 'package:wellness_app/data/services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
