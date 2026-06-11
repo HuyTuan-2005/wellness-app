@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wellness_app/core/theme/app_colors.dart';
 
 class MedicationCard extends StatelessWidget {
   final String name;
@@ -28,19 +29,23 @@ class MedicationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color primaryTeal = const Color(0xFF009688);
+    final bool isCompleted = status == "completed";
+    final bool isOverdue = status == "overdue";
+
+    // Đổi màu icon, nền, text theo trạng thái: upcoming → primary, overdue → error, completed → success
     Color iconBgColor;
     Color iconColor;
-    Color textColor = const Color(0xFF1E293B);
+    Color cardTextColor = AppColors.textDark;
+    IconData cardIcon = Icons.medication;
 
-    // LOGIC 9: ĐỔI MÀU THEO TRẠNG THÁI (BỎ LỠ LIỀU)
-    if (status == "completed") {
-      iconBgColor = Colors.grey[100]!;
-      iconColor = Colors.grey;
-      textColor = Colors.grey;
-    } else if (status == "overdue") {
-      iconBgColor = const Color(0xFFFFEBEE); // Đỏ nhạt
-      iconColor = const Color(0xFFE53935); // Đỏ đậm
+    if (isCompleted) {
+      iconBgColor = AppColors.success.withOpacity(0.12);
+      iconColor = AppColors.success;
+      cardTextColor = AppColors.textSecondary;
+      cardIcon = Icons.check_circle_rounded;
+    } else if (isOverdue) {
+      iconBgColor = AppColors.error.withOpacity(0.08);
+      iconColor = AppColors.error;
     } else {
       iconBgColor = primaryTeal.withValues(alpha: 0.1);
       iconColor = primaryTeal;
@@ -52,10 +57,15 @@ class MedicationCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        // Card đã uống có nền xanh lá rất nhạt để phân biệt trực quan
+        color: isCompleted
+            ? AppColors.success.withOpacity(0.04)
+            : AppColors.surface,
         borderRadius: BorderRadius.circular(24),
-        border: status == "overdue"
-            ? Border.all(color: const Color(0xFFFFEBEE), width: 2)
+        border: isOverdue
+            ? Border.all(color: AppColors.error.withOpacity(0.2), width: 2)
+            : isCompleted
+            ? Border.all(color: AppColors.success.withOpacity(0.15), width: 1.5)
             : null,
         boxShadow: [
           BoxShadow(
@@ -71,65 +81,114 @@ class MedicationCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Icon trạng thái: check khi đã uống, pill khi chưa
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
                   color: iconBgColor,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.medication, color: iconColor, size: 28),
+                child: Icon(cardIcon, color: iconColor, size: 28),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      name,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        color: textColor,
-                        decoration: status == "completed"
-                            ? TextDecoration.lineThrough
-                            : null,
-                      ),
+                    // Tên thuốc + badge "Đã uống" thay cho lineThrough
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            name,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                              color: cardTextColor,
+                            ),
+                          ),
+                        ),
+                        if (isCompleted) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.success.withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.check,
+                                  size: 12,
+                                  color: AppColors.success,
+                                ),
+                                const SizedBox(width: 3),
+                                Text(
+                                  "Đã uống",
+                                  style: TextStyle(
+                                    color: AppColors.success,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                     const SizedBox(height: 4),
                     Text(
                       dosage,
-                      style: TextStyle(color: Colors.grey[500], fontSize: 14),
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 14,
+                      ),
                     ),
                     const SizedBox(height: 8),
+                    // Badge hiển thị giờ uống, đổi màu theo trạng thái
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 10,
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: status == "overdue"
-                            ? const Color(0xFFFFEBEE)
-                            : Colors.grey[100],
+                        color: isOverdue
+                            ? AppColors.error.withOpacity(0.08)
+                            : isCompleted
+                            ? AppColors.success.withOpacity(0.08)
+                            : AppColors.border.withOpacity(0.5),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
-                            Icons.schedule,
+                            isCompleted
+                                ? Icons.check_circle_outline
+                                : Icons.schedule,
                             size: 14,
-                            color: status == "overdue"
-                                ? const Color(0xFFE53935)
-                                : Colors.grey[600],
+                            color: isOverdue
+                                ? AppColors.error
+                                : isCompleted
+                                ? AppColors.success
+                                : AppColors.textSecondary,
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            status == "overdue" ? "Đã lỡ $time" : time,
+                            isOverdue ? "Đã lỡ $time" : time,
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
-                              color: status == "overdue"
-                                  ? const Color(0xFFE53935)
-                                  : Colors.grey[700],
+                              color: isOverdue
+                                  ? AppColors.error
+                                  : isCompleted
+                                  ? AppColors.success
+                                  : AppColors.textSecondary,
                               fontSize: 12,
                             ),
                           ),
@@ -140,28 +199,28 @@ class MedicationCard extends StatelessWidget {
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                icon: Icon(Icons.delete_outline, color: AppColors.error),
                 onPressed: onDelete,
               ),
             ],
           ),
 
-          // LOGIC 7: CẢNH BÁO SẮP HẾT THUỐC
+          // Cảnh báo sắp hết thuốc
           if (isWarning)
             Padding(
               padding: const EdgeInsets.only(top: 12.0),
               child: Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.warning_amber_rounded,
-                    color: Colors.orange,
+                    color: AppColors.warning,
                     size: 16,
                   ),
                   const SizedBox(width: 6),
                   Text(
                     warningMsg,
-                    style: const TextStyle(
-                      color: Colors.orange,
+                    style: TextStyle(
+                      color: AppColors.warning,
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                     ),
@@ -172,7 +231,7 @@ class MedicationCard extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          // Row Progress & Nút bấm
+          // Thanh tiến độ & nút uống thuốc
           Row(
             children: [
               Expanded(
@@ -184,7 +243,7 @@ class MedicationCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
-                        color: status == 'completed' ? Colors.green : iconColor,
+                        color: isCompleted ? AppColors.success : iconColor,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -192,9 +251,9 @@ class MedicationCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(10),
                       child: LinearProgressIndicator(
                         value: progress,
-                        backgroundColor: Colors.grey[200],
+                        backgroundColor: AppColors.border,
                         valueColor: AlwaysStoppedAnimation<Color>(
-                          status == 'completed' ? Colors.green : iconColor,
+                          isCompleted ? AppColors.success : iconColor,
                         ),
                         minHeight: 8,
                       ),
@@ -203,11 +262,19 @@ class MedicationCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 24),
-              status == "completed"
-                  ? const Icon(
-                      Icons.check_circle,
-                      color: Colors.green,
-                      size: 36,
+              // Icon hoàn thành (có nền tròn) hoặc nút "Uống"
+              isCompleted
+                  ? Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColors.success.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.check_circle,
+                        color: AppColors.success,
+                        size: 32,
+                      ),
                     )
                   : InkWell(
                       onTap: onMarkAsTaken,
@@ -221,10 +288,10 @@ class MedicationCard extends StatelessWidget {
                           color: iconColor,
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Text(
+                        child: Text(
                           "Uống",
                           style: TextStyle(
-                            color: Colors.white,
+                            color: AppColors.surface,
                             fontWeight: FontWeight.bold,
                           ),
                         ),

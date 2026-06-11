@@ -8,6 +8,9 @@ class AppColors {
   // Màu phụ (Secondary) - Xanh nhạt dùng làm nền phụ, điểm nhấn mềm mại
   static const Color secondary = Color(0xFFE6F0FF);
 
+  // Màu nhấn (Accent) - Xanh ngọc dùng cho các module sức khỏe
+  static const Color teal = Color(0xFF009688);
+
   // Hệ thống màu nền (Background & Surface)
   static const Color background = Color(
     0xFFF4F6FA,
@@ -22,7 +25,7 @@ class AppColors {
     238,
     238,
     238,
-  ); // Chữ chú thích
+  ); // Đường viền nhẹ cho Card và Divider
 
   // Hệ thống màu chữ (Text)
   static const Color textPrimary = Color.fromARGB(
@@ -32,7 +35,7 @@ class AppColors {
     173,
   ); // Chữ tiêu đề
   static const Color textSecondary = Color(0xFF6B7280); // Chữ chú thích
-  static const Color textDark = Colors.black; // Chữ chú thích
+  static const Color textDark = Colors.black; // Chữ tiêu đề đậm, nội dung chính
 
   // Màu trạng thái (Semantic) - Cực kỳ quan trọng cho app sức khỏe
   static const Color success = Color(
