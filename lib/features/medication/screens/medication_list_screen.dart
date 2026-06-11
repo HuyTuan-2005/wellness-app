@@ -6,7 +6,7 @@ import 'package:wellness_app/features/medication/controller/medication_controlle
 import 'package:wellness_app/features/medication/models/medication.dart';
 import 'package:wellness_app/features/medication/screens/medication_detail_screen.dart';
 import 'package:wellness_app/features/medication/widget/medication_card.dart';
-import 'package:wellness_app/service/notification_service.dart';
+import 'package:wellness_app/data/services/notification_service.dart';
 import 'add_medication_screen.dart';
 
 class MedicationListScreen extends StatefulWidget {

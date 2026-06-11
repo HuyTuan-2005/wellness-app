@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:wellness_app/core/database/database_helper.dart';
+import 'package:wellness_app/data/services/data_sync_service.dart';
+import 'package:wellness_app/data/services/notification_service.dart';
 import 'package:wellness_app/features/appointment/models/appointment.dart';
-import 'package:wellness_app/service/notification_service.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:wellness_app/core/services/data_sync_service.dart';
 
 class AppointmentController {
   // ==================== THÊM LỊCH KHÁM MỚI ====================
@@ -31,8 +31,9 @@ class AppointmentController {
       // Hẹn giờ báo thức
       if (id > 0) {
         DateTime scheduledTime = DateTime.parse(dateTime);
-        DateTime notificationTime =
-            scheduledTime.subtract(Duration(minutes: reminderOffset));
+        DateTime notificationTime = scheduledTime.subtract(
+          Duration(minutes: reminderOffset),
+        );
         DateTime now = DateTime.now();
 
         // Chỉ đặt thông báo nếu thời gian báo thức vẫn ở trong tương lai
@@ -48,7 +49,7 @@ class AppointmentController {
             scheduledTime: notificationTime,
           );
         }
-        
+
         DataSyncService.syncLocalToCloud(); // Không cần await để UI không bị giật
         return true;
       }
@@ -83,7 +84,7 @@ class AppointmentController {
   static Future<void> markAsCompleted(AppointmentModel appointment) async {
     try {
       appointment.status = 'completed';
-      
+
       // Ghi xuống DB
       await DatabaseHelper.instance.updateAppointment(appointment);
 
@@ -104,7 +105,7 @@ class AppointmentController {
         int id = int.parse(appointment.id!);
         // Xóa khỏi DB
         await DatabaseHelper.instance.deleteAppointment(id);
-        
+
         // Hủy báo thức
         int notificationId = id + 10000;
         await NotificationService().cancelNotification(notificationId);
@@ -141,15 +142,14 @@ class AppointmentController {
         debugPrint("Địa chỉ phòng khám trống.");
         return;
       }
-      
+
       final String encodedLocation = Uri.encodeComponent(location);
-      final Uri mapsUrl = Uri.parse('https://www.google.com/maps/search/?api=1&query=$encodedLocation');
+      final Uri mapsUrl = Uri.parse(
+        'https://www.google.com/maps/search/?api=1&query=$encodedLocation',
+      );
 
       if (await canLaunchUrl(mapsUrl)) {
-        await launchUrl(
-          mapsUrl,
-          mode: LaunchMode.externalApplication,
-        );
+        await launchUrl(mapsUrl, mode: LaunchMode.externalApplication);
       } else {
         debugPrint("Không thể mở bản đồ với địa chỉ: $location");
       }
