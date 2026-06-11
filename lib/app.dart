@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:wellness_app/core/theme/app_theme.dart';
 import 'package:wellness_app/features/register_login/screens/auth_wrapper.dart';
-
+import 'package:wellness_app/features/medication/screens/medication_list_screen.dart';
+  
 class WellnessApp extends StatelessWidget {
   const WellnessApp({super.key});
 
@@ -14,7 +15,8 @@ class WellnessApp extends StatelessWidget {
       // darkTheme: AppTheme.darkTheme,
       theme: AppTheme.lightTheme,
 
-      home: const AuthWrapper(),
+      //home: const AuthWrapper(),
+      home : const MedicationListScreen(),
     );
   }
 }
