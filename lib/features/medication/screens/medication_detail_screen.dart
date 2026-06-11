@@ -1,5 +1,7 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:wellness_app/core/theme/app_colors.dart';
+import 'package:wellness_app/features/medication/controller/medication_controller.dart';
 
 class MedicationDetailScreen extends StatelessWidget {
   final String name;
@@ -10,6 +12,7 @@ class MedicationDetailScreen extends StatelessWidget {
   final String notes;
   final int takenQuantity;
   final int totalQuantity;
+  final int durationDays;
 
   const MedicationDetailScreen({
     super.key,
@@ -21,11 +24,15 @@ class MedicationDetailScreen extends StatelessWidget {
     required this.notes,
     required this.takenQuantity,
     required this.totalQuantity,
+    required this.durationDays,
   });
 
   @override
   Widget build(BuildContext context) {
     double progress = totalQuantity > 0 ? (takenQuantity / totalQuantity) : 0;
+    int dosePerTime = MedicationController.parseDoseAmount(dosage);
+    int calculatedDay = dosePerTime > 0 ? (takenQuantity / dosePerTime).floor() : 0;
+    int currentDay = min(calculatedDay, durationDays);
 
     // Xác định màu sắc và text theo trạng thái
     String badgeText;
@@ -148,17 +155,44 @@ class MedicationDetailScreen extends StatelessWidget {
               child: Column(
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      Icon(Icons.medication, color: AppColors.primary, size: 20),
+                      const SizedBox(width: 8),
                       Text(
-                        "${(progress * 100).toInt()}% Hoàn thành",
+                        "Số lượng:",
                         style: TextStyle(
                           color: AppColors.textSecondary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
+                      const Spacer(),
                       Text(
                         "$takenQuantity / $totalQuantity viên",
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(Icons.calendar_today, color: AppColors.primary, size: 20),
+                      const SizedBox(width: 8),
+                      Text(
+                        "Thời gian:",
+                        style: TextStyle(
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        (currentDay == durationDays && status == "completed") 
+                            ? "Đã hoàn thành liệu trình" 
+                            : "Ngày $currentDay / $durationDays ngày",
                         style: TextStyle(
                           color: AppColors.primary,
                           fontWeight: FontWeight.bold,

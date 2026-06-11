@@ -185,6 +185,7 @@ class _MedicationListScreenState extends State<MedicationListScreen> {
                                             notes: med.notes,
                                             takenQuantity: med.takenQuantity,
                                             totalQuantity: med.totalQuantity,
+                                            durationDays: med.durationDays,
                                           ),
                                     ),
                                   ).then((_) => _loadMedications());
