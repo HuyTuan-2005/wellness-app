@@ -55,22 +55,39 @@ class _AuthWrapperState extends State<AuthWrapper> with WidgetsBindingObserver {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: const Text(
-          'Tài khoản bị khóa',
-          style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            const Icon(Icons.gpp_bad_rounded, color: AppColors.error, size: 28),
+            const SizedBox(width: 8),
+            const Expanded(
+              child: Text(
+                'Tài khoản bị khóa',
+                style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold, fontSize: 20),
+              ),
+            ),
+          ],
         ),
         content: Text(
           reason != null && reason.isNotEmpty 
-            ? 'Tài khoản của bạn đã bị khóa vì lý do:\n"$reason"\n\nVui lòng liên hệ quản trị viên để biết thêm chi tiết.'
+            ? 'Tài khoản của bạn đã bị khóa với lý do:\n"$reason"\n\nVui lòng liên hệ quản trị viên để biết thêm chi tiết.'
             : 'Tài khoản của bạn đã bị Admin khóa. Vui lòng liên hệ quản trị viên để biết thêm chi tiết.',
+          style: const TextStyle(fontSize: 14, color: AppColors.textDark, height: 1.4),
         ),
+        actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         actions: [
-          TextButton(
+          ElevatedButton(
             onPressed: () {
               _isShowingLockedDialog = false;
               Navigator.of(context).pop();
             },
-            child: const Text('Đóng'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.error,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              elevation: 0,
+            ),
+            child: const Text('Đã hiểu', style: TextStyle(fontWeight: FontWeight.w700)),
           ),
         ],
       ),

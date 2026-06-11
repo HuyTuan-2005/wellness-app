@@ -105,6 +105,40 @@ class AuthService {
     }
   }
 
+  /// Đăng ký tài khoản bằng Email, Password và Name
+  Future<UserCredential?> registerWithEmailAndPassword(
+    String email,
+    String password,
+    String name,
+  ) async {
+    try {
+      final UserCredential userCredential = await _auth
+          .createUserWithEmailAndPassword(email: email, password: password);
+
+      final User? user = userCredential.user;
+      if (user != null) {
+        // Cập nhật Display Name trên Firebase Auth
+        await user.updateDisplayName(name);
+        await user.reload(); // Bắt buộc tải lại để lấy name vừa update
+        
+        final updatedUser = _auth.currentUser;
+        if (updatedUser != null) {
+          // Lưu xuống Firestore
+          await _syncUserToFirestore(updatedUser);
+          print('[AuthService] Đăng ký thành công: ${updatedUser.email}');
+        }
+      }
+
+      return userCredential;
+    } on FirebaseAuthException catch (e) {
+      print('[AuthService] Lỗi Firebase Auth (Đăng ký): ${e.code} - ${e.message}');
+      throw e; // Ném lỗi để UI bắt và hiển thị
+    } catch (e) {
+      print('[AuthService] Lỗi không xác định khi đăng ký: $e');
+      throw e;
+    }
+  }
+
   /// Lấy Role của User từ Firestore
   Future<String?> getUserRole(String uid) async {
     try {

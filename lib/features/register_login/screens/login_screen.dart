@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:wellness_app/core/utils/app_helpers.dart';
 import 'package:wellness_app/core/widgets/auth_widgets.dart';
@@ -41,7 +42,26 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (!mounted) return;
 
-      if (userCredential != null) {
+      if (userCredential != null && userCredential.user != null) {
+        // Kiểm tra xem tài khoản có bị khóa không
+        final doc = await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).get();
+        if (doc.exists) {
+          final userData = doc.data() as Map<String, dynamic>;
+          final bool isLocked = userData['isLocked'] ?? false;
+          
+          if (isLocked) {
+            final String? reason = userData['lockReason'] as String?;
+            await _authService.signOut();
+            setState(() => _isGoogleLoading = false);
+            
+            // Hiển thị thông báo
+            _showLockedDialog(reason);
+            return;
+          }
+        }
+
+        if (!mounted) return;
+
         // Đăng nhập thành công → AuthWrapper sẽ điều hướng
         Navigator.pushAndRemoveUntil(
           context,
@@ -58,6 +78,47 @@ class _LoginScreenState extends State<LoginScreen> {
         setState(() => _isGoogleLoading = false);
       }
     }
+  }
+
+  void _showLockedDialog(String? reason) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            const Icon(Icons.gpp_bad_rounded, color: AppColors.error, size: 28),
+            const SizedBox(width: 8),
+            const Expanded(
+              child: Text(
+                'Tài khoản bị khóa',
+                style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold, fontSize: 20),
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          reason != null && reason.isNotEmpty 
+            ? 'Tài khoản của bạn đã bị khóa với lý do:\n"$reason"\n\nVui lòng liên hệ quản trị viên để biết thêm chi tiết.'
+            : 'Tài khoản của bạn đã bị Admin khóa. Vui lòng liên hệ quản trị viên để biết thêm chi tiết.',
+          style: const TextStyle(fontSize: 14, color: AppColors.textDark, height: 1.4),
+        ),
+        actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.error,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              elevation: 0,
+            ),
+            child: const Text('Đã hiểu', style: TextStyle(fontWeight: FontWeight.w700)),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -184,6 +245,24 @@ class _LoginScreenState extends State<LoginScreen> {
                         if (context.mounted) {
                           AppHelpers.hideLoading(context);
                           if (credential != null && credential.user != null) {
+                            // Kiểm tra xem tài khoản có bị khóa không
+                            final doc = await FirebaseFirestore.instance.collection('users').doc(credential.user!.uid).get();
+                            if (doc.exists) {
+                              final userData = doc.data() as Map<String, dynamic>;
+                              final bool isLocked = userData['isLocked'] ?? false;
+                              
+                              if (isLocked) {
+                                final String? reason = userData['lockReason'] as String?;
+                                await _authService.signOut();
+                                if (!context.mounted) return;
+                                AppHelpers.hideLoading(context);
+                                _showLockedDialog(reason);
+                                return;
+                              }
+                            }
+
+                            if (!context.mounted) return;
+
                             // AuthWrapper sẽ tự động xử lý chuyển hướng
                             Navigator.pushAndRemoveUntil(
                               context,
