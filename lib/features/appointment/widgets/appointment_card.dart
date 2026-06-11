@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:wellness_app/core/theme/app_colors.dart';
 
 class AppointmentCard extends StatelessWidget {
   final String doctorName;
   final String location;
   final String date;
   final String time;
-  final String status;
+  final String status; // "upcoming", "completed", "overdue"
   final VoidCallback onViewDetails;
+  final VoidCallback onNavigate;
 
   const AppointmentCard({
     super.key,
@@ -16,167 +18,163 @@ class AppointmentCard extends StatelessWidget {
     required this.time,
     required this.status,
     required this.onViewDetails,
+    required this.onNavigate,
   });
 
   @override
   Widget build(BuildContext context) {
-    String statusText;
-    Color statusColor;
-    Color statusBgColor;
+    final bool isCompleted = status == "completed";
+    final bool isOverdue = status == "overdue";
 
-    switch (status) {
-      case "completed":
-        statusText = "Đã khám";
-        statusColor = Colors.grey[700]!;
-        statusBgColor = Colors.grey[200]!;
-        break;
-      case "overdue":
-        statusText = "Bị nhỡ";
-        statusColor = const Color(0xFFE53935);
-        statusBgColor = const Color(0xFFFFEBEE);
-        break;
-      case "upcoming":
-      default:
-        statusText = "Sắp đến";
-        statusColor = const Color(0xFF246BFD);
-        statusBgColor = const Color(0xFFE0F2F1);
+    // Đổi màu icon, nền, text theo trạng thái
+    Color iconBgColor;
+    Color iconColor;
+    Color cardTextColor = AppColors.textDark;
+    IconData cardIcon = Icons.medical_services;
+
+    if (isCompleted) {
+      iconBgColor = AppColors.success.withOpacity(0.12);
+      iconColor = AppColors.success;
+      cardTextColor = AppColors.textSecondary;
+      cardIcon = Icons.check_circle_rounded;
+    } else if (isOverdue) {
+      iconBgColor = AppColors.error.withOpacity(0.08);
+      iconColor = AppColors.error;
+    } else {
+      iconBgColor = AppColors.primary.withOpacity(0.08);
+      iconColor = AppColors.primary;
     }
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: status == "upcoming"
-            ? Border.all(color: const Color(0xFFE0F2F1), width: 1.5)
-            : null,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: statusBgColor,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  statusText,
-                  style: TextStyle(
-                    color: statusColor,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              InkWell(
-                onTap: onViewDetails,
-                child: const Text(
-                  "Xem chi tiết",
-                  style: TextStyle(
-                    color: Color(0xFF246BFD),
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  Icons.person,
-                  color: status == "completed" ? Colors.grey : Colors.black87,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      doctorName,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: status == "completed"
-                            ? Colors.grey
-                            : Colors.black,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      location,
-                      style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: BoxDecoration(
-              color: Colors.grey[50],
-              borderRadius: BorderRadius.circular(12),
+    return GestureDetector(
+      onTap: onViewDetails,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isCompleted
+              ? AppColors.success.withOpacity(0.04)
+              : AppColors.surface,
+          borderRadius: BorderRadius.circular(24),
+          border: isOverdue
+              ? Border.all(color: AppColors.error.withOpacity(0.2), width: 2)
+              : isCompleted
+                  ? Border.all(
+                      color: AppColors.success.withOpacity(0.15), width: 1.5)
+                  : null,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 15,
+              offset: const Offset(0, 5),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Icon(Icons.calendar_today, size: 16, color: statusColor),
-                    const SizedBox(width: 8),
-                    Text(
-                      date,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[800],
-                      ),
-                    ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    Icon(Icons.access_time, size: 16, color: statusColor),
-                    const SizedBox(width: 8),
-                    Text(
-                      time,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[800],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+          ],
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: iconBgColor,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(cardIcon, color: iconColor, size: 28),
             ),
-          ),
-        ],
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          doctorName,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                            color: cardTextColor,
+                          ),
+                        ),
+                      ),
+                      if (isCompleted) ...[
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.success.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.check,
+                                size: 12,
+                                color: AppColors.success,
+                              ),
+                              const SizedBox(width: 3),
+                              Text(
+                                "Đã khám",
+                                style: TextStyle(
+                                  color: AppColors.success,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(Icons.calendar_today, size: 14, color: AppColors.textSecondary),
+                      const SizedBox(width: 4),
+                      Text(
+                        date,
+                        style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+                      ),
+                      const SizedBox(width: 12),
+                      Icon(Icons.access_time, size: 14, color: AppColors.textSecondary),
+                      const SizedBox(width: 4),
+                      Text(
+                        time,
+                        style: TextStyle(
+                            color: isOverdue ? AppColors.error : AppColors.textSecondary,
+                            fontSize: 14,
+                            fontWeight: isOverdue ? FontWeight.bold : FontWeight.normal),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      Icon(Icons.location_on, size: 14, color: AppColors.textSecondary),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          location,
+                          style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            IconButton(
+              icon: Icon(Icons.navigation, color: AppColors.primary),
+              onPressed: onNavigate,
+            ),
+          ],
+        ),
       ),
     );
   }
