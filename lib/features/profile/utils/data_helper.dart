@@ -16,6 +16,9 @@ class UserProfile {
   static int dailyWaterGoal = 2500; // ml
   static int dailyCaloGoal = 2000; // kcal
   static String exerciseGoal = "Tập gym 5 buổi/tuần";
+  static double sleepGoalHours = 8.0;
+  static int targetSystolic = 120;
+  static int targetDiastolic = 80;
 
   // ==================== HÀM CẬP NHẬT DỮ LIỆU ====================
   static void updateProfile({
@@ -31,6 +34,9 @@ class UserProfile {
     int? newWaterGoal,
     int? newCaloGoal,
     String? newExerciseGoal,
+    double? newSleepGoalHours,
+    int? newTargetSystolic,
+    int? newTargetDiastolic,
   }) {
     if (newName != null) userName = newName;
     if (newEmail != null) email = newEmail;
@@ -44,6 +50,9 @@ class UserProfile {
     if (newWaterGoal != null) dailyWaterGoal = newWaterGoal;
     if (newCaloGoal != null) dailyCaloGoal = newCaloGoal;
     if (newExerciseGoal != null) exerciseGoal = newExerciseGoal;
+    if (newSleepGoalHours != null) sleepGoalHours = newSleepGoalHours;
+    if (newTargetSystolic != null) targetSystolic = newTargetSystolic;
+    if (newTargetDiastolic != null) targetDiastolic = newTargetDiastolic;
   }
 
   static void updateProfileFromMap(Map<String, dynamic> data) {
@@ -59,6 +68,9 @@ class UserProfile {
     if (data['dailyWaterGoal'] != null) dailyWaterGoal = data['dailyWaterGoal'];
     if (data['dailyCaloGoal'] != null) dailyCaloGoal = data['dailyCaloGoal'];
     if (data['exerciseGoal'] != null) exerciseGoal = data['exerciseGoal'];
+    if (data['sleepGoalHours'] != null) sleepGoalHours = (data['sleepGoalHours'] as num).toDouble();
+    if (data['targetSystolic'] != null) targetSystolic = data['targetSystolic'];
+    if (data['targetDiastolic'] != null) targetDiastolic = data['targetDiastolic'];
   }
 
   // Reset về giá trị mặc định (nếu cần)
@@ -75,8 +87,28 @@ class UserProfile {
     dailyWaterGoal = 2500;
     dailyCaloGoal = 2000;
     exerciseGoal = "Tập gym 5 buổi/tuần";
+    sleepGoalHours = 8.0;
+    targetSystolic = 120;
+    targetDiastolic = 80;
   }
 
   // Getter tiện lợi (tùy chọn)
   static double get bmi => weight / ((height / 100) * (height / 100));
+
+  static int getSuggestedCaloriesFor({
+    required double weight,
+    required double height,
+    required int age,
+    required String gender,
+  }) {
+    double bmr;
+    if (gender == "Nam") {
+      bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+    } else if (gender == "Nữ") {
+      bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+    } else {
+      bmr = 10 * weight + 6.25 * height - 5 * age - 78;
+    }
+    return (bmr * 1.375).round();
+  }
 }

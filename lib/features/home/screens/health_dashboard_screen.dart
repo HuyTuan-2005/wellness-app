@@ -14,6 +14,7 @@ import 'package:wellness_app/features/blood_pressure/screens/blood_pressure_trac
 import 'package:wellness_app/features/nutrition/screens/nutrition_tracking_screen.dart';
 import 'package:wellness_app/features/weight/screens/weight_tracking_screen.dart';
 import 'package:wellness_app/features/mental_health/screens/mental_health_tracking_screen.dart';
+import 'package:wellness_app/features/BMI/screens/BMI_screen.dart';
 
 class HealthDashboardScreen extends StatefulWidget {
   const HealthDashboardScreen({super.key});
@@ -174,127 +175,140 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
           const SizedBox(height: 30),
 
           // Thanh chỉ số BMI
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const BMICalculatorScreen(),
+                ),
+              ).then((_) => setState(() {}));
+            },
+            child: Container(
+              color: Colors.transparent,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Chỉ số BMI',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  Text(
-                    bmi.toStringAsFixed(1),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 15),
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  // Mốc 15 đến 40
-                  double percentage = (bmi - 15) / 25;
-                  if (percentage < 0) percentage = 0.05;
-                  if (percentage > 1) percentage = 0.95;
-
-                  return Stack(
-                    clipBehavior: Clip.none,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Container(
-                        height: 10,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                decoration: const BoxDecoration(
-                                  color: Colors.blue,
-                                  borderRadius: BorderRadius.horizontal(
-                                    left: Radius.circular(5),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Expanded(child: Container(color: Colors.green)),
-                            Expanded(child: Container(color: Colors.orange)),
-                            Expanded(
-                              child: Container(
-                                decoration: const BoxDecoration(
-                                  color: Colors.red,
-                                  borderRadius: BorderRadius.horizontal(
-                                    right: Radius.circular(5),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
+                      const Text(
+                        'Chỉ số BMI',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textSecondary,
                         ),
                       ),
-                      // Mũi tên chỉ báo
-                      Positioned(
-                        left:
-                            (constraints.maxWidth * percentage) -
-                            12, // 12 là nửa chiều rộng của icon
-                        top: -18,
-                        child: const Icon(
-                          Icons.arrow_drop_down,
-                          size: 24,
+                      Text(
+                        bmi.toStringAsFixed(1),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
                           color: AppColors.textPrimary,
                         ),
                       ),
                     ],
-                  );
-                },
-              ),
-              const SizedBox(height: 8),
-              const Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Thiếu cân',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Colors.blue,
-                      fontWeight: FontWeight.w500,
-                    ),
                   ),
-                  Text(
-                    'Bình thường',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Colors.green,
-                      fontWeight: FontWeight.w500,
-                    ),
+                  const SizedBox(height: 15),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      // Mốc 15 đến 40
+                      double percentage = (bmi - 15) / 25;
+                      if (percentage < 0) percentage = 0.05;
+                      if (percentage > 1) percentage = 0.95;
+
+                      return Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Container(
+                            height: 10,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                    decoration: const BoxDecoration(
+                                      color: Colors.blue,
+                                      borderRadius: BorderRadius.horizontal(
+                                        left: Radius.circular(5),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Expanded(child: Container(color: Colors.green)),
+                                Expanded(child: Container(color: Colors.orange)),
+                                Expanded(
+                                  child: Container(
+                                    decoration: const BoxDecoration(
+                                      color: Colors.red,
+                                      borderRadius: BorderRadius.horizontal(
+                                        right: Radius.circular(5),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          // Mũi tên chỉ báo
+                          Positioned(
+                            left:
+                                (constraints.maxWidth * percentage) -
+                                12, // 12 là nửa chiều rộng của icon
+                            top: -18,
+                            child: const Icon(
+                              Icons.arrow_drop_down,
+                              size: 24,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
-                  Text(
-                    'Thừa cân',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Colors.orange,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  Text(
-                    'Béo phì',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Colors.red,
-                      fontWeight: FontWeight.w500,
-                    ),
+                  const SizedBox(height: 8),
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Thiếu cân',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.blue,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      Text(
+                        'Bình thường',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.green,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      Text(
+                        'Thừa cân',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.orange,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      Text(
+                        'Béo phì',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.red,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
         ],
       ),

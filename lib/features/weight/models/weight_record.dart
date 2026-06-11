@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 class WeightRecord {
   final int? id;
   final double weight;

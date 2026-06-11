@@ -15,14 +15,6 @@ class MainNavigationScreen extends StatefulWidget {
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _currentIndex = 0;
 
-  // Danh sách các màn hình tương ứng với các Tab
-  final List<Widget> _screens = [
-    const HealthDashboardScreen(),
-    const MedicalScheduleScreen(),
-    const ExerciseScreen(),
-    const ProfileScreen(),
-  ];
-
   void _onTabTapped(int index) {
     setState(() {
       _currentIndex = index;
@@ -31,10 +23,18 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Định nghĩa danh sách màn hình trực tiếp trong build để chúng rebuild khi đổi tab
+    final List<Widget> screens = [
+      HealthDashboardScreen(),
+      const MedicalScheduleScreen(),
+      const ExerciseScreen(),
+      ProfileScreen(),
+    ];
+
     return Scaffold(
       backgroundColor: AppColors.background,
       // Sử dụng IndexedStack để giữ nguyên State của các màn hình khi chuyển Tab
-      body: IndexedStack(index: _currentIndex, children: _screens),
+      body: IndexedStack(index: _currentIndex, children: screens),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           boxShadow: [

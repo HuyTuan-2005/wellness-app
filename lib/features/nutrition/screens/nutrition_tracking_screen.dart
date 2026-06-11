@@ -166,25 +166,31 @@ class _NutritionTrackingScreenState extends State<NutritionTrackingScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Ghi nhận thức ăn',
-                        style: TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1B5E20),
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Color(0xFF1B5E20)),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Ghi nhận thức ăn',
+                          style: TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF1B5E20),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        DateHelper.getDateString(),
-                        style: TextStyle(fontSize: 14, color: Colors.green.shade300),
-                      ),
-                    ],
+                        const SizedBox(height: 4),
+                        Text(
+                          DateHelper.getDateString(),
+                          style: TextStyle(fontSize: 14, color: Colors.green.shade300),
+                        ),
+                      ],
+                    ),
                   ),
                   Container(
                     decoration: BoxDecoration(

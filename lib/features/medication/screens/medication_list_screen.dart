@@ -6,7 +6,6 @@ import 'package:wellness_app/features/medication/controller/medication_controlle
 import 'package:wellness_app/features/medication/models/medication.dart';
 import 'package:wellness_app/features/medication/screens/medication_detail_screen.dart';
 import 'package:wellness_app/features/medication/widget/medication_card.dart';
-import 'package:wellness_app/service/notification_service.dart';
 import 'add_medication_screen.dart';
 
 class MedicationListScreen extends StatefulWidget {
@@ -302,8 +301,7 @@ class _MedicationListScreenState extends State<MedicationListScreen> {
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
             onPressed: () async {
               Navigator.pop(ctx);
-              await DatabaseHelper.instance.deleteMedication(id);
-              await NotificationService().cancelNotification(id);
+              await MedicationController.deleteMedication(id);
               _loadMedications();
             },
             child: Text(

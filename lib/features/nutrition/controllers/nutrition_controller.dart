@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -10,48 +11,115 @@ class NutritionController extends ChangeNotifier {
   static final NutritionController _instance = NutritionController._internal();
   factory NutritionController() => _instance;
 
+  StreamSubscription? _subscription;
+  String? _userId;
+  String? _dateStr;
+
+  final List<NutritionEntry> _history = [];
+
   NutritionController._internal() {
     // Nếu mục tiêu calo chưa được cấu hình, tự động tính calo gợi ý dựa trên cơ thể
     if (UserProfile.dailyCaloGoal == 2000) {
       UserProfile.dailyCaloGoal = getSuggestedCalories();
     }
+
+    FirebaseAuth.instance.authStateChanges().listen((user) {
+      if (user != null) {
+        _userId = user.uid;
+        _subscribeToToday();
+      } else {
+        _unsubscribe();
+        _userId = null;
+      }
+    });
   }
 
-  final List<NutritionEntry> _history = [];
+  String _getTodayDateStr() {
+    final now = DateTime.now();
+    return "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+  }
+
+  void _subscribeToToday() {
+    if (_userId == null) return;
+    final today = _getTodayDateStr();
+    _dateStr = today;
+
+    _subscription?.cancel();
+    _subscription = FirebaseFirestore.instance
+        .collection('users')
+        .doc(_userId)
+        .collection('nutrition_logs')
+        .doc(today)
+        .snapshots()
+        .listen((doc) {
+      if (doc.exists) {
+        final data = doc.data()!;
+        final entriesData = data['entries'] as List<dynamic>? ?? [];
+        _history.clear();
+        for (var e in entriesData) {
+          _history.add(NutritionEntry.fromMap(e));
+        }
+      } else {
+        _history.clear();
+      }
+      notifyListeners();
+    }, onError: (e) {
+      debugPrint("Error listening to today's nutrition logs: $e");
+    });
+  }
+
+  void _unsubscribe() {
+    _subscription?.cancel();
+    _subscription = null;
+    _history.clear();
+    _dateStr = null;
+    notifyListeners();
+  }
+
+  void _checkRollover() {
+    if (_userId != null && _dateStr != _getTodayDateStr()) {
+      _subscribeToToday();
+    }
+  }
 
   int get goalCalo => UserProfile.dailyCaloGoal;
-  List<NutritionEntry> get history => List.unmodifiable(_history);
+  List<NutritionEntry> get history {
+    _checkRollover();
+    return List.unmodifiable(_history);
+  }
 
-  double get totalCalo => _history.fold(0, (tot, e) => tot + e.calo);
-  double get totalProtein => _history.fold(0, (tot, e) => tot + e.protein);
-  double get totalCarb => _history.fold(0, (tot, e) => tot + e.carb);
+  double get totalCalo {
+    _checkRollover();
+    return _history.fold(0.0, (tot, e) => tot + e.calo);
+  }
+
+  double get totalProtein {
+    _checkRollover();
+    return _history.fold(0.0, (tot, e) => tot + e.protein);
+  }
+
+  double get totalCarb {
+    _checkRollover();
+    return _history.fold(0.0, (tot, e) => tot + e.carb);
+  }
+
   double get remainingCalo => (goalCalo - totalCalo).clamp(0, double.infinity);
   double get progress => (totalCalo / goalCalo).clamp(0.0, 1.0);
   int get percent => (progress * 100).round();
 
   /// Tính lượng calo gợi ý dựa theo tỉ lệ cơ thể (Mifflin-St Jeor)
   int getSuggestedCalories() {
-    double w = UserProfile.weight;
-    double h = UserProfile.height;
-    int a = UserProfile.age;
-    String g = UserProfile.gender;
-
-    double bmr;
-    if (g == "Nam") {
-      bmr = 10 * w + 6.25 * h - 5 * a + 5;
-    } else if (g == "Nữ") {
-      bmr = 10 * w + 6.25 * h - 5 * a - 161;
-    } else {
-      bmr = 10 * w + 6.25 * h - 5 * a - 78; // Trung bình giới tính khác
-    }
-
-    // TDEE = BMR * 1.375 (Mức độ vận động nhẹ nhàng)
-    double tdee = bmr * 1.375;
-    return tdee.round();
+    return UserProfile.getSuggestedCaloriesFor(
+      weight: UserProfile.weight,
+      height: UserProfile.height,
+      age: UserProfile.age,
+      gender: UserProfile.gender,
+    );
   }
 
   /// Kiểm tra xem món ăn có tần suất ăn >= 2 lần hay không
   bool isFrequent(String foodName) {
+    _checkRollover();
     final name = foodName.trim().toLowerCase();
     final count = _history.where((e) => e.foodName.trim().toLowerCase() == name).length;
     return count >= 2;
@@ -59,6 +127,7 @@ class NutritionController extends ChangeNotifier {
 
   /// Gợi ý các món ăn bao gồm cả các món có tần suất ăn >= 2 bữa/ngày lên đầu
   List<FoodItem> suggestFood(String query) {
+    _checkRollover();
     // 1. Đếm tần suất các món ăn đã ăn trong lịch sử
     final Map<String, int> frequencies = {};
     for (final entry in _history) {
@@ -142,6 +211,7 @@ class NutritionController extends ChangeNotifier {
     required double carb,
     required MealType mealType,
   }) {
+    _checkRollover();
     _history.insert(
       0,
       NutritionEntry(
@@ -154,7 +224,20 @@ class NutritionController extends ChangeNotifier {
         time: TimeOfDay.now(),
       ),
     );
-    notifyListeners();
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('nutrition_logs')
+          .doc(_getTodayDateStr())
+          .set({
+        'entries': _history.map((e) => e.toMap()).toList(),
+      }).catchError((e) => debugPrint("Error updating nutrition log to Firestore: $e"));
+    } else {
+      notifyListeners();
+    }
   }
 
   void addFromDatabase({
@@ -174,8 +257,22 @@ class NutritionController extends ChangeNotifier {
   }
 
   void removeEntry(int index) {
+    _checkRollover();
     if (index < 0 || index >= _history.length) return;
     _history.removeAt(index);
-    notifyListeners();
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('nutrition_logs')
+          .doc(_getTodayDateStr())
+          .set({
+        'entries': _history.map((e) => e.toMap()).toList(),
+      }).catchError((e) => debugPrint("Error updating nutrition log in Firestore: $e"));
+    } else {
+      notifyListeners();
+    }
   }
 }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:wellness_app/core/database/database_helper.dart';
 import 'package:wellness_app/features/appointment/models/appointment.dart';
 import 'package:wellness_app/service/notification_service.dart';
@@ -29,6 +31,18 @@ class AppointmentController {
 
       // Hẹn giờ báo thức
       if (id > 0) {
+        // Đồng bộ lên Firestore nếu user đã đăng nhập
+        final user = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .collection('appointments')
+              .doc(id.toString())
+              .set(newAppointment.toMap()..['id'] = id.toString())
+              .catchError((e) => debugPrint("Error syncing appointment to Firestore: $e"));
+        }
+
         DateTime scheduledTime = DateTime.parse(dateTime);
         DateTime notificationTime =
             scheduledTime.subtract(Duration(minutes: reminderOffset));
@@ -84,6 +98,18 @@ class AppointmentController {
       // Ghi xuống DB
       await DatabaseHelper.instance.updateAppointment(appointment);
 
+      // Đồng bộ lên Firestore nếu user đã đăng nhập
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null && appointment.id != null) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('appointments')
+            .doc(appointment.id!)
+            .update(appointment.toMap())
+            .catchError((e) => debugPrint("Error updating appointment on Firestore: $e"));
+      }
+
       // Hủy báo thức nếu vẫn chưa kêu
       int notificationId = int.parse(appointment.id!) + 10000;
       await NotificationService().cancelNotification(notificationId);
@@ -99,6 +125,18 @@ class AppointmentController {
         int id = int.parse(appointment.id!);
         // Xóa khỏi DB
         await DatabaseHelper.instance.deleteAppointment(id);
+        
+        // Đồng bộ lên Firestore nếu user đã đăng nhập
+        final user = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .collection('appointments')
+              .doc(id.toString())
+              .delete()
+              .catchError((e) => debugPrint("Error deleting appointment on Firestore: $e"));
+        }
         
         // Hủy báo thức
         int notificationId = id + 10000;

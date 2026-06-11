@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // Vẫn cần để parse DocumentSnapshot, hoặc ta có thể tránh nếu trả về Map
 import 'package:wellness_app/core/theme/app_colors.dart';
 import 'package:wellness_app/data/services/auth_service.dart';
+import 'package:wellness_app/data/services/data_sync_service.dart';
+import 'package:wellness_app/features/profile/utils/data_helper.dart';
 import 'package:wellness_app/features/admin_dashboard/screens/dashboard_screen.dart';
 import 'package:wellness_app/features/home/screens/main_navigation_screen.dart';
 import 'package:wellness_app/features/register_login/screens/login_screen.dart';
@@ -17,6 +19,7 @@ class AuthWrapper extends StatefulWidget {
 class _AuthWrapperState extends State<AuthWrapper> with WidgetsBindingObserver {
   final AuthService _authService = AuthService();
   bool _isShowingLockedDialog = false;
+  String? _lastSyncedUid;
 
   @override
   void initState() {
@@ -116,6 +119,19 @@ class _AuthWrapperState extends State<AuthWrapper> with WidgetsBindingObserver {
               final bool isLocked = userData?['isLocked'] ?? false;
               final String? lockReason = userData?['lockReason'] as String?;
               final String role = userData?['role'] ?? 'user';
+
+              if (userData != null) {
+                // Cập nhật thông tin UserProfile thời gian thực
+                UserProfile.updateProfileFromMap(userData);
+              }
+
+              // Chỉ chạy đồng bộ khi vừa đăng nhập thành công và tài khoản không bị khóa
+              if (!isLocked && _lastSyncedUid != user.uid) {
+                _lastSyncedUid = user.uid;
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  DataSyncService().syncOnLogin(user.uid);
+                });
+              }
 
               // Nếu bị khóa, gọi hàm ép đăng xuất sau khi frame hiện tại vẽ xong
               if (isLocked) {

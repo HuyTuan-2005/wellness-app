@@ -58,4 +58,37 @@ class NutritionEntry {
     required this.mealType,
     required this.time,
   });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'foodName': foodName,
+      'quantity': quantity,
+      'calo': calo,
+      'protein': protein,
+      'carb': carb,
+      'mealType': mealType.name,
+      'time': {'hour': time.hour, 'minute': time.minute},
+    };
+  }
+
+  factory NutritionEntry.fromMap(Map<dynamic, dynamic> map) {
+    final timeMap = map['time'] as Map<dynamic, dynamic>;
+    final mealTypeName = map['mealType'] as String;
+    final mealType = MealType.values.firstWhere(
+      (e) => e.name == mealTypeName,
+      orElse: () => MealType.sang,
+    );
+    return NutritionEntry(
+      foodName: map['foodName'] ?? '',
+      quantity: (map['quantity'] as num).toInt(),
+      calo: (map['calo'] as num).toDouble(),
+      protein: (map['protein'] as num).toDouble(),
+      carb: (map['carb'] as num).toDouble(),
+      mealType: mealType,
+      time: TimeOfDay(
+        hour: (timeMap['hour'] as num).toInt(),
+        minute: (timeMap['minute'] as num).toInt(),
+      ),
+    );
+  }
 }

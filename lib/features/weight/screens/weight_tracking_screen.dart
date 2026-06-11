@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:wellness_app/core/theme/app_colors.dart';
 import 'package:wellness_app/features/profile/utils/data_helper.dart';
 import 'package:wellness_app/core/database/database_helper.dart';
@@ -93,10 +95,35 @@ class _WeightTrackingScreenState extends State<WeightTrackingScreen> {
                             weight: newWeight,
                             date: DateTime.now(),
                           );
-                          await DatabaseHelper.instance.insertWeightRecord(record);
+                          final id = await DatabaseHelper.instance.insertWeightRecord(record);
                           
                           // Update profile
                           UserProfile.weight = newWeight;
+
+                          final int caloGoal = UserProfile.getSuggestedCaloriesFor(
+                            weight: newWeight,
+                            height: UserProfile.height,
+                            age: UserProfile.age,
+                            gender: UserProfile.gender,
+                          );
+                          UserProfile.dailyCaloGoal = caloGoal;
+                          
+                          // Sync to Firestore
+                          final user = FirebaseAuth.instance.currentUser;
+                          if (user != null) {
+                            FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(user.uid)
+                                .collection('weight_records')
+                                .doc(id.toString())
+                                .set(record.toMap()..['id'] = id)
+                                .catchError((e) => debugPrint("Error syncing weight to Firestore: $e"));
+
+                            FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+                              'weight': newWeight,
+                              'dailyCaloGoal': caloGoal,
+                            }).catchError((e) => debugPrint("Error updating profile weight on Firestore: $e"));
+                          }
                           
                           Navigator.pop(context);
                           _loadRecords(); // Reload

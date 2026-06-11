@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:wellness_app/features/profile/utils/data_helper.dart';
+import 'package:wellness_app/core/database/database_helper.dart';
+import 'package:wellness_app/features/weight/models/weight_record.dart';
 import '../../../core/theme/app_colors.dart';
 import 'package:wellness_app/core/utils/app_helpers.dart';
 
@@ -85,15 +87,47 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   void _saveProfile() async {
     if (_formKey.currentState!.validate()) {
       final user = FirebaseAuth.instance.currentUser;
+      double? newWeightVal = double.tryParse(_weightController.text);
+      double? newHeightVal = double.tryParse(_heightController.text);
+      int? newAgeVal = int.tryParse(_ageController.text);
+      String newGenderVal = _selectedGender;
+
+      int? caloGoal;
+      if (newWeightVal != null && newHeightVal != null && newAgeVal != null) {
+        caloGoal = UserProfile.getSuggestedCaloriesFor(
+          weight: newWeightVal,
+          height: newHeightVal,
+          age: newAgeVal,
+          gender: newGenderVal,
+        );
+      }
+
       if (user != null) {
         try {
           AppHelpers.showLoading(context);
+
+          // Nếu có thay đổi cân nặng -> Lưu bản ghi cân nặng mới vào SQLite & Firestore
+          if (newWeightVal != null && newWeightVal != UserProfile.weight) {
+            final record = WeightRecord(
+              weight: newWeightVal,
+              date: DateTime.now(),
+            );
+            final id = await DatabaseHelper.instance.insertWeightRecord(record);
+            await FirebaseFirestore.instance
+                .collection('users')
+                .doc(user.uid)
+                .collection('weight_records')
+                .doc(id.toString())
+                .set(record.toMap()..['id'] = id)
+                .catchError((e) => debugPrint("Error syncing profile weight update to Firestore: $e"));
+          }
+
           final profileData = {
             'displayName': _nameController.text.trim(),
-            'age': int.tryParse(_ageController.text),
-            'gender': _selectedGender,
-            'height': double.tryParse(_heightController.text),
-            'weight': double.tryParse(_weightController.text),
+            'age': newAgeVal,
+            'gender': newGenderVal,
+            'height': newHeightVal,
+            'weight': newWeightVal,
             'targetWeight': double.tryParse(_targetWeightController.text),
             'bloodType': _selectedBloodType,
             'allergies': _allergiesController.text.trim().isEmpty
@@ -101,6 +135,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 : _allergiesController.text.trim(),
             'dailyWaterGoal': int.tryParse(_waterGoalController.text),
             'exerciseGoal': _exerciseGoalController.text.trim(),
+            if (caloGoal != null) 'dailyCaloGoal': caloGoal,
           };
 
           await FirebaseFirestore.instance
@@ -123,19 +158,28 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         }
       } else {
         // Fallback lưu cục bộ nếu không có user (phát triển/test)
+        if (newWeightVal != null && newWeightVal != UserProfile.weight) {
+          final record = WeightRecord(
+            weight: newWeightVal,
+            date: DateTime.now(),
+          );
+          await DatabaseHelper.instance.insertWeightRecord(record);
+        }
+
         UserProfile.updateProfile(
           newName: _nameController.text.trim(),
           newEmail: _emailController.text.trim(),
-          newAge: int.tryParse(_ageController.text),
-          newGender: _selectedGender,
-          newHeight: double.tryParse(_heightController.text),
-          newWeight: double.tryParse(_weightController.text),
+          newAge: newAgeVal,
+          newGender: newGenderVal,
+          newHeight: newHeightVal,
+          newWeight: newWeightVal,
           newTargetWeight: double.tryParse(_targetWeightController.text),
           newBloodType: _selectedBloodType,
           newAllergies: _allergiesController.text.trim().isEmpty
               ? "Không có"
               : _allergiesController.text.trim(),
           newWaterGoal: int.tryParse(_waterGoalController.text),
+          newCaloGoal: caloGoal,
           newExerciseGoal: _exerciseGoalController.text.trim(),
         );
         AppHelpers.showSnackBar(context, 'Đã lưu thông tin thành công (cục bộ)!');

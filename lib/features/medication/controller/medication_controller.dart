@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:wellness_app/core/database/database_helper.dart';
 import 'package:wellness_app/features/medication/models/medication.dart';
 import 'package:wellness_app/service/notification_service.dart';
@@ -42,6 +44,18 @@ class MedicationController {
 
       // Hẹn giờ báo thức liều đầu tiên
       if (id > 0) {
+        // Đồng bộ lên Firestore nếu user đã đăng nhập
+        final user = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .collection('medications')
+              .doc(id.toString())
+              .set(newMedication.toMap()..['id'] = id)
+              .catchError((e) => debugPrint("Error syncing medication to Firestore: $e"));
+        }
+
         DateTime now = DateTime.now();
         DateTime firstDoseTime = DateTime(
           now.year,
@@ -188,6 +202,18 @@ class MedicationController {
     // Ghi xuống DB
     await DatabaseHelper.instance.updateMedication(med);
 
+    // Đồng bộ lên Firestore nếu user đã đăng nhập
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('medications')
+          .doc(med.id.toString())
+          .update(med.toMap())
+          .catchError((e) => debugPrint("Error syncing medication progress to Firestore: $e"));
+    }
+
     // Hủy báo thức hôm nay
     await NotificationService().cancelNotification(med.id!);
 
@@ -214,6 +240,28 @@ class MedicationController {
       } catch (_) {
         // Bỏ qua lỗi parse nếu time format không hợp lệ
       }
+    }
+  }
+
+  /// Xóa lịch uống thuốc khỏi SQLite và Firestore
+  static Future<void> deleteMedication(int id) async {
+    try {
+      await DatabaseHelper.instance.deleteMedication(id);
+
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('medications')
+            .doc(id.toString())
+            .delete()
+            .catchError((e) => debugPrint("Error deleting medication on Firestore: $e"));
+      }
+
+      await NotificationService().cancelNotification(id);
+    } catch (e) {
+      debugPrint("Lỗi khi xóa thuốc: $e");
     }
   }
 }

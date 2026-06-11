@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:wellness_app/features/profile/utils/data_helper.dart';
+import 'package:wellness_app/core/database/database_helper.dart';
+import 'package:wellness_app/features/weight/models/weight_record.dart';
 import '../../../core/theme/app_colors.dart';
 
 class BMICalculatorScreen extends StatefulWidget {
@@ -17,13 +22,27 @@ class _BMICalculatorScreenState extends State<BMICalculatorScreen> {
   String _bmiCategory = "";
   Color _bmiColor = Colors.grey;
 
-  void _calculateBMI() {
-    if (_formKey.currentState!.validate()) {
-      double height = double.parse(_heightController.text) / 100; // cm -> m
-      double weight = double.parse(_weightController.text);
+  @override
+  void initState() {
+    super.initState();
+    _heightController.text = UserProfile.height.toString();
+    _weightController.text = UserProfile.weight.toString();
+    if (UserProfile.height > 0 && UserProfile.weight > 0) {
+      _calculateBMI(silent: true);
+    }
+  }
+
+  void _calculateBMI({bool silent = false}) {
+    // If silent is true, we skip form validation check because controllers are pre-populated.
+    if (silent || (_formKey.currentState != null && _formKey.currentState!.validate())) {
+      double? parsedHeight = double.tryParse(_heightController.text);
+      double? parsedWeight = double.tryParse(_weightController.text);
+      if (parsedHeight == null || parsedWeight == null || parsedHeight == 0) return;
+      
+      double heightInMeters = parsedHeight / 100; // cm -> m
 
       setState(() {
-        _bmi = weight / (height * height);
+        _bmi = parsedWeight / (heightInMeters * heightInMeters);
 
         if (_bmi! < 18.5) {
           _bmiCategory = "Thiếu cân";
@@ -39,6 +58,54 @@ class _BMICalculatorScreenState extends State<BMICalculatorScreen> {
           _bmiColor = Colors.red;
         }
       });
+
+      // Update static profile only if calculated by user interaction (not silent init)
+      if (!silent) {
+        UserProfile.height = parsedHeight;
+        UserProfile.weight = parsedWeight;
+
+        // Recalculate daily calorie goal
+        final int caloGoal = UserProfile.getSuggestedCaloriesFor(
+          weight: parsedWeight,
+          height: parsedHeight,
+          age: UserProfile.age,
+          gender: UserProfile.gender,
+        );
+        UserProfile.dailyCaloGoal = caloGoal;
+
+        // Sync weight to local DB & Firestore
+        final record = WeightRecord(
+          weight: parsedWeight,
+          date: DateTime.now(),
+        );
+
+        DatabaseHelper.instance.insertWeightRecord(record).then((id) {
+          final user = FirebaseAuth.instance.currentUser;
+          if (user != null) {
+            // Sync new weight record to Firestore weight_records collection
+            FirebaseFirestore.instance
+                .collection('users')
+                .doc(user.uid)
+                .collection('weight_records')
+                .doc(id.toString())
+                .set(record.toMap()..['id'] = id);
+          }
+        }).catchError((e) {
+          debugPrint("Error saving weight log: $e");
+        });
+
+        // Sync user profile stats to Firestore
+        final user = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+            'height': parsedHeight,
+            'weight': parsedWeight,
+            'dailyCaloGoal': caloGoal,
+          }).catchError((e) {
+            debugPrint("Error syncing BMI metrics to Firestore: $e");
+          });
+        }
+      }
     }
   }
 
@@ -50,6 +117,10 @@ class _BMICalculatorScreenState extends State<BMICalculatorScreen> {
         title: const Text('Tính BMI'),
         backgroundColor: AppColors.background,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),

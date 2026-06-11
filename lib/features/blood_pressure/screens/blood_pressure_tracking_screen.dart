@@ -151,25 +151,31 @@ class _BloodPressureTrackingScreenState extends State<BloodPressureTrackingScree
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Theo dõi huyết áp',
-                        style: TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFFB71C1C),
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Color(0xFFB71C1C)),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Theo dõi huyết áp',
+                          style: TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFFB71C1C),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        DateHelper.getDateString(),
-                        style: TextStyle(fontSize: 14, color: Colors.red.shade300),
-                      ),
-                    ],
+                        const SizedBox(height: 4),
+                        Text(
+                          DateHelper.getDateString(),
+                          style: TextStyle(fontSize: 14, color: Colors.red.shade300),
+                        ),
+                      ],
+                    ),
                   ),
                   Container(
                     decoration: BoxDecoration(

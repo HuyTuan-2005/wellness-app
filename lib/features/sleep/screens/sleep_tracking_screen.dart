@@ -61,7 +61,6 @@ class _SleepTrackingScreenState extends State<SleepTrackingScreen> {
   @override
   void dispose() {
     _controller.removeListener(_onChanged);
-    _controller.dispose();
     super.dispose();
   }
 
@@ -113,25 +112,31 @@ class _SleepTrackingScreenState extends State<SleepTrackingScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Theo dõi giấc ngủ',
-                        style: TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF283593),
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Color(0xFF283593)),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Theo dõi giấc ngủ',
+                          style: TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF283593),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        DateHelper.getDateString(),
-                        style: TextStyle(fontSize: 14, color: Colors.indigo.shade300),
-                      ),
-                    ],
+                        const SizedBox(height: 4),
+                        Text(
+                          DateHelper.getDateString(),
+                          style: TextStyle(fontSize: 14, color: Colors.indigo.shade300),
+                        ),
+                      ],
+                    ),
                   ),
                   Container(
                     decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
