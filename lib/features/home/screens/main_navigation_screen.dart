@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wellness_app/core/theme/app_colors.dart';
 import 'package:wellness_app/features/home/screens/health_dashboard_screen.dart';
-import 'package:wellness_app/features/medication/screens/medical_schedule_screen.dart';
+import 'package:wellness_app/features/medical/screens/medical_schedule_screen.dart';
 import 'package:wellness_app/features/exercise/screens/exercise_screen.dart';
 import 'package:wellness_app/features/profile/screens/profile_screen.dart';
 
