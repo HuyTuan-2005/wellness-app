@@ -23,7 +23,6 @@ class _WaterTrackingScreenState extends State<WaterTrackingScreen> {
   @override
   void dispose() {
     _controller.removeListener(_onControllerChanged);
-    _controller.dispose();
     super.dispose();
   }
 

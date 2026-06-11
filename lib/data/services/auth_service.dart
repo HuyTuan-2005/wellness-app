@@ -120,7 +120,7 @@ class AuthService {
         // Cập nhật Display Name trên Firebase Auth
         await user.updateDisplayName(name);
         await user.reload(); // Bắt buộc tải lại để lấy name vừa update
-        
+
         final updatedUser = _auth.currentUser;
         if (updatedUser != null) {
           // Lưu xuống Firestore
@@ -131,7 +131,9 @@ class AuthService {
 
       return userCredential;
     } on FirebaseAuthException catch (e) {
-      print('[AuthService] Lỗi Firebase Auth (Đăng ký): ${e.code} - ${e.message}');
+      print(
+        '[AuthService] Lỗi Firebase Auth (Đăng ký): ${e.code} - ${e.message}',
+      );
       throw e; // Ném lỗi để UI bắt và hiển thị
     } catch (e) {
       print('[AuthService] Lỗi không xác định khi đăng ký: $e');

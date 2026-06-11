@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:wellness_app/features/profile/utils/data_helper.dart';
 import '../../../core/theme/app_colors.dart';
 import 'package:wellness_app/core/utils/app_helpers.dart';
@@ -80,27 +82,65 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     super.dispose();
   }
 
-  void _saveProfile() {
+  void _saveProfile() async {
     if (_formKey.currentState!.validate()) {
-      UserProfile.updateProfile(
-        newName: _nameController.text.trim(),
-        newEmail: _emailController.text.trim(),
-        newAge: int.tryParse(_ageController.text),
-        newGender: _selectedGender,
-        newHeight: double.tryParse(_heightController.text),
-        newWeight: double.tryParse(_weightController.text),
-        newTargetWeight: double.tryParse(_targetWeightController.text),
-        newBloodType: _selectedBloodType,
-        newAllergies: _allergiesController.text.trim().isEmpty
-            ? "Không có"
-            : _allergiesController.text.trim(),
-        newWaterGoal: int.tryParse(_waterGoalController.text),
-        newExerciseGoal: _exerciseGoalController.text.trim(),
-      );
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        try {
+          AppHelpers.showLoading(context);
+          final profileData = {
+            'displayName': _nameController.text.trim(),
+            'age': int.tryParse(_ageController.text),
+            'gender': _selectedGender,
+            'height': double.tryParse(_heightController.text),
+            'weight': double.tryParse(_weightController.text),
+            'targetWeight': double.tryParse(_targetWeightController.text),
+            'bloodType': _selectedBloodType,
+            'allergies': _allergiesController.text.trim().isEmpty
+                ? "Không có"
+                : _allergiesController.text.trim(),
+            'dailyWaterGoal': int.tryParse(_waterGoalController.text),
+            'exerciseGoal': _exerciseGoalController.text.trim(),
+          };
 
-      AppHelpers.showSnackBar(context, 'Đã lưu thông tin thành công!');
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .update(profileData);
 
-      Navigator.pop(context);
+          UserProfile.updateProfileFromMap(profileData);
+
+          if (mounted) {
+            AppHelpers.hideLoading(context);
+            AppHelpers.showSnackBar(context, 'Đã lưu thông tin thành công!');
+            Navigator.pop(context);
+          }
+        } catch (e) {
+          if (mounted) {
+            AppHelpers.hideLoading(context);
+            AppHelpers.showSnackBar(context, 'Lỗi khi lưu thông tin lên Firestore: $e');
+          }
+        }
+      } else {
+        // Fallback lưu cục bộ nếu không có user (phát triển/test)
+        UserProfile.updateProfile(
+          newName: _nameController.text.trim(),
+          newEmail: _emailController.text.trim(),
+          newAge: int.tryParse(_ageController.text),
+          newGender: _selectedGender,
+          newHeight: double.tryParse(_heightController.text),
+          newWeight: double.tryParse(_weightController.text),
+          newTargetWeight: double.tryParse(_targetWeightController.text),
+          newBloodType: _selectedBloodType,
+          newAllergies: _allergiesController.text.trim().isEmpty
+              ? "Không có"
+              : _allergiesController.text.trim(),
+          newWaterGoal: int.tryParse(_waterGoalController.text),
+          newExerciseGoal: _exerciseGoalController.text.trim(),
+        );
+        AppHelpers.showSnackBar(context, 'Đã lưu thông tin thành công (cục bộ)!');
+        Navigator.pop(context);
+      }
     }
   }
 
