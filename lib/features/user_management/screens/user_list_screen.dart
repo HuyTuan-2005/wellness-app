@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:wellness_app/core/theme/app_colors.dart';
 import 'package:wellness_app/features/user_management/widgets/user_card.dart';
 
@@ -13,35 +14,7 @@ class UserListScreen extends StatefulWidget {
 class _UserListScreenState extends State<UserListScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-
-  // ──── Mock Data dài để test scroll ────
-  final List<Map<String, dynamic>> _allUsers = [
-    {'name': 'Nguyễn Huy Tuấn', 'email': 'huytuan@gmail.com', 'isActive': true, 'role': 'Admin'},
-    {'name': 'Trần Trung Tính', 'email': 'truntinh@gmail.com', 'isActive': true, 'role': 'Người dùng'},
-    {'name': 'Lê Quốc Trường', 'email': 'quoctruong@gmail.com', 'isActive': false, 'role': 'Người dùng'},
-    {'name': 'Phạm Hoàng Nhân', 'email': 'hoangnhan@gmail.com', 'isActive': true, 'role': 'Người dùng'},
-    {'name': 'Võ Thị Lan', 'email': 'vothilan@gmail.com', 'isActive': true, 'role': 'Người dùng'},
-    {'name': 'Đặng Minh Quân', 'email': 'minhquan@gmail.com', 'isActive': false, 'role': 'Người dùng'},
-    {'name': 'Huỳnh Thị Mai', 'email': 'thmai@gmail.com', 'isActive': true, 'role': 'Người dùng'},
-    {'name': 'Bùi Văn Hùng', 'email': 'vanhung@gmail.com', 'isActive': true, 'role': 'Người dùng'},
-    {'name': 'Ngô Thanh Tùng', 'email': 'thanhtung@gmail.com', 'isActive': false, 'role': 'Người dùng'},
-    {'name': 'Lý Hoàng Long', 'email': 'hoanglong@gmail.com', 'isActive': true, 'role': 'Người dùng'},
-    {'name': 'Trịnh Ngọc Hân', 'email': 'ngochan@gmail.com', 'isActive': true, 'role': 'Bác sĩ'},
-    {'name': 'Dương Minh Trí', 'email': 'minhtri@gmail.com', 'isActive': true, 'role': 'Người dùng'},
-    {'name': 'Phan Thị Hương', 'email': 'thihuong@gmail.com', 'isActive': false, 'role': 'Người dùng'},
-    {'name': 'Cao Đức Anh', 'email': 'ducanh@gmail.com', 'isActive': true, 'role': 'Bác sĩ'},
-    {'name': 'Mai Xuân Bách', 'email': 'xuanbach@gmail.com', 'isActive': true, 'role': 'Người dùng'},
-  ];
-
-  List<Map<String, dynamic>> get _filteredUsers {
-    if (_searchQuery.isEmpty) return _allUsers;
-    return _allUsers.where((user) {
-      final name = (user['name'] as String).toLowerCase();
-      final email = (user['email'] as String).toLowerCase();
-      final query = _searchQuery.toLowerCase();
-      return name.contains(query) || email.contains(query);
-    }).toList();
-  }
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
   void dispose() {
@@ -51,8 +24,6 @@ class _UserListScreenState extends State<UserListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final users = _filteredUsers;
-
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -72,14 +43,6 @@ class _UserListScreenState extends State<UserListScreen> {
                       fontSize: 24,
                       color: AppColors.textDark,
                       letterSpacing: -0.3,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${_allUsers.length} tài khoản trong hệ thống',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: AppColors.textSecondary,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -144,8 +107,34 @@ class _UserListScreenState extends State<UserListScreen> {
 
             // ─── Danh sách người dùng (scrollable) ──
             Expanded(
-              child: users.isEmpty
-                  ? Center(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: _firestore
+                    .collection('users')
+                    .where('role', isNotEqualTo: 'admin')
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Đã xảy ra lỗi: ${snapshot.error}'));
+                  }
+
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  final docs = snapshot.data?.docs ?? [];
+                  
+                  // Filter by search query
+                  final filteredDocs = docs.where((doc) {
+                    if (_searchQuery.isEmpty) return true;
+                    final data = doc.data() as Map<String, dynamic>;
+                    final name = (data['displayName'] ?? '').toString().toLowerCase();
+                    final email = (data['email'] ?? '').toString().toLowerCase();
+                    final query = _searchQuery.toLowerCase();
+                    return name.contains(query) || email.contains(query);
+                  }).toList();
+
+                  if (filteredDocs.isEmpty) {
+                    return Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -164,21 +153,51 @@ class _UserListScreenState extends State<UserListScreen> {
                           ),
                         ],
                       ),
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      physics: const BouncingScrollPhysics(),
-                      itemCount: users.length,
-                      itemBuilder: (context, index) {
-                        final user = users[index];
-                        return UserCard(
-                          name: user['name'],
-                          email: user['email'],
-                          isActive: user['isActive'],
-                          role: user['role'],
-                        );
-                      },
-                    ),
+                    );
+                  }
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
+                        child: Text(
+                          '${docs.length} tài khoản trong hệ thống',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: ListView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          physics: const BouncingScrollPhysics(),
+                          itemCount: filteredDocs.length,
+                          itemBuilder: (context, index) {
+                            final doc = filteredDocs[index];
+                            final data = doc.data() as Map<String, dynamic>;
+
+                            final email = data['email'] ?? 'Không có email';
+                            final name = data['displayName'] ?? 'Người dùng';
+                            final photoUrl = data['photoURL'];
+                            final isLocked = data['isLocked'] ?? false;
+                            final role = data['role'] ?? 'Người dùng';
+
+                            return UserCard(
+                              name: name,
+                              email: email,
+                              isActive: !isLocked,
+                              role: role,
+                              avatarUrl: photoUrl,
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
           ],
         ),

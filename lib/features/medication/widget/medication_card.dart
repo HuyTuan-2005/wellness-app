@@ -42,12 +42,11 @@ class MedicationCard extends StatelessWidget {
       iconBgColor = const Color(0xFFFFEBEE); // Đỏ nhạt
       iconColor = const Color(0xFFE53935); // Đỏ đậm
     } else {
-      iconBgColor = primaryTeal.withOpacity(0.1);
+      iconBgColor = primaryTeal.withValues(alpha: 0.1);
       iconColor = primaryTeal;
     }
 
     double progress = totalQuantity > 0 ? (takenQuantity / totalQuantity) : 0;
-    int remaining = totalQuantity - takenQuantity; // Số thuốc còn lại
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),

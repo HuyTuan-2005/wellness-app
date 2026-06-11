@@ -6,6 +6,7 @@ import '../../../core/theme/app_colors.dart';
 import 'package:wellness_app/data/services/auth_service.dart';
 import 'package:wellness_app/features/register_login/screens/auth_wrapper.dart';
 import 'package:wellness_app/features/device/screens/device_screen.dart';
+import 'package:wellness_app/features/system_notifications/screens/user_notification_screen.dart';
 import 'edit_profile_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -156,7 +157,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         _buildMenuItem(
                           Icons.notifications_none_rounded,
                           'Thông báo',
-                          () {},
+                          () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const UserNotificationScreen(),
+                              ),
+                            );
+                          },
                         ),
                         _buildMenuItem(
                           Icons.info_outline_rounded,

@@ -18,9 +18,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   // ── 3 trang con được giữ trong IndexedStack (đã xóa Lịch hẹn) ──
   final List<Widget> _pages = const [
-    DashboardContentPage(),       // Tab 0: Tổng quan
-    UserListScreen(),             // Tab 1: Người dùng
-    AdminNotificationScreen(),    // Tab 2: Thông báo
+    DashboardContentPage(), // Tab 0: Tổng quan
+    UserListScreen(), // Tab 1: Người dùng
+    AdminNotificationScreen(), // Tab 2: Thông báo
   ];
 
   void _onTap(int index) {
@@ -33,10 +33,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       // IndexedStack giữ trạng thái tất cả trang – không reload khi chuyển tab
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _pages,
-      ),
+      body: IndexedStack(index: _currentIndex, children: _pages),
 
       bottomNavigationBar: Container(
         decoration: BoxDecoration(

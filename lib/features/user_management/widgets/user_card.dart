@@ -99,6 +99,12 @@ class UserCard extends StatelessWidget {
 
   Widget _buildAvatar() {
     if (avatarUrl != null && avatarUrl!.isNotEmpty) {
+      if (avatarUrl!.startsWith('http')) {
+        return CircleAvatar(
+          radius: 20,
+          backgroundImage: NetworkImage(avatarUrl!),
+        );
+      }
       return CircleAvatar(
         radius: 20,
         backgroundImage: AssetImage(avatarUrl!),
