@@ -84,19 +84,23 @@ class SleepController extends ChangeNotifier {
     notifyListeners();
   }
 
-  SleepSessionResult addSleepSession({required TimeOfDay bedTime, required TimeOfDay wakeTime}) {
+  static double calculateDuration({required TimeOfDay bedTime, required TimeOfDay wakeTime}) {
     final bedMinutes = bedTime.hour * 60 + bedTime.minute;
     final wakeMinutes = wakeTime.hour * 60 + wakeTime.minute;
-
-    if (wakeMinutes == bedMinutes) {
-      return SleepSessionResult.invalidTimeRange;
-    }
 
     int totalMinutes = wakeMinutes - bedMinutes;
     if (totalMinutes < 0) {
       totalMinutes += 24 * 60;
     }
-    final totalHours = totalMinutes / 60.0;
+    return totalMinutes / 60.0;
+  }
+
+  SleepSessionResult addSleepSession({required TimeOfDay bedTime, required TimeOfDay wakeTime}) {
+    if (wakeTime.hour == bedTime.hour && wakeTime.minute == bedTime.minute) {
+      return SleepSessionResult.invalidTimeRange;
+    }
+
+    final totalHours = calculateDuration(bedTime: bedTime, wakeTime: wakeTime);
 
     final newEntry = SleepEntry(
       bedTime: bedTime,
