@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:wellness_app/core/theme/app_colors.dart';
 import 'package:wellness_app/features/home/screens/health_dashboard_screen.dart';
 import 'package:wellness_app/features/medical/screens/medical_schedule_screen.dart';
-import 'package:wellness_app/features/health/exercise/screens/exercise_screen.dart';
+import 'package:wellness_app/features/health/nutrition/screens/nutrition_tracking_screen.dart';
 import 'package:wellness_app/features/profile/screens/profile_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
@@ -27,7 +27,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     final List<Widget> screens = [
       HealthDashboardScreen(),
       const MedicalScheduleScreen(),
-      const ExerciseScreen(),
+      const NutritionTrackingScreen(),
       ProfileScreen(),
     ];
 
@@ -81,9 +81,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             BottomNavigationBarItem(
               icon: Padding(
                 padding: EdgeInsets.only(bottom: 4.0),
-                child: Icon(Icons.directions_run),
+                child: Icon(Icons.restaurant),
               ),
-              label: 'Bài tập',
+              label: 'Ăn uống',
             ),
             BottomNavigationBarItem(
               icon: Padding(

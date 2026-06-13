@@ -65,11 +65,8 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
           children: [
             _buildOverviewSection(context),
             const SizedBox(height: 24),
-            AiAdviceCard(
+            AiHealthAdviceCard(
               controller: _nutritionController,
-              showAdviceText: true,
-              showRecommendedMeals: false,
-              autoFetch: true,
             ),
             const SizedBox(height: 24),
             _buildCardsSection(context, waterValue, sleepValue, bpValue),

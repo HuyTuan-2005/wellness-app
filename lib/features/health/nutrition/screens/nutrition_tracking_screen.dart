@@ -137,6 +137,27 @@ class _NutritionTrackingScreenState extends State<NutritionTrackingScreen> {
     );
   }
 
+  void _showAddSuccessSnackBar(String foodName) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    if (_controller.totalCalo > _controller.goalCalo) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Đã thêm $foodName. Cảnh báo: Vượt mục tiêu calo hôm nay!'),
+          backgroundColor: Colors.orange.shade800,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Đã thêm $foodName thành công!'),
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
   Future<void> _openAddFoodDialog() async {
     if (_isAddFoodDialogOpen) return;
     _isAddFoodDialogOpen = true;
@@ -159,12 +180,7 @@ class _NutritionTrackingScreenState extends State<NutritionTrackingScreen> {
         mealType: result.mealType,
       );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Đã thêm ${result.food!.name} thành công!'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        _showAddSuccessSnackBar(result.food!.name);
       }
       return;
     }
@@ -178,12 +194,7 @@ class _NutritionTrackingScreenState extends State<NutritionTrackingScreen> {
       mealType: result.mealType,
     );
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Đã thêm ${result.foodName} thành công!'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      _showAddSuccessSnackBar(result.foodName!);
     }
   }
 
@@ -355,11 +366,9 @@ class _NutritionTrackingScreenState extends State<NutritionTrackingScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              // === AI ADVICE CARD ===
-              AiAdviceCard(
+              // === AI MEAL SUGGESTION CARD ===
+              AiMealSuggestionCard(
                 controller: _controller,
-                showAdviceText: false,
-                showRecommendedMeals: true,
                 currentMealType: _selectedMeal,
                 onAddMeal: (meal, type) {
                   _controller.addEntry(
@@ -370,12 +379,7 @@ class _NutritionTrackingScreenState extends State<NutritionTrackingScreen> {
                     carb: meal.carb.toDouble(),
                     mealType: type,
                   );
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Đã thêm ${meal.name} vào bữa ${type.label}'),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
+                  _showAddSuccessSnackBar(meal.name);
                 },
               ),
               const SizedBox(height: 20),

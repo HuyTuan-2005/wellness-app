@@ -272,9 +272,8 @@ class NutritionController extends ChangeNotifier {
           .catchError(
             (e) => debugPrint("Error updating nutrition log to Firestore: $e"),
           );
-    } else {
-      notifyListeners();
     }
+    notifyListeners();
   }
 
   void addFromDatabase({
@@ -308,9 +307,8 @@ class NutritionController extends ChangeNotifier {
           .set({
         'entries': _history.map((e) => e.toMap()).toList(),
       }).catchError((e) => debugPrint("Error updating nutrition log in Firestore: $e"));
-    } else {
-      notifyListeners();
     }
+    notifyListeners();
   }
 
 
