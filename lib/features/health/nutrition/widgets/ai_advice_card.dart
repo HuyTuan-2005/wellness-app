@@ -70,7 +70,7 @@ class _AiHealthAdviceCardState extends State<AiHealthAdviceCard> with SingleTick
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF667EEA).withValues(alpha: 0.2)),
+        border: Border.all(color: Colors.teal.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -81,7 +81,7 @@ class _AiHealthAdviceCardState extends State<AiHealthAdviceCard> with SingleTick
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Colors.blue.shade400, Colors.teal.shade400, Colors.amber.shade400],
+                    colors: [Colors.teal.shade400, Colors.green.shade400],
                   ),
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -90,7 +90,7 @@ class _AiHealthAdviceCardState extends State<AiHealthAdviceCard> with SingleTick
               const SizedBox(width: 10),
               const Text(
                 'AI đang phân tích...',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Color(0xFF667EEA)),
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.teal),
               ),
             ],
           ),

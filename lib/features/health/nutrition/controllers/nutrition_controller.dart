@@ -211,7 +211,7 @@ class NutritionController extends ChangeNotifier {
 
     // 4. Lọc theo từ khóa tìm kiếm
     if (query.isEmpty) {
-      return frequentFoods;
+      return combined;
     } else {
       final lower = query.toLowerCase();
       return combined
