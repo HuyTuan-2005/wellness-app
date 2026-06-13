@@ -348,22 +348,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       readOnly: true,
                       isRequired: true,
                       onTap: () {
-                        String current = '170.0';
-                        if (_heightController.text.isNotEmpty) {
-                          final parsed = double.tryParse(
-                            _heightController.text,
-                          );
-                          if (parsed != null)
-                            current = parsed.toStringAsFixed(1);
-                        }
-                        _showPicker(
-                          'Chiều cao (cm)',
-                          List.generate(
-                            201,
-                            (index) => (50.0 + index).toStringAsFixed(1),
-                          ), // 50.0 - 250.0
-                          current,
-                          (val) => setState(() => _heightController.text = val),
+                        _showAdvancedPickerBottomsheet(
+                          context: context,
+                          title: 'Chọn Chiều Cao',
+                          controller: _heightController,
+                          isWeight: false,
                         );
                       },
                     ),
@@ -377,24 +366,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       readOnly: true,
                       isRequired: true,
                       onTap: () {
-                        List<String> weights = [];
-                        for (double i = 10.0; i <= 300.0; i += 0.5) {
-                          // 10.0 - 300.0
-                          weights.add(i.toStringAsFixed(1));
-                        }
-                        String current = '60.0';
-                        if (_weightController.text.isNotEmpty) {
-                          final parsed = double.tryParse(
-                            _weightController.text,
-                          );
-                          if (parsed != null)
-                            current = parsed.toStringAsFixed(1);
-                        }
-                        _showPicker(
-                          'Cân nặng (kg)',
-                          weights,
-                          current,
-                          (val) => setState(() => _weightController.text = val),
+                        _showAdvancedPickerBottomsheet(
+                          context: context,
+                          title: 'Chọn Cân Nặng',
+                          controller: _weightController,
+                          isWeight: true,
                         );
                       },
                     ),
@@ -412,23 +388,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 Icons.flag_outlined,
                 readOnly: true,
                 onTap: () {
-                  List<String> weights = [];
-                  for (double i = 10.0; i <= 300.0; i += 0.5) {
-                    // 10.0 - 300.0
-                    weights.add(i.toStringAsFixed(1));
-                  }
-                  String current = '60.0';
-                  if (_targetWeightController.text.isNotEmpty) {
-                    final parsed = double.tryParse(
-                      _targetWeightController.text,
-                    );
-                    if (parsed != null) current = parsed.toStringAsFixed(1);
-                  }
-                  _showPicker(
-                    'Mục tiêu cân nặng (kg)',
-                    weights,
-                    current,
-                    (val) => setState(() => _targetWeightController.text = val),
+                  _showAdvancedPickerBottomsheet(
+                    context: context,
+                    title: 'Chọn Mục Tiêu Cân Nặng',
+                    controller: _targetWeightController,
+                    isWeight: true,
                   );
                 },
               ),
@@ -555,6 +519,143 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ),
             ],
           ),
+        );
+      },
+    );
+  }
+
+  void _showAdvancedPickerBottomsheet({
+    required BuildContext context,
+    required String title,
+    required TextEditingController controller,
+    required bool isWeight,
+  }) {
+    double currentVal = double.tryParse(controller.text) ?? (isWeight ? 65.0 : 170.0);
+
+    int selectedInteger = currentVal.truncate();
+    int selectedDecimal = ((currentVal - selectedInteger) * 10).round();
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext builderContext) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Container(
+              height: 300,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('Hủy', style: TextStyle(color: Colors.red, fontSize: 16)),
+                      ),
+                      Text(
+                        title,
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          double newVal = isWeight 
+                              ? selectedInteger + (selectedDecimal / 10.0)
+                              : selectedInteger.toDouble();
+                          
+                          setState(() {
+                            controller.text = isWeight ? newVal.toString() : newVal.toInt().toString();
+                          });
+                          Navigator.pop(context);
+                        },
+                        child: const Text('Xác nhận', style: TextStyle(color: AppColors.primary, fontSize: 16)),
+                      ),
+                    ],
+                  ),
+                  const Divider(),
+                  Expanded(
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Container(
+                          height: 40,
+                          margin: const EdgeInsets.symmetric(horizontal: 40),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        Positioned.fill(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // Integer Picker
+                              SizedBox(
+                                width: 80,
+                                child: CupertinoPicker(
+                                  scrollController: FixedExtentScrollController(
+                                      initialItem: isWeight ? (selectedInteger - 10) : (selectedInteger - 50)),
+                                  itemExtent: 40,
+                                  onSelectedItemChanged: (index) {
+                                    setModalState(() {
+                                      selectedInteger = isWeight ? (index + 10) : (index + 50);
+                                    });
+                                  },
+                                  children: List.generate(isWeight ? 291 : 201, (index) {
+                                    int val = isWeight ? (index + 10) : (index + 50);
+                                    return Center(
+                                      child: Text(
+                                        '$val',
+                                        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w500),
+                                      ),
+                                    );
+                                  }),
+                                ),
+                              ),
+                              if (isWeight) ...[
+                                const Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 8.0),
+                                  child: Text(',', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                                ),
+                                // Decimal Picker
+                                SizedBox(
+                                  width: 60,
+                                  child: CupertinoPicker(
+                                    scrollController: FixedExtentScrollController(initialItem: selectedDecimal),
+                                    itemExtent: 40,
+                                    onSelectedItemChanged: (index) {
+                                      setModalState(() {
+                                        selectedDecimal = index;
+                                      });
+                                    },
+                                    children: List.generate(10, (index) {
+                                      return Center(
+                                        child: Text(
+                                          '$index',
+                                          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w500),
+                                        ),
+                                      );
+                                    }),
+                                  ),
+                                ),
+                              ],
+                              const SizedBox(width: 10),
+                              Text(
+                                isWeight ? 'kg' : 'cm',
+                                style: const TextStyle(fontSize: 20, color: Colors.grey, fontWeight: FontWeight.w500),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
         );
       },
     );

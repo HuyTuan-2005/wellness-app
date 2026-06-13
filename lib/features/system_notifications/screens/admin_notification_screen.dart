@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:wellness_app/core/theme/app_colors.dart';
+import 'package:wellness_app/features/home/screens/main_navigation_screen.dart';
 import '../widgets/notification_item.dart';
 import 'create_notification_screen.dart';
 import '../services/notification_service.dart';
@@ -23,31 +24,62 @@ class AdminNotificationScreen extends StatelessWidget {
             // ─── Header ────────────
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Quản lý thông báo',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 24,
-                      color: AppColors.textDark,
-                      letterSpacing: -0.3,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  StreamBuilder<QuerySnapshot>(
-                    stream: _notificationService.getNotificationsCountStream(),
-                    builder: (context, snapshot) {
-                      int count = snapshot.hasData ? snapshot.data!.docs.length : 0;
-                      return Text(
-                        '$count thông báo đã gửi',
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: AppColors.textSecondary,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Quản lý thông báo',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 24,
+                          color: AppColors.textDark,
+                          letterSpacing: -0.3,
                         ),
-                      );
-                    }
+                      ),
+                      const SizedBox(height: 4),
+                      StreamBuilder<QuerySnapshot>(
+                        stream: _notificationService.getNotificationsCountStream(),
+                        builder: (context, snapshot) {
+                          int count = snapshot.hasData ? snapshot.data!.docs.length : 0;
+                          return Text(
+                            '$count thông báo đã gửi',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: AppColors.textSecondary,
+                            ),
+                          );
+                        }
+                      ),
+                    ],
+                  ),
+                  // Nút chuyển giao diện User
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      icon: const Icon(
+                        Icons.swap_horiz_rounded,
+                        color: AppColors.primary,
+                        size: 26,
+                      ),
+                      tooltip: 'Chuyển sang giao diện người dùng',
+                      onPressed: () {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const MainNavigationScreen(),
+                          ),
+                          (route) => false,
+                        );
+                      },
+                    ),
                   ),
                 ],
               ),

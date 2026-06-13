@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:wellness_app/features/admin/services/admin_user_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:wellness_app/core/theme/app_colors.dart';
-import 'package:wellness_app/features/user_management/widgets/user_card.dart';
+import 'package:wellness_app/features/admin/widgets/user_card.dart';
 import 'package:wellness_app/features/admin/controllers/admin_user_controller.dart';
 
 /// Trang quản lý người dùng – search bar cố định + danh sách cuộn.
@@ -209,3 +209,4 @@ class _UserListScreenState extends State<UserListScreen> {
     );
   }
 }
+

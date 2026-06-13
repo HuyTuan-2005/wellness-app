@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:wellness_app/features/profile/utils/data_helper.dart';
@@ -46,11 +47,11 @@ class _BMICalculatorScreenState extends State<BMICalculatorScreen> {
 
         if (_bmi! < 18.5) {
           _bmiCategory = "Thiếu cân";
-          _bmiColor = Colors.orange;
-        } else if (_bmi! < 25) {
+          _bmiColor = Colors.blue;
+        } else if (_bmi! < 23.0) {
           _bmiCategory = "Bình thường";
           _bmiColor = Colors.green;
-        } else if (_bmi! < 30) {
+        } else if (_bmi! < 25.0) {
           _bmiCategory = "Thừa cân";
           _bmiColor = Colors.orange;
         } else {
@@ -145,20 +146,20 @@ class _BMICalculatorScreenState extends State<BMICalculatorScreen> {
               const SizedBox(height: 40),
 
               // Input Chiều cao
-              _buildInputField(
-                label: 'Chiều cao (cm)',
-                controller: _heightController,
+              _buildPickerField(
+                label: 'Chiều cao',
+                value: '${_heightController.text} cm',
                 icon: Icons.height,
-                hint: 'Ví dụ: 172',
+                onTap: () => _showPickerBottomsheet(context, false),
               ),
               const SizedBox(height: 20),
 
               // Input Cân nặng
-              _buildInputField(
-                label: 'Cân nặng (kg)',
-                controller: _weightController,
+              _buildPickerField(
+                label: 'Cân nặng',
+                value: '${_weightController.text} kg',
                 icon: Icons.monitor_weight_outlined,
-                hint: 'Ví dụ: 68.5',
+                onTap: () => _showPickerBottomsheet(context, true),
               ),
 
               const SizedBox(height: 32),
@@ -175,7 +176,7 @@ class _BMICalculatorScreenState extends State<BMICalculatorScreen> {
                     ),
                   ),
                   child: const Text(
-                    'Tính BMI',
+                    'Lưu kết quả BMI',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                   ),
                 ),
@@ -214,7 +215,7 @@ class _BMICalculatorScreenState extends State<BMICalculatorScreen> {
                           borderRadius: BorderRadius.circular(10),
                           gradient: const LinearGradient(
                             colors: [
-                              Colors.orange,
+                              Colors.blue,
                               Colors.green,
                               Colors.orange,
                               Colors.red,
@@ -242,10 +243,10 @@ class _BMICalculatorScreenState extends State<BMICalculatorScreen> {
               // Bảng phân loại BMI
               _buildSectionTitle('Bảng phân loại BMI'),
               const SizedBox(height: 12),
-              _buildBMICard('Dưới 18.5', 'Thiếu cân', Colors.orange),
-              _buildBMICard('18.5 - 24.9', 'Bình thường', Colors.green),
-              _buildBMICard('25.0 - 29.9', 'Thừa cân', Colors.orange),
-              _buildBMICard('Trên 30', 'Béo phì', Colors.red),
+              _buildBMICard('Dưới 18.5', 'Thiếu cân', Colors.blue),
+              _buildBMICard('18.5 - 22.9', 'Bình thường', Colors.green),
+              _buildBMICard('23.0 - 24.9', 'Thừa cân', Colors.orange),
+              _buildBMICard('Từ 25.0 trở lên', 'Béo phì', Colors.red),
             ],
           ),
         ),
@@ -253,34 +254,178 @@ class _BMICalculatorScreenState extends State<BMICalculatorScreen> {
     );
   }
 
-  Widget _buildInputField({
+  Widget _buildPickerField({
     required String label,
-    required TextEditingController controller,
+    required String value,
     required IconData icon,
-    required String hint,
+    required VoidCallback onTap,
   }) {
-    return TextFormField(
-      controller: controller,
-      keyboardType: TextInputType.number,
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        prefixIcon: Icon(icon, color: AppColors.textSecondary),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        enabledBorder: OutlineInputBorder(
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.secondary),
+          border: Border.all(color: AppColors.secondary),
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.primary, width: 2),
+        child: Row(
+          children: [
+            Icon(icon, color: AppColors.textSecondary),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                label,
+                style: const TextStyle(fontSize: 16, color: AppColors.textSecondary),
+              ),
+            ),
+            Text(
+              value,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+            ),
+            const SizedBox(width: 8),
+            const Icon(Icons.arrow_drop_down, color: AppColors.textSecondary),
+          ],
         ),
       ),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Vui lòng nhập $label';
-        }
-        return null;
+    );
+  }
+
+  void _showPickerBottomsheet(BuildContext context, bool isWeight) {
+    double currentVal = isWeight 
+        ? (double.tryParse(_weightController.text) ?? UserProfile.weight)
+        : (double.tryParse(_heightController.text) ?? UserProfile.height);
+
+    int selectedInteger = currentVal.truncate();
+    int selectedDecimal = ((currentVal - selectedInteger) * 10).round();
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext builderContext) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Container(
+              height: 300,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('Hủy', style: TextStyle(color: Colors.red, fontSize: 16)),
+                      ),
+                      Text(
+                        isWeight ? 'Chọn Cân Nặng' : 'Chọn Chiều Cao',
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          double newVal = isWeight 
+                              ? selectedInteger + (selectedDecimal / 10.0)
+                              : selectedInteger.toDouble();
+                          
+                          setState(() {
+                            if (isWeight) {
+                              _weightController.text = newVal.toString();
+                            } else {
+                              _heightController.text = newVal.toInt().toString();
+                            }
+                          });
+                          Navigator.pop(context);
+                          _calculateBMI(silent: true); // Auto update visual UI but don't save to DB yet
+                        },
+                        child: const Text('Xác nhận', style: TextStyle(color: AppColors.primary, fontSize: 16)),
+                      ),
+                    ],
+                  ),
+                  const Divider(),
+                  Expanded(
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Container(
+                          height: 40,
+                          margin: const EdgeInsets.symmetric(horizontal: 40),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        Positioned.fill(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // Integer Picker
+                              SizedBox(
+                                width: 80,
+                                child: CupertinoPicker(
+                                  scrollController: FixedExtentScrollController(
+                                      initialItem: isWeight ? (selectedInteger - 30) : (selectedInteger - 100)),
+                                  itemExtent: 40,
+                                  onSelectedItemChanged: (index) {
+                                    setModalState(() {
+                                      selectedInteger = isWeight ? (index + 30) : (index + 100);
+                                    });
+                                  },
+                                  children: List.generate(isWeight ? 171 : 151, (index) {
+                                    int val = isWeight ? (index + 30) : (index + 100);
+                                    return Center(
+                                      child: Text(
+                                        '$val',
+                                        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w500),
+                                      ),
+                                    );
+                                  }),
+                                ),
+                              ),
+                              if (isWeight) ...[
+                                const Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 8.0),
+                                  child: Text(',', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                                ),
+                                // Decimal Picker
+                                SizedBox(
+                                  width: 60,
+                                  child: CupertinoPicker(
+                                    scrollController: FixedExtentScrollController(initialItem: selectedDecimal),
+                                    itemExtent: 40,
+                                    onSelectedItemChanged: (index) {
+                                      setModalState(() {
+                                        selectedDecimal = index;
+                                      });
+                                    },
+                                    children: List.generate(10, (index) {
+                                      return Center(
+                                        child: Text(
+                                          '$index',
+                                          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w500),
+                                        ),
+                                      );
+                                    }),
+                                  ),
+                                ),
+                              ],
+                              const SizedBox(width: 10),
+                              Text(
+                                isWeight ? 'kg' : 'cm',
+                                style: const TextStyle(fontSize: 20, color: Colors.grey, fontWeight: FontWeight.w500),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
       },
     );
   }
