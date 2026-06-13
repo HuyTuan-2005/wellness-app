@@ -187,7 +187,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 : _allergiesController.text.trim(),
             'dailyWaterGoal': int.tryParse(_waterGoalController.text),
             'exerciseGoal': _exerciseGoalController.text.trim(),
-            if (caloGoal != null) 'dailyCaloGoal': caloGoal,
+            'dailyCaloGoal': ?caloGoal,
           };
 
           await FirebaseFirestore.instance
@@ -237,6 +237,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           newCaloGoal: caloGoal,
           newExerciseGoal: _exerciseGoalController.text.trim(),
         );
+        if (!mounted) return;
         AppHelpers.showSnackBar(
           context,
           'Đã lưu thông tin thành công (cục bộ)!',
@@ -702,7 +703,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   Widget _buildGenderDropdown() {
     return DropdownButtonFormField<String>(
-      value: _selectedGender,
+      initialValue: _selectedGender,
       decoration: InputDecoration(
         labelText: 'Giới tính',
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -720,7 +721,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   Widget _buildBloodTypeDropdown() {
     return DropdownButtonFormField<String>(
-      value: _selectedBloodType,
+      initialValue: _selectedBloodType,
       decoration: InputDecoration(
         labelText: 'Nhóm máu',
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),

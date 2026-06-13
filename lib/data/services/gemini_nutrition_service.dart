@@ -194,7 +194,7 @@ Bạn BẮT BUỘC phải trả về kết quả dưới định dạng JSON thu
     }
   ]
 }
-Kiểm soát rủi ro dữ liệu: Trong trường hợp API lỗi, hết quota, hoặc trả về cấu trúc sai, bạn nên set up giá trị mặc định cho adviceText (ví dụ: "Hệ thống AI đang tạm nghỉ ngơi, vui lòng uống đủ nước và ngủ sớm nhé!") và trả về danh sách rỗng cho recommendedMeals để UI không bị gián đoạn.
+Kiểm soát rủi ro dữ liệu: Trong trường hợp API lỗi, hết quota, hoặc trả về cấu trúc sai, bạn nên set up giá trị mặc định cho adviceText (ví dụ: "Hệ thống AI đang tạm nghỉ ngơi, nhớ uống đủ nước và ngủ sớm nhé!") và trả về danh sách rỗng cho recommendedMeals để UI không bị gián đoạn.
 ''';
   }
 }

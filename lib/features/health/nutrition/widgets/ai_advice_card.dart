@@ -262,6 +262,10 @@ class _AiMealSuggestionCardState extends State<AiMealSuggestionCard> with Single
           return _buildLoadingState();
         }
 
+        if (ctrl.aiError != null) {
+          return _buildErrorState();
+        }
+
         final advice = ctrl.aiAdvice;
         if (advice != null && advice.recommendedMeals.isNotEmpty) {
           return _buildResultState(advice);
@@ -270,6 +274,61 @@ class _AiMealSuggestionCardState extends State<AiMealSuggestionCard> with Single
         // fallback if empty
         return _buildIdleState();
       },
+    );
+  }
+
+  Widget _buildErrorState() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: Colors.red.shade100),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.wifi_off, color: Colors.red.shade400),
+              const SizedBox(width: 8),
+              const Text(
+                'Lỗi kết nối mạng',
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF2D3748),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'Hệ thống AI không thể kết nối. Vui lòng kiểm tra lại mạng (Wi-Fi/4G) và thử lại sau.',
+            style: TextStyle(fontSize: 14, color: Color(0xFF4A5568), height: 1.5),
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () {
+                widget.controller.fetchAiAdvice(budget: _selectedBudget);
+              },
+              icon: const Icon(Icons.refresh, color: Colors.white),
+              label: const Text(
+                'Thử lại',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red.shade400,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

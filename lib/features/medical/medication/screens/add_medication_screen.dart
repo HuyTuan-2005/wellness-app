@@ -136,7 +136,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
 
                   // Chọn tần suất
                   DropdownButtonFormField<String>(
-                    value: _selectedFrequency,
+                    initialValue: _selectedFrequency,
                     icon: Icon(
                       Icons.keyboard_arrow_down_rounded,
                       color: AppColors.primary,
@@ -219,7 +219,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                   gradient: LinearGradient(
                     colors: [
                       AppColors.primary,
-                      AppColors.primary.withOpacity(0.75),
+                      AppColors.primary.withValues(alpha: 0.75),
                     ],
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
@@ -227,7 +227,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.primary.withOpacity(0.3),
+                      color: AppColors.primary.withValues(alpha: 0.3),
                       blurRadius: 15,
                       offset: const Offset(0, 5),
                     ),
@@ -337,7 +337,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),

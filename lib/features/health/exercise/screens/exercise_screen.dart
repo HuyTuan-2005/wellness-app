@@ -24,7 +24,7 @@ class ExerciseScreen extends StatelessWidget {
             Icon(
               Icons.directions_run,
               size: 80,
-              color: AppColors.primary.withOpacity(0.5),
+              color: AppColors.primary.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 20),
             const Text(

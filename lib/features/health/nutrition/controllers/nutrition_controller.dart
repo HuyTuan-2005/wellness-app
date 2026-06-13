@@ -368,6 +368,11 @@ class NutritionController extends ChangeNotifier {
       );
 
       _aiAdvice = advice;
+      if (advice == AiNutritionAdvice.fallback) {
+        _aiError = "Không thể lấy gợi ý từ AI. Vui lòng kiểm tra lại mạng hoặc thử lại sau.";
+      } else {
+        _aiError = null;
+      }
       _isLoadingAi = false;
       notifyListeners();
     } catch (e) {

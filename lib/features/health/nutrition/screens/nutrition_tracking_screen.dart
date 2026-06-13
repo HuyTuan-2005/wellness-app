@@ -572,13 +572,7 @@ class _NutritionTrackingScreenState extends State<NutritionTrackingScreen> {
                                   ],
                                 ),
                               ),
-                              Text(
-                                DateHelper.formatTime(entry.time),
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey.shade500,
-                                ),
-                              ),
+                              // Đã loại bỏ thông tin về thời gian theo yêu cầu
                               const SizedBox(width: 4),
                               IconButton(
                                 icon: Icon(

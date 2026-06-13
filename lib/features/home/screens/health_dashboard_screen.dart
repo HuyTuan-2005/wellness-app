@@ -14,7 +14,7 @@ import 'package:wellness_app/features/health/blood_pressure/screens/blood_pressu
 import 'package:wellness_app/features/health/nutrition/screens/nutrition_tracking_screen.dart';
 import 'package:wellness_app/features/health/weight/screens/weight_tracking_screen.dart';
 import 'package:wellness_app/features/health/mental_health/screens/mental_health_tracking_screen.dart';
-import 'package:wellness_app/features/health/BMI/screens/BMI_screen.dart';
+import 'package:wellness_app/features/health/BMI/screens/bmi_screen.dart';
 import 'package:wellness_app/features/health/nutrition/widgets/ai_advice_card.dart';
 
 class HealthDashboardScreen extends StatefulWidget {

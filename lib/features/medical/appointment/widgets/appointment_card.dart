@@ -33,15 +33,15 @@ class AppointmentCard extends StatelessWidget {
     IconData cardIcon = Icons.medical_services;
 
     if (isCompleted) {
-      iconBgColor = AppColors.success.withOpacity(0.12);
+      iconBgColor = AppColors.success.withValues(alpha: 0.12);
       iconColor = AppColors.success;
       cardTextColor = AppColors.textSecondary;
       cardIcon = Icons.check_circle_rounded;
     } else if (isOverdue) {
-      iconBgColor = AppColors.error.withOpacity(0.08);
+      iconBgColor = AppColors.error.withValues(alpha: 0.08);
       iconColor = AppColors.error;
     } else {
-      iconBgColor = AppColors.primary.withOpacity(0.08);
+      iconBgColor = AppColors.primary.withValues(alpha: 0.08);
       iconColor = AppColors.primary;
     }
 
@@ -52,18 +52,18 @@ class AppointmentCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: isCompleted
-              ? AppColors.success.withOpacity(0.04)
+              ? AppColors.success.withValues(alpha: 0.04)
               : AppColors.surface,
           borderRadius: BorderRadius.circular(24),
           border: isOverdue
-              ? Border.all(color: AppColors.error.withOpacity(0.2), width: 2)
+              ? Border.all(color: AppColors.error.withValues(alpha: 0.2), width: 2)
               : isCompleted
                   ? Border.all(
-                      color: AppColors.success.withOpacity(0.15), width: 1.5)
+                      color: AppColors.success.withValues(alpha: 0.15), width: 1.5)
                   : null,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 15,
               offset: const Offset(0, 5),
             ),
@@ -105,7 +105,7 @@ class AppointmentCard extends StatelessWidget {
                             vertical: 3,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.success.withOpacity(0.12),
+                            color: AppColors.success.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Row(

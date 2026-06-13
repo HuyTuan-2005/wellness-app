@@ -43,17 +43,17 @@ class MedicationDetailScreen extends StatelessWidget {
     if (status == "completed") {
       badgeText = "Đã uống hôm nay";
       statusColor = AppColors.success;
-      statusBgColor = AppColors.success.withOpacity(0.1);
+      statusBgColor = AppColors.success.withValues(alpha: 0.1);
       timelineTitle = "Đã uống ($time)";
     } else if (status == "overdue") {
       badgeText = "Bỏ lỡ liều";
       statusColor = AppColors.error;
-      statusBgColor = AppColors.error.withOpacity(0.08);
+      statusBgColor = AppColors.error.withValues(alpha: 0.08);
       timelineTitle = "Đã lỡ hẹn ($time)";
     } else {
       badgeText = "Đang điều trị";
       statusColor = AppColors.primary;
-      statusBgColor = AppColors.primary.withOpacity(0.1);
+      statusBgColor = AppColors.primary.withValues(alpha: 0.1);
       timelineTitle = "Sắp tới ($time)";
     }
 
@@ -146,7 +146,7 @@ class MedicationDetailScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
+                    color: Colors.black.withValues(alpha: 0.03),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -237,7 +237,7 @@ class MedicationDetailScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
+                    color: Colors.black.withValues(alpha: 0.03),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),

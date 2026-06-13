@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:wellness_app/data/services/data_sync_service.dart';
 
@@ -27,7 +28,7 @@ class AuthService {
           'lastActive': FieldValue.serverTimestamp(),
         });
       } catch (e) {
-        print('[AuthService] Lỗi khi cập nhật lastActive: $e');
+        debugPrint('[AuthService] Lỗi khi cập nhật lastActive: $e');
       }
     }
   }
@@ -62,7 +63,7 @@ class AuthService {
       final User? user = userCredential.user;
 
       if (user == null) {
-        print('[AuthService] Không lấy được thông tin user từ Firebase Auth.');
+        debugPrint('[AuthService] Không lấy được thông tin user từ Firebase Auth.');
         return null;
       }
 
@@ -72,13 +73,13 @@ class AuthService {
       // Kéo dữ liệu từ Cloud về SQLite
       await DataSyncService.pullCloudToLocal();
 
-      print('[AuthService] Đăng nhập thành công: ${user.email}');
+      debugPrint('[AuthService] Đăng nhập thành công: ${user.email}');
       return userCredential;
     } on FirebaseAuthException catch (e) {
-      print('[AuthService] FirebaseAuthException: ${e.code} - ${e.message}');
+      debugPrint('[AuthService] FirebaseAuthException: ${e.code} - ${e.message}');
       return null;
     } catch (e) {
-      print('[AuthService] Lỗi không xác định khi đăng nhập Google: $e');
+      debugPrint('[AuthService] Lỗi không xác định khi đăng nhập Google: $e');
       return null;
     }
   }
@@ -100,15 +101,15 @@ class AuthService {
         // Kéo dữ liệu từ Cloud về SQLite
         await DataSyncService.pullCloudToLocal();
         
-        print('[AuthService] Đăng nhập Email thành công: ${user.email}');
+        debugPrint('[AuthService] Đăng nhập Email thành công: ${user.email}');
       }
 
       return userCredential;
     } on FirebaseAuthException catch (e) {
-      print('[AuthService] Lỗi FirebaseAuth: ${e.code} - ${e.message}');
+      debugPrint('[AuthService] Lỗi FirebaseAuth: ${e.code} - ${e.message}');
       return null;
     } catch (e) {
-      print('[AuthService] Lỗi không xác định khi đăng nhập Email: $e');
+      debugPrint('[AuthService] Lỗi không xác định khi đăng nhập Email: $e');
       return null;
     }
   }
@@ -133,19 +134,19 @@ class AuthService {
         if (updatedUser != null) {
           // Lưu xuống Firestore
           await _syncUserToFirestore(updatedUser);
-          print('[AuthService] Đăng ký thành công: ${updatedUser.email}');
+          debugPrint('[AuthService] Đăng ký thành công: ${updatedUser.email}');
         }
       }
 
       return userCredential;
     } on FirebaseAuthException catch (e) {
-      print(
+      debugPrint(
         '[AuthService] Lỗi Firebase Auth (Đăng ký): ${e.code} - ${e.message}',
       );
-      throw e; // Ném lỗi để UI bắt và hiển thị
+      rethrow; // Ném lỗi để UI bắt và hiển thị
     } catch (e) {
-      print('[AuthService] Lỗi không xác định khi đăng ký: $e');
-      throw e;
+      debugPrint('[AuthService] Lỗi không xác định khi đăng ký: $e');
+      rethrow;
     }
   }
 
@@ -157,7 +158,7 @@ class AuthService {
         return doc.data()?['role'] as String?;
       }
     } catch (e) {
-      print('[AuthService] Lỗi khi lấy role: $e');
+      debugPrint('[AuthService] Lỗi khi lấy role: $e');
     }
     return null;
   }
@@ -182,16 +183,16 @@ class AuthService {
           'fcmToken': '',
           'lastActive': FieldValue.serverTimestamp(),
         });
-        print('[AuthService] Đã tạo user mới trong Firestore: ${user.uid}');
+        debugPrint('[AuthService] Đã tạo user mới trong Firestore: ${user.uid}');
       } else {
         // Đã tồn tại → Chỉ cập nhật lastActive
         await userDoc.set({
           'lastActive': FieldValue.serverTimestamp(),
         }, SetOptions(merge: true));
-        print('[AuthService] Đã cập nhật lastActive cho user: ${user.uid}');
+        debugPrint('[AuthService] Đã cập nhật lastActive cho user: ${user.uid}');
       }
     } catch (e) {
-      print('[AuthService] Lỗi khi đồng bộ user vào Firestore: $e');
+      debugPrint('[AuthService] Lỗi khi đồng bộ user vào Firestore: $e');
     }
   }
 
@@ -200,9 +201,9 @@ class AuthService {
     try {
       await GoogleSignIn.instance.signOut();
       await _auth.signOut();
-      print('[AuthService] Đã đăng xuất thành công.');
+      debugPrint('[AuthService] Đã đăng xuất thành công.');
     } catch (e) {
-      print('[AuthService] Lỗi khi đăng xuất: $e');
+      debugPrint('[AuthService] Lỗi khi đăng xuất: $e');
     }
   }
 }

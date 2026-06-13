@@ -125,6 +125,7 @@ class _WeightTrackingScreenState extends State<WeightTrackingScreen> {
                             }).catchError((e) => debugPrint("Error updating profile weight on Firestore: $e"));
                           }
                           
+                          if (!context.mounted) return;
                           Navigator.pop(context);
                           _loadRecords(); // Reload
                         },
@@ -142,7 +143,7 @@ class _WeightTrackingScreenState extends State<WeightTrackingScreen> {
                           height: 40,
                           margin: const EdgeInsets.symmetric(horizontal: 40),
                           decoration: BoxDecoration(
-                            color: Colors.grey.withOpacity(0.15),
+                            color: Colors.grey.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
@@ -287,7 +288,7 @@ class _WeightTrackingScreenState extends State<WeightTrackingScreen> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -305,7 +306,7 @@ class _WeightTrackingScreenState extends State<WeightTrackingScreen> {
             horizontalInterval: 5,
             getDrawingHorizontalLine: (value) {
               return FlLine(
-                color: Colors.grey.withOpacity(0.2),
+                color: Colors.grey.withValues(alpha: 0.2),
                 strokeWidth: 1,
               );
             },
@@ -368,7 +369,7 @@ class _WeightTrackingScreenState extends State<WeightTrackingScreen> {
               ),
               belowBarData: BarAreaData(
                 show: true,
-                color: Colors.cyan.withOpacity(0.15),
+                color: Colors.cyan.withValues(alpha: 0.15),
               ),
             ),
           ],
@@ -417,7 +418,7 @@ class _WeightTrackingScreenState extends State<WeightTrackingScreen> {
                   leading: Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: Colors.cyan.withOpacity(0.1),
+                      color: Colors.cyan.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(Icons.monitor_weight, color: Colors.cyan),
