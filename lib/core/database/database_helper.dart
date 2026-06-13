@@ -3,6 +3,7 @@ import 'package:path/path.dart';
 import 'package:wellness_app/features/appointment/models/appointment.dart';
 import 'package:wellness_app/features/medication/models/medication.dart';
 import 'package:wellness_app/features/weight/models/weight_record.dart';
+import 'package:wellness_app/features/mental_health/models/mental_health.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
@@ -22,7 +23,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 3,
+      version: 4,
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
     );
@@ -46,6 +47,18 @@ class DatabaseHelper {
       // Thêm trường userId và isSynced cho bảng appointments
       await db.execute('ALTER TABLE appointments ADD COLUMN userId TEXT');
       await db.execute('ALTER TABLE appointments ADD COLUMN isSynced INTEGER DEFAULT 0');
+    }
+    if (oldVersion < 4) {
+      await db.execute('''
+        CREATE TABLE mental_health_records (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          emotion TEXT NOT NULL,
+          notes TEXT NOT NULL,
+          dateTime TEXT NOT NULL,
+          userId TEXT,
+          isSynced INTEGER DEFAULT 0
+        )
+      ''');
     }
   }
 
@@ -95,6 +108,18 @@ class DatabaseHelper {
         date TEXT NOT NULL
       )
     ''');
+
+    // 4. Bảng Sức khỏe tinh thần
+    await db.execute('''
+      CREATE TABLE mental_health_records (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        emotion TEXT NOT NULL,
+        notes TEXT NOT NULL,
+        dateTime TEXT NOT NULL,
+        userId TEXT,
+        isSynced INTEGER DEFAULT 0
+      )
+    ''');
   }
 
   // ================= CÁC HÀM CHO ĐỒNG BỘ ĐÁM MÂY =================
@@ -106,6 +131,11 @@ class DatabaseHelper {
   Future<List<Map<String, dynamic>>> getUnsyncedAppointments() async {
     final db = await instance.database;
     return await db.query('appointments', where: 'isSynced = ?', whereArgs: [0]);
+  }
+
+  Future<List<Map<String, dynamic>>> getUnsyncedMentalHealthRecords() async {
+    final db = await instance.database;
+    return await db.query('mental_health_records', where: 'isSynced = ?', whereArgs: [0]);
   }
 
   Future<int> markAsSynced(String tableName, int id) async {
@@ -191,5 +221,19 @@ class DatabaseHelper {
     final db = await instance.database;
     final result = await db.query('weight_records', orderBy: 'date ASC');
     return result.map((json) => WeightRecord.fromMap(json)).toList();
+  }
+
+  // ================= CÁC HÀM CRUD CHO SỨC KHỎE TINH THẦN =================
+  Future<int> insertMentalHealthRecord(MentalHealthRecord record) async {
+    final db = await instance.database;
+    Map<String, dynamic> data = record.toMap();
+    data['isSynced'] = 0;
+    return await db.insert('mental_health_records', data);
+  }
+
+  Future<List<MentalHealthRecord>> getAllMentalHealthRecords() async {
+    final db = await instance.database;
+    final result = await db.query('mental_health_records', orderBy: 'dateTime DESC');
+    return result.map((json) => MentalHealthRecord.fromMap(json)).toList();
   }
 }

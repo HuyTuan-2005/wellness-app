@@ -90,6 +90,26 @@ class DataSyncService {
         }
       }
 
+      // 4. Đồng bộ Sức khỏe Tinh thần (Mental Health)
+      final unsyncedEmotions = await DatabaseHelper.instance.getUnsyncedMentalHealthRecords();
+      for (var record in unsyncedEmotions) {
+        String docId = record['id'].toString();
+        
+        Map<String, dynamic> dataToSync = Map<String, dynamic>.from(record);
+        dataToSync['userId'] = uid;
+        dataToSync['isSynced'] = 1;
+
+        await _firestore
+            .collection('users')
+            .doc(uid)
+            .collection('mental_health_records')
+            .doc(docId)
+            .set(dataToSync, SetOptions(merge: true));
+
+        await DatabaseHelper.instance.markAsSynced('mental_health_records', record['id'] as int);
+        debugPrint("DataSyncService: Đã đẩy Cảm xúc ID ${record['id']} lên Cloud.");
+      }
+
       debugPrint("DataSyncService: Hoàn tất syncLocalToCloud.");
     } catch (e) {
       debugPrint("DataSyncService: Lỗi trong quá trình syncLocalToCloud - $e");
@@ -167,6 +187,24 @@ class DataSyncService {
           await DatabaseHelper.instance.insertWeightRecord(record);
           debugPrint("DataSyncService: Đã khôi phục cân nặng từ Firestore: ${record.weight} kg");
         }
+      }
+
+      // 4. Tải Sức khỏe tinh thần
+      final emotionsSnapshot = await _firestore
+          .collection('users')
+          .doc(uid)
+          .collection('mental_health_records')
+          .get();
+
+      for (var doc in emotionsSnapshot.docs) {
+        final data = doc.data();
+        data['isSynced'] = 1;
+
+        int id = int.parse(doc.id);
+        data['id'] = id;
+
+        await db.insert('mental_health_records', data, conflictAlgorithm: ConflictAlgorithm.replace);
+        debugPrint("DataSyncService: Đã tải Cảm xúc ID $id về máy.");
       }
 
       debugPrint("DataSyncService: Hoàn tất pullCloudToLocal.");
