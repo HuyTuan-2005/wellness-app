@@ -30,17 +30,20 @@ class SleepController extends ChangeNotifier {
         .collection('sleep_logs')
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .listen((snapshot) {
-      _history.clear();
-      for (var doc in snapshot.docs) {
-        final data = doc.data();
-        final entry = SleepEntry.fromMap(doc.id, data);
-        _history.add(entry);
-      }
-      notifyListeners();
-    }, onError: (e) {
-      debugPrint("Error listening to sleep logs: $e");
-    });
+        .listen(
+          (snapshot) {
+            _history.clear();
+            for (var doc in snapshot.docs) {
+              final data = doc.data();
+              final entry = SleepEntry.fromMap(doc.id, data);
+              _history.add(entry);
+            }
+            notifyListeners();
+          },
+          onError: (e) {
+            debugPrint("Error listening to sleep logs: $e");
+          },
+        );
   }
 
   void _unsubscribe() {
@@ -73,9 +76,10 @@ class SleepController extends ChangeNotifier {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       try {
-        await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
-          'sleepGoalHours': value,
-        });
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .update({'sleepGoalHours': value});
       } catch (e) {
         debugPrint('Lỗi cập nhật mục tiêu ngủ lên Firestore: $e');
       }
@@ -84,23 +88,22 @@ class SleepController extends ChangeNotifier {
     notifyListeners();
   }
 
-  static double calculateDuration({required TimeOfDay bedTime, required TimeOfDay wakeTime}) {
+  SleepSessionResult addSleepSession({
+    required TimeOfDay bedTime,
+    required TimeOfDay wakeTime,
+  }) {
     final bedMinutes = bedTime.hour * 60 + bedTime.minute;
     final wakeMinutes = wakeTime.hour * 60 + wakeTime.minute;
+
+    if (wakeMinutes == bedMinutes) {
+      return SleepSessionResult.invalidTimeRange;
+    }
 
     int totalMinutes = wakeMinutes - bedMinutes;
     if (totalMinutes < 0) {
       totalMinutes += 24 * 60;
     }
-    return totalMinutes / 60.0;
-  }
-
-  SleepSessionResult addSleepSession({required TimeOfDay bedTime, required TimeOfDay wakeTime}) {
-    if (wakeTime.hour == bedTime.hour && wakeTime.minute == bedTime.minute) {
-      return SleepSessionResult.invalidTimeRange;
-    }
-
-    final totalHours = calculateDuration(bedTime: bedTime, wakeTime: wakeTime);
+    final totalHours = totalMinutes / 60.0;
 
     final newEntry = SleepEntry(
       bedTime: bedTime,
@@ -116,11 +119,14 @@ class SleepController extends ChangeNotifier {
       _history.insert(0, newEntry);
       notifyListeners();
     }
-    
+
     return SleepSessionResult.success;
   }
 
-  Future<void> _saveSleepSessionToFirestore(String uid, SleepEntry entry) async {
+  Future<void> _saveSleepSessionToFirestore(
+    String uid,
+    SleepEntry entry,
+  ) async {
     try {
       await FirebaseFirestore.instance
           .collection('users')

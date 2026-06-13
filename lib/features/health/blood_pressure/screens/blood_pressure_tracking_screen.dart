@@ -21,7 +21,6 @@ class _BloodPressureTrackingScreenState extends State<BloodPressureTrackingScree
   @override
   void dispose() {
     _controller.removeListener(_onChanged);
-    _controller.dispose();
     super.dispose();
   }
 
