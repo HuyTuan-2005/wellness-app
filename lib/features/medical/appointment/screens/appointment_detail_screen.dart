@@ -106,7 +106,7 @@ class _AppointmentDetailScreenState extends State<AppointmentDetailScreen> {
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
-                      color: Colors.black.withOpacity(0.02),
+                      color: Colors.black.withValues(alpha: 0.02),
                       blurRadius: 10,
                       offset: const Offset(0, 4)),
                 ],
@@ -118,7 +118,7 @@ class _AppointmentDetailScreenState extends State<AppointmentDetailScreen> {
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.1),
+                          color: AppColors.primary.withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(Icons.person,
@@ -165,7 +165,7 @@ class _AppointmentDetailScreenState extends State<AppointmentDetailScreen> {
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                        color: Colors.black.withOpacity(0.02),
+                        color: Colors.black.withValues(alpha: 0.02),
                         blurRadius: 10,
                         offset: const Offset(0, 4)),
                   ],
@@ -198,7 +198,7 @@ class _AppointmentDetailScreenState extends State<AppointmentDetailScreen> {
                       color: AppColors.primary, fontWeight: FontWeight.bold)),
               style: OutlinedButton.styleFrom(
                 side: BorderSide(
-                    color: AppColors.primary.withOpacity(0.5), width: 1.5),
+                    color: AppColors.primary.withValues(alpha: 0.5), width: 1.5),
                 minimumSize: const Size(double.infinity, 56),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20)),

@@ -14,14 +14,15 @@ class AiNutritionAdvice {
   /// Giá trị mặc định khi API lỗi hoặc không khả dụng.
   static const AiNutritionAdvice fallback = AiNutritionAdvice(
     adviceText:
-        'Hệ thống AI đang tạm nghỉ ngơi, vui lòng uống đủ nước và ngủ sớm nhé!',
+        'Hệ thống AI đang tạm nghỉ ngơi, nhớ uống đủ nước và ngủ sớm nhé!',
     recommendedMeals: [],
   );
 
   /// Parse từ JSON Map trả về bởi Gemini API.
   factory AiNutritionAdvice.fromJson(Map<String, dynamic> json) {
     try {
-      final meals = (json['recommendedMeals'] as List<dynamic>?)
+      final meals =
+          (json['recommendedMeals'] as List<dynamic>?)
               ?.map((m) => RecommendedMeal.fromJson(m as Map<String, dynamic>))
               .toList() ??
           [];

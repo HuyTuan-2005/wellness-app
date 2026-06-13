@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../controllers/nutrition_controller.dart';
 import '../widgets/add_food_dialog.dart';
 import '../widgets/calo_painter.dart';
-import '../widgets/ai_advice_card.dart';
+import '../widgets/ai_meal_suggestion_card.dart';
 import '../models/nutrition_entry.dart';
 import 'package:wellness_app/core/utils/date_helper.dart';
 
@@ -137,17 +137,59 @@ class _NutritionTrackingScreenState extends State<NutritionTrackingScreen> {
     );
   }
 
-  void _showAddSuccessSnackBar(String foodName) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    if (_controller.totalCalo > _controller.goalCalo) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Đã thêm $foodName. Cảnh báo: Vượt mục tiêu calo hôm nay!'),
-          backgroundColor: Colors.orange.shade800,
-          duration: const Duration(seconds: 3),
+  Future<void> _checkAndAddFood({
+    required String foodName,
+    required int quantity,
+    required double calo,
+    required double protein,
+    required double carb,
+    required MealType mealType,
+    FoodItem? dbFood,
+  }) async {
+    final newTotal = _controller.totalCalo + calo;
+    if (newTotal > _controller.goalCalo) {
+      final confirm = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('Cảnh báo vượt mức Calo', style: TextStyle(color: Colors.orange)),
+          content: Text('Thêm "$foodName" sẽ làm bạn vượt quá mục tiêu calo trong ngày. Bạn có chắc chắn muốn thêm?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('Hủy', style: TextStyle(color: Colors.grey)),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              style: FilledButton.styleFrom(backgroundColor: Colors.orange.shade800),
+              child: const Text('Vẫn thêm'),
+            ),
+          ],
         ),
       );
+      if (confirm != true) {
+        return; // User cancelled
+      }
+    }
+
+    if (dbFood != null) {
+      _controller.addFromDatabase(
+        food: dbFood,
+        quantity: quantity,
+        mealType: mealType,
+      );
     } else {
+      _controller.addEntry(
+        foodName: foodName,
+        quantity: quantity,
+        calo: calo,
+        protein: protein,
+        carb: carb,
+        mealType: mealType,
+      );
+    }
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Đã thêm $foodName thành công!'),
@@ -174,18 +216,20 @@ class _NutritionTrackingScreenState extends State<NutritionTrackingScreen> {
     if (!mounted || result == null) return;
 
     if (result.food != null) {
-      _controller.addFromDatabase(
-        food: result.food!,
+      final factor = result.quantity / 100;
+      await _checkAndAddFood(
+        foodName: result.food!.name,
         quantity: result.quantity,
+        calo: result.food!.caloPer100g * factor,
+        protein: result.food!.proteinPer100g * factor,
+        carb: result.food!.carbPer100g * factor,
         mealType: result.mealType,
+        dbFood: result.food,
       );
-      if (mounted) {
-        _showAddSuccessSnackBar(result.food!.name);
-      }
       return;
     }
 
-    _controller.addEntry(
+    await _checkAndAddFood(
       foodName: result.foodName!,
       quantity: result.quantity,
       calo: result.calo!,
@@ -193,9 +237,6 @@ class _NutritionTrackingScreenState extends State<NutritionTrackingScreen> {
       carb: result.carb!,
       mealType: result.mealType,
     );
-    if (mounted) {
-      _showAddSuccessSnackBar(result.foodName!);
-    }
   }
 
   @override
@@ -371,7 +412,7 @@ class _NutritionTrackingScreenState extends State<NutritionTrackingScreen> {
                 controller: _controller,
                 currentMealType: _selectedMeal,
                 onAddMeal: (meal, type) {
-                  _controller.addEntry(
+                  _checkAndAddFood(
                     foodName: meal.name,
                     quantity: 100, // Hoặc một lượng hợp lý theo khẩu phần
                     calo: meal.calo.toDouble(),
@@ -379,7 +420,6 @@ class _NutritionTrackingScreenState extends State<NutritionTrackingScreen> {
                     carb: meal.carb.toDouble(),
                     mealType: type,
                   );
-                  _showAddSuccessSnackBar(meal.name);
                 },
               ),
               const SizedBox(height: 20),
@@ -532,13 +572,7 @@ class _NutritionTrackingScreenState extends State<NutritionTrackingScreen> {
                                   ],
                                 ),
                               ),
-                              Text(
-                                DateHelper.formatTime(entry.time),
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey.shade500,
-                                ),
-                              ),
+                              // Đã loại bỏ thông tin về thời gian theo yêu cầu
                               const SizedBox(width: 4),
                               IconButton(
                                 icon: Icon(

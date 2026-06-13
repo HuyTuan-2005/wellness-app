@@ -233,10 +233,13 @@ class _AddFoodDialogState extends State<AddFoodDialog> with SingleTickerProvider
                         selectedTileColor: const Color(0xFFE8F5E9),
                         title: Row(
                           children: [
-                            Text(
-                              food.name,
-                              style: TextStyle(
-                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                            Expanded(
+                              child: Text(
+                                food.name,
+                                style: TextStyle(
+                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                ),
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                             if (isFrequent) ...[

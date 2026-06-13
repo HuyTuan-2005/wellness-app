@@ -457,7 +457,7 @@ class _BMICalculatorScreenState extends State<BMICalculatorScreen> {
           width: 24,
           height: 24,
           decoration: BoxDecoration(
-            color: color.withOpacity(0.2),
+            color: color.withValues(alpha: 0.2),
             shape: BoxShape.circle,
           ),
           child: Icon(Icons.circle, size: 12, color: color),

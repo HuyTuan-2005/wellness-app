@@ -139,7 +139,7 @@ class _MentalHealthTrackingScreenState extends State<MentalHealthTrackingScreen>
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: isSelected ? AppColors.primary.withOpacity(0.2) : Colors.grey.shade100,
+              color: isSelected ? AppColors.primary.withValues(alpha: 0.2) : Colors.grey.shade100,
               shape: BoxShape.circle,
               border: isSelected ? Border.all(color: AppColors.primary, width: 2) : null,
             ),
@@ -228,7 +228,7 @@ class _MentalHealthTrackingScreenState extends State<MentalHealthTrackingScreen>
                         shape: BoxShape.circle,
                       ),
                       todayDecoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.3),
+                        color: AppColors.primary.withValues(alpha: 0.3),
                         shape: BoxShape.circle,
                       ),
                       markerDecoration: const BoxDecoration(
@@ -247,7 +247,7 @@ class _MentalHealthTrackingScreenState extends State<MentalHealthTrackingScreen>
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.self_improvement, size: 60, color: Colors.purple.withOpacity(0.5)),
+                              Icon(Icons.self_improvement, size: 60, color: Colors.purple.withValues(alpha: 0.5)),
                               const SizedBox(height: 16),
                               const Text(
                                 "Chưa có bản ghi nào trong ngày này.\nHãy ghi nhận cảm xúc của bạn!",
@@ -304,7 +304,7 @@ class _MentalHealthTrackingScreenState extends State<MentalHealthTrackingScreen>
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -316,7 +316,7 @@ class _MentalHealthTrackingScreenState extends State<MentalHealthTrackingScreen>
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Text(emoji, style: const TextStyle(fontSize: 24)),
