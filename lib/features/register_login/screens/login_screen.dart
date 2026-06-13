@@ -9,7 +9,7 @@ import 'package:wellness_app/features/register_login/screens/auth_wrapper.dart';
 import 'package:wellness_app/features/register_login/screens/forgotpassword_screen.dart';
 import 'package:wellness_app/features/register_login/screens/register_screen.dart';
 
-import '../../../core/theme/app_colors.dart';
+import 'package:wellness_app/core/theme/app_colors.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

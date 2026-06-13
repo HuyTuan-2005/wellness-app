@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wellness_app/core/theme/app_colors.dart';
-import 'package:wellness_app/features/medication/screens/medication_list_screen.dart';
-import 'package:wellness_app/features/appointment/screens/appointment_list_screen.dart';
+import 'package:wellness_app/features/medical/medication/screens/medication_list_screen.dart';
+import 'package:wellness_app/features/medical/appointment/screens/appointment_list_screen.dart';
 
 class MedicalScheduleScreen extends StatelessWidget {
   const MedicalScheduleScreen({super.key});

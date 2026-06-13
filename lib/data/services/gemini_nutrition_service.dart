@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
-import 'package:wellness_app/features/nutrition/models/ai_nutrition_advice.dart';
+import 'package:wellness_app/features/health/nutrition/models/ai_nutrition_advice.dart';
 
 /// Service giao tiếp với Gemini API để nhận tư vấn dinh dưỡng cá nhân hóa.
 ///

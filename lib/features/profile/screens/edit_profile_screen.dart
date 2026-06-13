@@ -4,8 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:wellness_app/features/profile/utils/data_helper.dart';
 import 'package:wellness_app/core/database/database_helper.dart';
-import 'package:wellness_app/features/weight/models/weight_record.dart';
-import '../../../core/theme/app_colors.dart';
+import 'package:wellness_app/features/health/weight/models/weight_record.dart';
+import 'package:wellness_app/core/theme/app_colors.dart';
 import 'package:wellness_app/core/utils/app_helpers.dart';
 
 class EditProfileScreen extends StatefulWidget {

@@ -4,7 +4,7 @@ import 'package:wellness_app/core/widgets/auth_widgets.dart';
 import 'package:wellness_app/data/services/auth_service.dart';
 import 'package:wellness_app/core/utils/app_helpers.dart';
 import 'package:wellness_app/features/register_login/screens/auth_wrapper.dart';
-import '../../../core/theme/app_colors.dart';
+import 'package:wellness_app/core/theme/app_colors.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
