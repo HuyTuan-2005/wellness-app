@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wellness_app/features/register_login/screens/login_screen.dart';
 import 'package:wellness_app/core/widgets/auth_widgets.dart';
-import '../../../core/theme/app_colors.dart';
+import 'package:wellness_app/core/theme/app_colors.dart';
 import 'package:wellness_app/core/utils/app_helpers.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {

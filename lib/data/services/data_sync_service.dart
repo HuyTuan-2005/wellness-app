@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:wellness_app/core/database/database_helper.dart';
-import 'package:wellness_app/features/weight/models/weight_record.dart';
+import 'package:wellness_app/features/health/weight/models/weight_record.dart';
 
 class DataSyncService {
   static final DataSyncService _instance = DataSyncService._internal();

@@ -3,7 +3,7 @@ import '../services/profile_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:wellness_app/features/profile/utils/data_helper.dart';
-import '../../../core/theme/app_colors.dart';
+import 'package:wellness_app/core/theme/app_colors.dart';
 import 'package:wellness_app/data/services/auth_service.dart';
 import 'package:wellness_app/features/register_login/screens/auth_wrapper.dart';
 import 'package:wellness_app/features/device/screens/device_screen.dart';

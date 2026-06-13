@@ -1,9 +1,9 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import 'package:wellness_app/features/appointment/models/appointment.dart';
-import 'package:wellness_app/features/medication/models/medication.dart';
-import 'package:wellness_app/features/weight/models/weight_record.dart';
-import 'package:wellness_app/features/mental_health/models/mental_health.dart';
+import 'package:wellness_app/features/medical/appointment/models/appointment.dart';
+import 'package:wellness_app/features/medical/medication/models/medication.dart';
+import 'package:wellness_app/features/health/weight/models/weight_record.dart';
+import 'package:wellness_app/features/health/mental_health/models/mental_health.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();

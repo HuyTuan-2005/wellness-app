@@ -2,20 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:wellness_app/core/theme/app_colors.dart';
 import 'package:wellness_app/features/system_notifications/widgets/notification_icon_badge.dart';
-import 'package:wellness_app/features/water/controllers/water_controller.dart';
-import 'package:wellness_app/features/sleep/controllers/sleep_controller.dart';
-import 'package:wellness_app/features/blood_pressure/controllers/blood_pressure_controller.dart';
-import 'package:wellness_app/features/nutrition/controllers/nutrition_controller.dart';
+import 'package:wellness_app/features/health/water/controllers/water_controller.dart';
+import 'package:wellness_app/features/health/sleep/controllers/sleep_controller.dart';
+import 'package:wellness_app/features/health/blood_pressure/controllers/blood_pressure_controller.dart';
+import 'package:wellness_app/features/health/nutrition/controllers/nutrition_controller.dart';
 import 'package:wellness_app/features/profile/utils/data_helper.dart';
 
-import 'package:wellness_app/features/water/screens/water_tracking_screen.dart';
-import 'package:wellness_app/features/sleep/screens/sleep_tracking_screen.dart';
-import 'package:wellness_app/features/blood_pressure/screens/blood_pressure_tracking_screen.dart';
-import 'package:wellness_app/features/nutrition/screens/nutrition_tracking_screen.dart';
-import 'package:wellness_app/features/weight/screens/weight_tracking_screen.dart';
-import 'package:wellness_app/features/mental_health/screens/mental_health_tracking_screen.dart';
-import 'package:wellness_app/features/bmi/screens/bmi_screen.dart';
-import 'package:wellness_app/features/nutrition/widgets/ai_advice_card.dart';
+import 'package:wellness_app/features/health/water/screens/water_tracking_screen.dart';
+import 'package:wellness_app/features/health/sleep/screens/sleep_tracking_screen.dart';
+import 'package:wellness_app/features/health/blood_pressure/screens/blood_pressure_tracking_screen.dart';
+import 'package:wellness_app/features/health/nutrition/screens/nutrition_tracking_screen.dart';
+import 'package:wellness_app/features/health/weight/screens/weight_tracking_screen.dart';
+import 'package:wellness_app/features/health/mental_health/screens/mental_health_tracking_screen.dart';
+import 'package:wellness_app/features/health/BMI/screens/BMI_screen.dart';
+import 'package:wellness_app/features/health/nutrition/widgets/ai_advice_card.dart';
 
 class HealthDashboardScreen extends StatefulWidget {
   const HealthDashboardScreen({super.key});
