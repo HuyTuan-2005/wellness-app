@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:wellness_app/features/admin/services/admin_user_service.dart';
-import 'package:wellness_app/features/user_management/utils/user_dialog_helper.dart';
+import 'package:wellness_app/features/admin/utils/user_dialog_helper.dart';
 import 'package:wellness_app/core/theme/app_colors.dart';
 
 class AdminUserController {
@@ -60,3 +60,4 @@ class AdminUserController {
     }
   }
 }
+

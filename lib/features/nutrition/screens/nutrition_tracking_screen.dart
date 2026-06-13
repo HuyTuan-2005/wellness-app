@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../controllers/nutrition_controller.dart';
 import '../widgets/add_food_dialog.dart';
 import '../widgets/calo_painter.dart';
+import '../widgets/ai_advice_card.dart';
 import '../models/nutrition_entry.dart';
 import 'package:wellness_app/core/utils/date_helper.dart';
 
@@ -9,7 +10,8 @@ class NutritionTrackingScreen extends StatefulWidget {
   const NutritionTrackingScreen({super.key});
 
   @override
-  State<NutritionTrackingScreen> createState() => _NutritionTrackingScreenState();
+  State<NutritionTrackingScreen> createState() =>
+      _NutritionTrackingScreenState();
 }
 
 class _NutritionTrackingScreenState extends State<NutritionTrackingScreen> {
@@ -21,6 +23,9 @@ class _NutritionTrackingScreenState extends State<NutritionTrackingScreen> {
   void initState() {
     super.initState();
     _controller.addListener(_onChanged);
+
+    // Xóa việc tự động gọi AI khi mở màn hình, 
+    // AI sẽ chỉ được gọi khi ấn nút trong AiAdviceCard
   }
 
   @override
@@ -35,7 +40,9 @@ class _NutritionTrackingScreenState extends State<NutritionTrackingScreen> {
 
   Future<void> _showGoalDialog() async {
     final suggested = _controller.getSuggestedCalories();
-    final textController = TextEditingController(text: _controller.goalCalo.toString());
+    final textController = TextEditingController(
+      text: _controller.goalCalo.toString(),
+    );
 
     final result = await showDialog<int>(
       context: context,
@@ -79,7 +86,10 @@ class _NutritionTrackingScreenState extends State<NutritionTrackingScreen> {
                           ),
                           const Text(
                             '(Theo chiều cao, cân nặng, tuổi và giới tính của bạn)',
-                            style: TextStyle(fontSize: 11, color: Colors.black54),
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.black54,
+                            ),
                           ),
                         ],
                       ),
@@ -168,7 +178,10 @@ class _NutritionTrackingScreenState extends State<NutritionTrackingScreen> {
               Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Color(0xFF1B5E20)),
+                    icon: const Icon(
+                      Icons.arrow_back,
+                      color: Color(0xFF1B5E20),
+                    ),
                     onPressed: () => Navigator.pop(context),
                   ),
                   const SizedBox(width: 8),
@@ -187,7 +200,10 @@ class _NutritionTrackingScreenState extends State<NutritionTrackingScreen> {
                         const SizedBox(height: 4),
                         Text(
                           DateHelper.getDateString(),
-                          style: TextStyle(fontSize: 14, color: Colors.green.shade300),
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.green.shade300,
+                          ),
                         ),
                       ],
                     ),
@@ -198,7 +214,10 @@ class _NutritionTrackingScreenState extends State<NutritionTrackingScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.settings_outlined, color: Color(0xFF1B5E20)),
+                      icon: const Icon(
+                        Icons.settings_outlined,
+                        color: Color(0xFF1B5E20),
+                      ),
                       onPressed: _showGoalDialog,
                     ),
                   ),
@@ -208,7 +227,10 @@ class _NutritionTrackingScreenState extends State<NutritionTrackingScreen> {
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 30),
-                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                ),
                 child: Center(
                   child: SizedBox(
                     width: 200,
@@ -219,13 +241,27 @@ class _NutritionTrackingScreenState extends State<NutritionTrackingScreen> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.local_fire_department, size: 36, color: Colors.orange.shade700),
+                            Icon(
+                              Icons.local_fire_department,
+                              size: 36,
+                              color: Colors.orange.shade700,
+                            ),
                             const SizedBox(height: 8),
                             Text(
                               _controller.totalCalo.round().toString(),
-                              style: const TextStyle(fontSize: 42, fontWeight: FontWeight.bold, color: Color(0xFF1B5E20)),
+                              style: const TextStyle(
+                                fontSize: 42,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF1B5E20),
+                              ),
                             ),
-                            const Text('kcal', style: TextStyle(fontSize: 16, color: Colors.grey)),
+                            const Text(
+                              'kcal',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -237,16 +273,26 @@ class _NutritionTrackingScreenState extends State<NutritionTrackingScreen> {
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                ),
                 child: Column(
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Tiến độ hôm nay', style: TextStyle(fontSize: 15, color: Colors.black87)),
+                        const Text(
+                          'Tiến độ hôm nay',
+                          style: TextStyle(fontSize: 15, color: Colors.black87),
+                        ),
                         Text(
                           '${_controller.totalCalo.round()} / ${_controller.goalCalo} kcal',
-                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF1B5E20)),
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF1B5E20),
+                          ),
                         ),
                       ],
                     ),
@@ -257,22 +303,58 @@ class _NutritionTrackingScreenState extends State<NutritionTrackingScreen> {
                         value: _controller.progress,
                         minHeight: 10,
                         backgroundColor: Colors.grey.shade200,
-                        valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF66BB6A)),
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                          Color(0xFF66BB6A),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 10),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('${_controller.percent}% hoàn thành', style: TextStyle(fontSize: 13, color: Colors.grey.shade600)),
+                        Text(
+                          '${_controller.percent}% hoàn thành',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
                         Text(
                           'Còn ${_controller.remainingCalo.round()} kcal',
-                          style: TextStyle(fontSize: 13, color: Colors.green.shade400, fontStyle: FontStyle.italic),
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.green.shade400,
+                            fontStyle: FontStyle.italic,
+                          ),
                         ),
                       ],
                     ),
                   ],
                 ),
+              ),
+              const SizedBox(height: 20),
+              // === AI ADVICE CARD ===
+              AiAdviceCard(
+                controller: _controller,
+                showAdviceText: false,
+                showRecommendedMeals: true,
+                currentMealType: _selectedMeal,
+                onAddMeal: (meal, type) {
+                  _controller.addEntry(
+                    foodName: meal.name,
+                    quantity: 100, // Hoặc một lượng hợp lý theo khẩu phần
+                    calo: meal.calo.toDouble(),
+                    protein: meal.protein.toDouble(),
+                    carb: meal.carb.toDouble(),
+                    mealType: type,
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Đã thêm ${meal.name} vào bữa ${type.label}'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 20),
               Row(
@@ -288,23 +370,40 @@ class _NutritionTrackingScreenState extends State<NutritionTrackingScreen> {
                           decoration: BoxDecoration(
                             gradient: isSelected
                                 ? const LinearGradient(
-                                    colors: [Color(0xFF66BB6A), Color(0xFF388E3C)],
+                                    colors: [
+                                      Color(0xFF66BB6A),
+                                      Color(0xFF388E3C),
+                                    ],
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
                                   )
                                 : null,
                             color: isSelected ? null : Colors.white,
                             borderRadius: BorderRadius.circular(16),
-                            border: isSelected ? null : Border.all(color: Colors.grey.shade300),
+                            border: isSelected
+                                ? null
+                                : Border.all(color: Colors.grey.shade300),
                           ),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(type.icon, size: 24, color: isSelected ? Colors.white : Colors.grey.shade600),
+                              Icon(
+                                type.icon,
+                                size: 24,
+                                color: isSelected
+                                    ? Colors.white
+                                    : Colors.grey.shade600,
+                              ),
                               const SizedBox(height: 4),
                               Text(
                                 type.label,
-                                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: isSelected ? Colors.white : Colors.grey.shade600),
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: isSelected
+                                      ? Colors.white
+                                      : Colors.grey.shade600,
+                                ),
                               ),
                             ],
                           ),
@@ -325,7 +424,9 @@ class _NutritionTrackingScreenState extends State<NutritionTrackingScreen> {
                     backgroundColor: const Color(0xFF388E3C),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
                 ),
               ),
@@ -333,71 +434,100 @@ class _NutritionTrackingScreenState extends State<NutritionTrackingScreen> {
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
                       'Lịch sử hôm nay',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF1B5E20)),
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1B5E20),
+                      ),
                     ),
                     const SizedBox(height: 12),
                     if (_controller.history.isEmpty)
                       Center(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 20),
-                          child: Text('Chưa có dữ liệu. Hãy ghi nhận bữa ăn!', style: TextStyle(fontSize: 14, color: Colors.grey.shade500)),
+                          child: Text(
+                            'Chưa có dữ liệu. Hãy ghi nhận bữa ăn!',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey.shade500,
+                            ),
+                          ),
                         ),
                       )
                     else
-                      ..._controller.history.asMap().entries.map(
-                        (mapEntry) {
-                          final index = mapEntry.key;
-                          final entry = mapEntry.value;
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 6),
-                            child: Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: Colors.green.shade50,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Icon(entry.mealType.icon, color: Colors.green.shade400, size: 20),
+                      ..._controller.history.asMap().entries.map((mapEntry) {
+                        final index = mapEntry.key;
+                        final entry = mapEntry.value;
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 6),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.green.shade50,
+                                  borderRadius: BorderRadius.circular(10),
                                 ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        entry.foodName,
-                                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Color(0xFF1B5E20)),
+                                child: Icon(
+                                  entry.mealType.icon,
+                                  color: Colors.green.shade400,
+                                  size: 20,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      entry.foodName,
+                                      style: const TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                        color: Color(0xFF1B5E20),
                                       ),
-                                      Text(
-                                        '${entry.quantity}g - ${entry.calo.round()} kcal',
-                                        style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                                    ),
+                                    Text(
+                                      '${entry.quantity}g - ${entry.calo.round()} kcal',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey.shade500,
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
-                                Text(
-                                  DateHelper.formatTime(entry.time),
-                                  style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                              ),
+                              Text(
+                                DateHelper.formatTime(entry.time),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey.shade500,
                                 ),
-                                const SizedBox(width: 4),
-                                IconButton(
-                                  icon: Icon(Icons.delete_outline, color: Colors.red.shade300, size: 20),
-                                  padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(),
-                                  onPressed: () => _controller.removeEntry(index),
+                              ),
+                              const SizedBox(width: 4),
+                              IconButton(
+                                icon: Icon(
+                                  Icons.delete_outline,
+                                  color: Colors.red.shade300,
+                                  size: 20,
                                 ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
+                                onPressed: () => _controller.removeEntry(index),
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
                   ],
                 ),
               ),
@@ -408,4 +538,3 @@ class _NutritionTrackingScreenState extends State<NutritionTrackingScreen> {
     );
   }
 }
-

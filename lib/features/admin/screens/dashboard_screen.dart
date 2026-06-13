@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wellness_app/core/theme/app_colors.dart';
-import 'package:wellness_app/features/admin_dashboard/screens/dashboard_content_page.dart';
 import 'package:wellness_app/features/system_notifications/screens/admin_notification_screen.dart';
-import 'package:wellness_app/features/user_management/screens/user_list_screen.dart';
+import 'package:wellness_app/features/admin/screens/user_list_screen.dart';
 
 /// Màn hình chính Admin – khung nền chứa BottomNavigationBar.
 /// Sử dụng IndexedStack để giữ trạng thái các trang khi chuyển tab.
@@ -16,11 +15,10 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   int _currentIndex = 0;
 
-  // ── 3 trang con được giữ trong IndexedStack (đã xóa Lịch hẹn) ──
+  // ── 2 trang con được giữ trong IndexedStack ──
   final List<Widget> _pages = [
-    DashboardContentPage(), // Tab 0: Tổng quan
+    AdminNotificationScreen(), // Tab 0: Thông báo
     const UserListScreen(), // Tab 1: Người dùng
-    AdminNotificationScreen(), // Tab 2: Thông báo
   ];
 
   void _onTap(int index) {
@@ -67,9 +65,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
             BottomNavigationBarItem(
               icon: Padding(
                 padding: EdgeInsets.only(bottom: 4.0),
-                child: Icon(Icons.dashboard_rounded),
+                child: Icon(Icons.notifications_rounded),
               ),
-              label: 'Tổng quan',
+              label: 'Thông báo',
             ),
             BottomNavigationBarItem(
               icon: Padding(
@@ -78,16 +76,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               label: 'Người dùng',
             ),
-            BottomNavigationBarItem(
-              icon: Padding(
-                padding: EdgeInsets.only(bottom: 4.0),
-                child: Icon(Icons.notifications_rounded),
-              ),
-              label: 'Thông báo',
-            ),
           ],
         ),
       ),
     );
   }
 }
+
+

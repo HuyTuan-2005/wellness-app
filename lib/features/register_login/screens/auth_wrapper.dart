@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // Vẫn cần để parse DocumentSnapshot, hoặc ta có thể tránh nếu trả về Map
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:wellness_app/core/theme/app_colors.dart';
 import 'package:wellness_app/data/services/auth_service.dart';
 import 'package:wellness_app/data/services/data_sync_service.dart';
 import 'package:wellness_app/features/profile/utils/data_helper.dart';
-import 'package:wellness_app/features/admin_dashboard/screens/dashboard_screen.dart';
+import 'package:wellness_app/features/admin/screens/dashboard_screen.dart';
 import 'package:wellness_app/features/home/screens/main_navigation_screen.dart';
 import 'package:wellness_app/features/register_login/screens/login_screen.dart';
 
@@ -66,18 +66,29 @@ class _AuthWrapperState extends State<AuthWrapper> with WidgetsBindingObserver {
             const Expanded(
               child: Text(
                 'Tài khoản bị khóa',
-                style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold, fontSize: 20),
+                style: TextStyle(
+                  color: AppColors.error,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                ),
               ),
             ),
           ],
         ),
         content: Text(
-          reason != null && reason.isNotEmpty 
-            ? 'Tài khoản của bạn đã bị khóa với lý do:\n"$reason"\n\nVui lòng liên hệ quản trị viên để biết thêm chi tiết.'
-            : 'Tài khoản của bạn đã bị Admin khóa. Vui lòng liên hệ quản trị viên để biết thêm chi tiết.',
-          style: const TextStyle(fontSize: 14, color: AppColors.textDark, height: 1.4),
+          reason != null && reason.isNotEmpty
+              ? 'Tài khoản của bạn đã bị khóa với lý do:\n"$reason"\n\nVui lòng liên hệ quản trị viên để biết thêm chi tiết.'
+              : 'Tài khoản của bạn đã bị Admin khóa. Vui lòng liên hệ quản trị viên để biết thêm chi tiết.',
+          style: const TextStyle(
+            fontSize: 14,
+            color: AppColors.textDark,
+            height: 1.4,
+          ),
         ),
-        actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        actionsPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
         actions: [
           ElevatedButton(
             onPressed: () {
@@ -87,10 +98,15 @@ class _AuthWrapperState extends State<AuthWrapper> with WidgetsBindingObserver {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.error,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
               elevation: 0,
             ),
-            child: const Text('Đã hiểu', style: TextStyle(fontWeight: FontWeight.w700)),
+            child: const Text(
+              'Đã hiểu',
+              style: TextStyle(fontWeight: FontWeight.w700),
+            ),
           ),
         ],
       ),

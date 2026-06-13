@@ -14,7 +14,8 @@ import 'package:wellness_app/features/blood_pressure/screens/blood_pressure_trac
 import 'package:wellness_app/features/nutrition/screens/nutrition_tracking_screen.dart';
 import 'package:wellness_app/features/weight/screens/weight_tracking_screen.dart';
 import 'package:wellness_app/features/mental_health/screens/mental_health_tracking_screen.dart';
-import 'package:wellness_app/features/BMI/screens/BMI_screen.dart';
+import 'package:wellness_app/features/bmi/screens/bmi_screen.dart';
+import 'package:wellness_app/features/nutrition/widgets/ai_advice_card.dart';
 
 class HealthDashboardScreen extends StatefulWidget {
   const HealthDashboardScreen({super.key});
@@ -63,7 +64,14 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildOverviewSection(context),
-            const SizedBox(height: 30),
+            const SizedBox(height: 24),
+            AiAdviceCard(
+              controller: _nutritionController,
+              showAdviceText: true,
+              showRecommendedMeals: false,
+              autoFetch: true,
+            ),
+            const SizedBox(height: 24),
             _buildCardsSection(context, waterValue, sleepValue, bpValue),
           ],
         ),
@@ -499,3 +507,4 @@ class HealthSummaryCard extends StatelessWidget {
     );
   }
 }
+

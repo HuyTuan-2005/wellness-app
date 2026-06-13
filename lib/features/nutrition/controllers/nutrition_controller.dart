@@ -3,8 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:wellness_app/features/profile/utils/data_helper.dart';
+import 'package:wellness_app/features/sleep/controllers/sleep_controller.dart';
+import 'package:wellness_app/features/blood_pressure/controllers/blood_pressure_controller.dart';
+import 'package:wellness_app/data/services/gemini_nutrition_service.dart';
 import '../data/food_database.dart';
 import '../models/nutrition_entry.dart';
+import '../models/ai_nutrition_advice.dart';
 
 class NutritionController extends ChangeNotifier {
   // Singleton pattern
@@ -16,6 +20,15 @@ class NutritionController extends ChangeNotifier {
   String? _dateStr;
 
   final List<NutritionEntry> _history = [];
+
+  // ==================== AI ADVICE STATE ====================
+  AiNutritionAdvice? _aiAdvice;
+  bool _isLoadingAi = false;
+  String? _aiError;
+
+  AiNutritionAdvice? get aiAdvice => _aiAdvice;
+  bool get isLoadingAi => _isLoadingAi;
+  String? get aiError => _aiError;
 
   NutritionController._internal() {
     // Nếu mục tiêu calo chưa được cấu hình, tự động tính calo gợi ý dựa trên cơ thể
@@ -51,21 +64,24 @@ class NutritionController extends ChangeNotifier {
         .collection('nutrition_logs')
         .doc(today)
         .snapshots()
-        .listen((doc) {
-      if (doc.exists) {
-        final data = doc.data()!;
-        final entriesData = data['entries'] as List<dynamic>? ?? [];
-        _history.clear();
-        for (var e in entriesData) {
-          _history.add(NutritionEntry.fromMap(e));
-        }
-      } else {
-        _history.clear();
-      }
-      notifyListeners();
-    }, onError: (e) {
-      debugPrint("Error listening to today's nutrition logs: $e");
-    });
+        .listen(
+          (doc) {
+            if (doc.exists) {
+              final data = doc.data()!;
+              final entriesData = data['entries'] as List<dynamic>? ?? [];
+              _history.clear();
+              for (var e in entriesData) {
+                _history.add(NutritionEntry.fromMap(e));
+              }
+            } else {
+              _history.clear();
+            }
+            notifyListeners();
+          },
+          onError: (e) {
+            debugPrint("Error listening to today's nutrition logs: $e");
+          },
+        );
   }
 
   void _unsubscribe() {
@@ -121,7 +137,9 @@ class NutritionController extends ChangeNotifier {
   bool isFrequent(String foodName) {
     _checkRollover();
     final name = foodName.trim().toLowerCase();
-    final count = _history.where((e) => e.foodName.trim().toLowerCase() == name).length;
+    final count = _history
+        .where((e) => e.foodName.trim().toLowerCase() == name)
+        .length;
     return count >= 2;
   }
 
@@ -140,7 +158,9 @@ class NutritionController extends ChangeNotifier {
     frequencies.forEach((name, cnt) {
       if (cnt >= 2) {
         // Tìm các entries tương ứng để tính trung bình dinh dưỡng trên 100g
-        final matchingEntries = _history.where((e) => e.foodName.trim().toLowerCase() == name.toLowerCase()).toList();
+        final matchingEntries = _history
+            .where((e) => e.foodName.trim().toLowerCase() == name.toLowerCase())
+            .toList();
         double totalCalo100g = 0;
         double totalProtein100g = 0;
         double totalCarb100g = 0;
@@ -157,12 +177,20 @@ class NutritionController extends ChangeNotifier {
         }
 
         if (validCount > 0) {
-          frequentFoods.add(FoodItem(
-            name: name,
-            caloPer100g: double.parse((totalCalo100g / validCount).toStringAsFixed(1)),
-            proteinPer100g: double.parse((totalProtein100g / validCount).toStringAsFixed(1)),
-            carbPer100g: double.parse((totalCarb100g / validCount).toStringAsFixed(1)),
-          ));
+          frequentFoods.add(
+            FoodItem(
+              name: name,
+              caloPer100g: double.parse(
+                (totalCalo100g / validCount).toStringAsFixed(1),
+              ),
+              proteinPer100g: double.parse(
+                (totalProtein100g / validCount).toStringAsFixed(1),
+              ),
+              carbPer100g: double.parse(
+                (totalCarb100g / validCount).toStringAsFixed(1),
+              ),
+            ),
+          );
         }
       }
     });
@@ -173,7 +201,9 @@ class NutritionController extends ChangeNotifier {
 
     final dbSuggestions = FoodDatabase.suggest(query);
     for (final dbFood in dbSuggestions) {
-      final alreadyExists = combined.any((f) => f.name.toLowerCase() == dbFood.name.toLowerCase());
+      final alreadyExists = combined.any(
+        (f) => f.name.toLowerCase() == dbFood.name.toLowerCase(),
+      );
       if (!alreadyExists) {
         combined.add(dbFood);
       }
@@ -184,7 +214,9 @@ class NutritionController extends ChangeNotifier {
       return frequentFoods;
     } else {
       final lower = query.toLowerCase();
-      return combined.where((f) => f.name.toLowerCase().contains(lower)).toList();
+      return combined
+          .where((f) => f.name.toLowerCase().contains(lower))
+          .toList();
     }
   }
 
@@ -195,9 +227,13 @@ class NutritionController extends ChangeNotifier {
     // Đồng bộ lên Firestore nếu user đã đăng nhập
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      FirebaseFirestore.instance.collection('users').doc(user.uid).update({
-        'dailyCaloGoal': goalCalo,
-      }).catchError((e) => debugPrint('Lỗi cập nhật mục tiêu calo lên Firestore: $e'));
+      FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .update({'dailyCaloGoal': goalCalo})
+          .catchError(
+            (e) => debugPrint('Lỗi cập nhật mục tiêu calo lên Firestore: $e'),
+          );
     }
 
     notifyListeners();
@@ -232,9 +268,10 @@ class NutritionController extends ChangeNotifier {
           .doc(user.uid)
           .collection('nutrition_logs')
           .doc(_getTodayDateStr())
-          .set({
-        'entries': _history.map((e) => e.toMap()).toList(),
-      }).catchError((e) => debugPrint("Error updating nutrition log to Firestore: $e"));
+          .set({'entries': _history.map((e) => e.toMap()).toList()})
+          .catchError(
+            (e) => debugPrint("Error updating nutrition log to Firestore: $e"),
+          );
     } else {
       notifyListeners();
     }
@@ -274,5 +311,79 @@ class NutritionController extends ChangeNotifier {
     } else {
       notifyListeners();
     }
+  }
+
+
+
+  // ==================== AI ADVICE METHODS ====================
+
+  /// Lấy danh sách tên các món ăn có tần suất >= 2 lần.
+  List<String> getFrequentFoodNames() {
+    final Map<String, int> frequencies = {};
+    for (final entry in _history) {
+      final name = entry.foodName.trim();
+      frequencies[name] = (frequencies[name] ?? 0) + 1;
+    }
+    return frequencies.entries
+        .where((e) => e.value >= 2)
+        .map((e) => e.key)
+        .toList();
+  }
+
+  /// Gọi Gemini API để lấy lời khuyên dinh dưỡng cá nhân hóa.
+  Future<void> fetchAiAdvice({String budget = 'Trung bình'}) async {
+    if (_isLoadingAi) return;
+
+    _isLoadingAi = true;
+    _aiError = null;
+    notifyListeners();
+
+    try {
+      final sleepCtrl = SleepController();
+      final bpCtrl = BloodPressureController();
+
+      // Thu thập dữ liệu giấc ngủ
+      final sleepHours = sleepCtrl.latest?.hours ?? 0.0;
+
+      // Thu thập dữ liệu huyết áp
+      String bpStatus;
+      final bpLatest = bpCtrl.latest;
+      if (bpLatest != null) {
+        final classification = bpCtrl.classify(bpLatest);
+        bpStatus = '${bpLatest.systolic}/${bpLatest.diastolic} - $classification';
+      } else {
+        bpStatus = 'Chưa có dữ liệu';
+      }
+
+      // Gọi Gemini
+      final advice = await GeminiNutritionService().getAdvice(
+        currentWeight: UserProfile.weight,
+        goalCalo: goalCalo,
+        consumedCalo: totalCalo,
+        consumedProtein: totalProtein,
+        consumedCarb: totalCarb,
+        remainingCalo: remainingCalo,
+        sleepHours: sleepHours,
+        bloodPressureStatus: bpStatus,
+        frequentFoods: getFrequentFoodNames(),
+        budget: budget,
+      );
+
+      _aiAdvice = advice;
+      _isLoadingAi = false;
+      notifyListeners();
+    } catch (e) {
+      _aiAdvice = AiNutritionAdvice.fallback;
+      _aiError = e.toString();
+      _isLoadingAi = false;
+      notifyListeners();
+    }
+  }
+
+  /// Xóa kết quả AI hiện tại.
+  void clearAiAdvice() {
+    _aiAdvice = null;
+    _aiError = null;
+    notifyListeners();
   }
 }
