@@ -32,39 +32,10 @@ class _WaterTrackingScreenState extends State<WaterTrackingScreen> {
     if (mounted) setState(() {});
   }
 
-  Future<void> _addWaterAndNotify(int ml) async {
-    if (_isLoading) return;
-    setState(() => _isLoading = true);
-    
-    try {
-      final reachedGoal = await Future.value(_controller.addWater(ml));
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Lưu thành công!'), 
-            backgroundColor: AppColors.success,
-          ),
-        );
-        if (reachedGoal) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Chúc mừng! Bạn đã đạt mục tiêu nước uống hôm nay.'), 
-              backgroundColor: AppColors.success,
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Có lỗi xảy ra, vui lòng thử lại!'), 
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
+  void _addWaterAndNotify(int ml) {
+    final reachedGoal = _controller.addWater(ml);
+    if (reachedGoal && mounted) {
+      AppHelpers.showSnackBar(context, 'Chúc mừng! Bạn đã đạt mục tiêu nước uống hôm nay.');
     }
   }
 
@@ -93,7 +64,7 @@ class _WaterTrackingScreenState extends State<WaterTrackingScreen> {
 
     setState(() => _isLoading = true);
     try {
-      await Future.value(_controller.removeEntry(index));
+      _controller.removeEntry(index);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

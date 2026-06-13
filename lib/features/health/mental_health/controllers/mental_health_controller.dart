@@ -5,6 +5,7 @@ import 'package:wellness_app/data/services/data_sync_service.dart';
 
 class MentalHealthController extends ChangeNotifier {
   List<MentalHealthRecord> _records = [];
+  final Map<DateTime, List<MentalHealthRecord>> _eventsMap = {};
   bool _isLoading = false;
 
   List<MentalHealthRecord> get records => _records;
@@ -14,11 +15,30 @@ class MentalHealthController extends ChangeNotifier {
     loadRecords();
   }
 
+  // Chuẩn hóa ngày (bỏ giờ phút) để dùng làm Key cho Map
+  DateTime _normalizeDate(DateTime date) {
+    return DateTime(date.year, date.month, date.day);
+  }
+
   Future<void> loadRecords() async {
     _isLoading = true;
     notifyListeners();
 
     _records = await DatabaseHelper.instance.getAllMentalHealthRecords();
+
+    _eventsMap.clear();
+    for (var record in _records) {
+      try {
+        DateTime dt = DateTime.parse(record.dateTime);
+        DateTime normalized = _normalizeDate(dt);
+        if (_eventsMap[normalized] == null) {
+          _eventsMap[normalized] = [];
+        }
+        _eventsMap[normalized]!.add(record);
+      } catch (e) {
+        debugPrint("Error parsing date: $e");
+      }
+    }
 
     _isLoading = false;
     notifyListeners();
@@ -41,8 +61,17 @@ class MentalHealthController extends ChangeNotifier {
       
       if (id > 0) {
         newRecord.id = id;
+        
         // Chèn vào đầu danh sách (vì list load theo DESC)
         _records.insert(0, newRecord);
+        
+        // Cập nhật Events Map cho TableCalendar
+        DateTime normalized = _normalizeDate(date);
+        if (_eventsMap[normalized] == null) {
+          _eventsMap[normalized] = [];
+        }
+        _eventsMap[normalized]!.insert(0, newRecord);
+
         notifyListeners();
         
         // Bắn trigger đẩy dữ liệu lên Cloud
@@ -56,11 +85,9 @@ class MentalHealthController extends ChangeNotifier {
     }
   }
 
-  // Lấy các record trong một ngày cụ thể
+  // Lấy các record trong một ngày cụ thể - Cực kỳ mượt vì dùng Map (O(1))
   List<MentalHealthRecord> getRecordsForDay(DateTime day) {
-    return _records.where((record) {
-      DateTime dt = DateTime.parse(record.dateTime);
-      return dt.year == day.year && dt.month == day.month && dt.day == day.day;
-    }).toList();
+    DateTime normalized = _normalizeDate(day);
+    return _eventsMap[normalized] ?? [];
   }
 }
