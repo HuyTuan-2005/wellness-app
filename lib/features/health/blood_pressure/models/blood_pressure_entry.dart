@@ -1,46 +1,78 @@
 import 'package:flutter/material.dart';
 
 class BloodPressureEntry {
-  final String? id;
-  final int systolic;
-  final int diastolic;
-  final String trigger;
-  final TimeOfDay time;
-  final DateTime createdAt;
+  int? id;
+  int systolic;
+  int diastolic;
+  String trigger;
+  String timeStr;
+  String createdAtStr;
+  String? userId;
+  int isSynced;
 
   BloodPressureEntry({
     this.id,
     required this.systolic,
     required this.diastolic,
     required this.trigger,
-    required this.time,
-    required this.createdAt,
+    required this.timeStr,
+    required this.createdAtStr,
+    this.userId,
+    this.isSynced = 0,
   });
+
+  BloodPressureEntry.create({
+    this.id,
+    required this.systolic,
+    required this.diastolic,
+    required this.trigger,
+    required TimeOfDay time,
+    required DateTime createdAt,
+    this.userId,
+    this.isSynced = 0,
+  })  : timeStr = '${time.hour}:${time.minute}',
+        createdAtStr = createdAt.toIso8601String();
+
+  TimeOfDay get time {
+    try {
+      final parts = timeStr.split(':');
+      return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+    } catch (_) {
+      return TimeOfDay.now();
+    }
+  }
+
+  DateTime get createdAt {
+    try {
+      return DateTime.parse(createdAtStr);
+    } catch (_) {
+      return DateTime.now();
+    }
+  }
 
   Map<String, dynamic> toMap() {
     return {
+      'id': id,
       'systolic': systolic,
       'diastolic': diastolic,
       'trigger': trigger,
-      'time': {'hour': time.hour, 'minute': time.minute},
-      'createdAt': createdAt.toIso8601String(),
+      'timeStr': timeStr,
+      'createdAtStr': createdAtStr,
+      'userId': userId,
+      'isSynced': isSynced,
     };
   }
 
-  factory BloodPressureEntry.fromMap(String id, Map<String, dynamic> map) {
-    final timeMap = map['time'] as Map<dynamic, dynamic>;
+  factory BloodPressureEntry.fromMap(Map<String, dynamic> map) {
     return BloodPressureEntry(
-      id: id,
-      systolic: (map['systolic'] as num).toInt(),
-      diastolic: (map['diastolic'] as num).toInt(),
+      id: map['id'],
+      systolic: map['systolic'] ?? 0,
+      diastolic: map['diastolic'] ?? 0,
       trigger: map['trigger'] ?? '',
-      time: TimeOfDay(
-        hour: (timeMap['hour'] as num).toInt(),
-        minute: (timeMap['minute'] as num).toInt(),
-      ),
-      createdAt: map['createdAt'] != null
-          ? DateTime.parse(map['createdAt'])
-          : DateTime.now(),
+      timeStr: map['timeStr'] ?? '0:0',
+      createdAtStr: map['createdAtStr'] ?? DateTime.now().toIso8601String(),
+      userId: map['userId'],
+      isSynced: map['isSynced'] ?? 0,
     );
   }
 }

@@ -1,54 +1,27 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:wellness_app/core/database/database_helper.dart';
+import 'package:wellness_app/data/services/data_sync_service.dart';
 import 'package:wellness_app/features/profile/utils/data_helper.dart';
 import '../models/blood_pressure_entry.dart';
 
 class BloodPressureController extends ChangeNotifier {
-  // Singleton pattern
   static final BloodPressureController _instance = BloodPressureController._internal();
   factory BloodPressureController() => _instance;
 
-  StreamSubscription? _subscription;
-  final List<BloodPressureEntry> _history = [];
+  List<BloodPressureEntry> _history = [];
 
   BloodPressureController._internal() {
-    FirebaseAuth.instance.authStateChanges().listen((user) {
-      if (user != null) {
-        _subscribe(user.uid);
-      } else {
-        _unsubscribe();
-      }
-    });
+    _loadRecords();
   }
 
-  void _subscribe(String uid) {
-    _subscription?.cancel();
-    _subscription = FirebaseFirestore.instance
-        .collection('users')
-        .doc(uid)
-        .collection('blood_pressure_logs')
-        .orderBy('createdAt', descending: true)
-        .snapshots()
-        .listen((snapshot) {
-      _history.clear();
-      for (var doc in snapshot.docs) {
-        final data = doc.data();
-        final entry = BloodPressureEntry.fromMap(doc.id, data);
-        _history.add(entry);
-      }
-      notifyListeners();
-    }, onError: (e) {
-      debugPrint("Error listening to blood pressure logs: $e");
-    });
-  }
-
-  void _unsubscribe() {
-    _subscription?.cancel();
-    _subscription = null;
-    _history.clear();
+  Future<void> _loadRecords() async {
+    _history = await DatabaseHelper.instance.getAllBloodPressureEntries();
     notifyListeners();
+  }
+
+  Future<void> reloadData() async {
+    await _loadRecords();
   }
 
   int get targetSystolic => UserProfile.targetSystolic;
@@ -97,7 +70,7 @@ class BloodPressureController extends ChangeNotifier {
   }
 
   void addReading({required int systolic, required int diastolic, required String trigger}) {
-    final newEntry = BloodPressureEntry(
+    final newEntry = BloodPressureEntry.create(
       systolic: systolic,
       diastolic: diastolic,
       trigger: trigger,
@@ -105,44 +78,21 @@ class BloodPressureController extends ChangeNotifier {
       createdAt: DateTime.now(),
     );
 
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      _saveReadingToFirestore(user.uid, newEntry);
-    } else {
-      _history.insert(0, newEntry);
-      notifyListeners();
-    }
-  }
+    _history.insert(0, newEntry);
+    notifyListeners();
 
-  Future<void> _saveReadingToFirestore(String uid, BloodPressureEntry entry) async {
-    try {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(uid)
-          .collection('blood_pressure_logs')
-          .add(entry.toMap());
-    } catch (e) {
-      debugPrint("Error saving BP reading to Firestore: $e");
-    }
+    DatabaseHelper.instance.insertBloodPressureEntry(newEntry).then((id) {
+      if (id > 0) {
+        newEntry.id = id;
+        DataSyncService.syncLocalToCloud();
+      }
+    });
   }
 
   Future<void> updateTarget({required int systolic, required int diastolic}) async {
     if (systolic < 90 || diastolic < 60) return;
     UserProfile.targetSystolic = systolic;
     UserProfile.targetDiastolic = diastolic;
-
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      try {
-        await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
-          'targetSystolic': systolic,
-          'targetDiastolic': diastolic,
-        });
-      } catch (e) {
-        debugPrint('Lỗi cập nhật mục tiêu huyết áp lên Firestore: $e');
-      }
-    }
-
     notifyListeners();
   }
 
@@ -150,21 +100,12 @@ class BloodPressureController extends ChangeNotifier {
     if (index < 0 || index >= _history.length) return;
     final entry = _history[index];
 
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null && entry.id != null) {
-      try {
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .collection('blood_pressure_logs')
-            .doc(entry.id)
-            .delete();
-      } catch (e) {
-        debugPrint("Error deleting BP log: $e");
-      }
-    } else {
-      _history.removeAt(index);
-      notifyListeners();
+    if (entry.id != null) {
+      await DatabaseHelper.instance.deleteBloodPressureEntry(entry.id!);
+      DataSyncService.syncLocalToCloud();
     }
+    
+    _history.removeAt(index);
+    notifyListeners();
   }
 }

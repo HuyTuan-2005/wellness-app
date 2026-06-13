@@ -1,26 +1,47 @@
 import 'package:flutter/material.dart';
 
 class WaterEntry {
-  final int ml;
-  final TimeOfDay time;
+  int? id;
+  int ml;
+  String date; // ISO8601 string containing both date and time
+  String? userId;
+  int isSynced;
 
-  WaterEntry({required this.ml, required this.time});
+  WaterEntry({
+    this.id,
+    required this.ml,
+    required this.date,
+    this.userId,
+    this.isSynced = 0,
+  });
+
+  // Getter giúp tương thích ngược với UI cũ không cần sửa đổi (Yêu cầu tuyệt đối không sửa giao diện)
+  TimeOfDay get time {
+    try {
+      DateTime dt = DateTime.parse(date).toLocal();
+      return TimeOfDay(hour: dt.hour, minute: dt.minute);
+    } catch (_) {
+      return TimeOfDay.now();
+    }
+  }
 
   Map<String, dynamic> toMap() {
     return {
+      'id': id,
       'ml': ml,
-      'time': {'hour': time.hour, 'minute': time.minute},
+      'date': date,
+      'userId': userId,
+      'isSynced': isSynced,
     };
   }
 
-  factory WaterEntry.fromMap(Map<dynamic, dynamic> map) {
-    final timeMap = map['time'] as Map<dynamic, dynamic>;
+  factory WaterEntry.fromMap(Map<String, dynamic> map) {
     return WaterEntry(
-      ml: (map['ml'] as num).toInt(),
-      time: TimeOfDay(
-        hour: (timeMap['hour'] as num).toInt(),
-        minute: (timeMap['minute'] as num).toInt(),
-      ),
+      id: map['id'],
+      ml: map['ml'],
+      date: map['date'],
+      userId: map['userId'],
+      isSynced: map['isSynced'] ?? 0,
     );
   }
 }

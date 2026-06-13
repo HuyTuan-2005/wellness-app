@@ -4,6 +4,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:wellness_app/core/database/database_helper.dart';
 import 'package:wellness_app/features/health/weight/models/weight_record.dart';
+import 'package:wellness_app/features/health/water/controllers/water_controller.dart';
+import 'package:wellness_app/features/health/sleep/controllers/sleep_controller.dart';
+import 'package:wellness_app/features/health/blood_pressure/controllers/blood_pressure_controller.dart';
 
 class DataSyncService {
   static final DataSyncService _instance = DataSyncService._internal();
@@ -110,6 +113,64 @@ class DataSyncService {
         debugPrint("DataSyncService: Đã đẩy Cảm xúc ID ${record['id']} lên Cloud.");
       }
 
+      // 5. Đồng bộ Nước uống (Water)
+      final unsyncedWater = await DatabaseHelper.instance.getUnsyncedWaterEntries();
+      for (var record in unsyncedWater) {
+        String docId = record['id'].toString();
+        
+        Map<String, dynamic> dataToSync = Map<String, dynamic>.from(record);
+        dataToSync['userId'] = uid;
+        dataToSync['isSynced'] = 1;
+
+        await _firestore
+            .collection('users')
+            .doc(uid)
+            .collection('water_entries')
+            .doc(docId)
+            .set(dataToSync, SetOptions(merge: true));
+
+        await DatabaseHelper.instance.markAsSynced('water_entries', record['id'] as int);
+        debugPrint("DataSyncService: Đã đẩy Nước uống ID ${record['id']} lên Cloud.");
+      }
+
+      // 6. Đồng bộ Giấc ngủ (Sleep)
+      final unsyncedSleep = await DatabaseHelper.instance.getUnsyncedSleepEntries();
+      for (var record in unsyncedSleep) {
+        String docId = record['id'].toString();
+        Map<String, dynamic> dataToSync = Map<String, dynamic>.from(record);
+        dataToSync['userId'] = uid;
+        dataToSync['isSynced'] = 1;
+
+        await _firestore
+            .collection('users')
+            .doc(uid)
+            .collection('sleep_entries')
+            .doc(docId)
+            .set(dataToSync, SetOptions(merge: true));
+
+        await DatabaseHelper.instance.markAsSynced('sleep_entries', record['id'] as int);
+        debugPrint("DataSyncService: Đã đẩy Giấc ngủ ID ${record['id']} lên Cloud.");
+      }
+
+      // 7. Đồng bộ Huyết áp (Blood Pressure)
+      final unsyncedBP = await DatabaseHelper.instance.getUnsyncedBloodPressureEntries();
+      for (var record in unsyncedBP) {
+        String docId = record['id'].toString();
+        Map<String, dynamic> dataToSync = Map<String, dynamic>.from(record);
+        dataToSync['userId'] = uid;
+        dataToSync['isSynced'] = 1;
+
+        await _firestore
+            .collection('users')
+            .doc(uid)
+            .collection('blood_pressure_entries')
+            .doc(docId)
+            .set(dataToSync, SetOptions(merge: true));
+
+        await DatabaseHelper.instance.markAsSynced('blood_pressure_entries', record['id'] as int);
+        debugPrint("DataSyncService: Đã đẩy Huyết áp ID ${record['id']} lên Cloud.");
+      }
+
       debugPrint("DataSyncService: Hoàn tất syncLocalToCloud.");
     } catch (e) {
       debugPrint("DataSyncService: Lỗi trong quá trình syncLocalToCloud - $e");
@@ -205,6 +266,74 @@ class DataSyncService {
 
         await db.insert('mental_health_records', data, conflictAlgorithm: ConflictAlgorithm.replace);
         debugPrint("DataSyncService: Đã tải Cảm xúc ID $id về máy.");
+      }
+
+      // 5. Tải Nước uống
+      final waterSnapshot = await _firestore
+          .collection('users')
+          .doc(uid)
+          .collection('water_entries')
+          .get();
+
+      bool hasNewWater = false;
+      for (var doc in waterSnapshot.docs) {
+        final data = doc.data();
+        data['isSynced'] = 1;
+
+        int id = int.parse(doc.id);
+        data['id'] = id;
+
+        await db.insert('water_entries', data, conflictAlgorithm: ConflictAlgorithm.replace);
+        hasNewWater = true;
+        debugPrint("DataSyncService: Đã tải Nước uống ID $id về máy.");
+      }
+
+      if (hasNewWater) {
+        WaterController().reloadData();
+      }
+
+      // 6. Tải Giấc ngủ
+      final sleepSnapshot = await _firestore
+          .collection('users')
+          .doc(uid)
+          .collection('sleep_entries')
+          .get();
+
+      bool hasNewSleep = false;
+      for (var doc in sleepSnapshot.docs) {
+        final data = doc.data();
+        data['isSynced'] = 1;
+        int id = int.parse(doc.id);
+        data['id'] = id;
+
+        await db.insert('sleep_entries', data, conflictAlgorithm: ConflictAlgorithm.replace);
+        hasNewSleep = true;
+        debugPrint("DataSyncService: Đã tải Giấc ngủ ID $id về máy.");
+      }
+      if (hasNewSleep) {
+        SleepController().reloadData();
+      }
+
+      // 7. Tải Huyết áp
+      final bpSnapshot = await _firestore
+          .collection('users')
+          .doc(uid)
+          .collection('blood_pressure_entries')
+          .get();
+
+      bool hasNewBP = false;
+      for (var doc in bpSnapshot.docs) {
+        final data = doc.data();
+        data['isSynced'] = 1;
+        int id = int.parse(doc.id);
+        data['id'] = id;
+
+        await db.insert('blood_pressure_entries', data, conflictAlgorithm: ConflictAlgorithm.replace);
+        hasNewBP = true;
+        debugPrint("DataSyncService: Đã tải Huyết áp ID $id về máy.");
+      }
+      if (hasNewBP) {
+        BloodPressureController().reloadData();
       }
 
       debugPrint("DataSyncService: Hoàn tất pullCloudToLocal.");

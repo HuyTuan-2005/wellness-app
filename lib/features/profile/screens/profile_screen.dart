@@ -8,6 +8,7 @@ import 'package:wellness_app/data/services/auth_service.dart';
 import 'package:wellness_app/features/register_login/screens/auth_wrapper.dart';
 import 'package:wellness_app/features/device/screens/device_screen.dart';
 import 'package:wellness_app/features/system_notifications/screens/user_notification_screen.dart';
+import 'package:wellness_app/core/database/database_helper.dart';
 import 'edit_profile_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -174,7 +175,47 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           Icons.logout_rounded,
                           'Đăng xuất',
                           () async {
+                            // Bước 1: Kiểm tra xem có dữ liệu Offline chưa đồng bộ không
+                            bool hasUnsynced = await DatabaseHelper.instance.hasUnsyncedData();
+
+                            if (hasUnsynced) {
+                              if (!context.mounted) return;
+                              // Bước 2: Hiện Dialog cảnh báo màu đỏ
+                              final bool? confirm = await showDialog<bool>(
+                                context: context,
+                                builder: (ctx) => AlertDialog(
+                                  title: const Text('Cảnh báo mất dữ liệu', style: TextStyle(color: Colors.red)),
+                                  content: const Text(
+                                    'CẢNH BÁO: Bạn có dữ liệu chưa được đồng bộ lên đám mây (do mất mạng hoặc đang chờ). '
+                                    'Nếu đăng xuất bây giờ, dữ liệu này sẽ bị MẤT VĨNH VIỄN do dữ liệu cục bộ sẽ bị xóa để bảo vệ tài khoản.\n\n'
+                                    'Bạn có chắc chắn muốn tiếp tục đăng xuất không?'
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(ctx, false),
+                                      child: const Text('Hủy'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(ctx, true),
+                                      style: TextButton.styleFrom(foregroundColor: Colors.red),
+                                      child: const Text('Vẫn Đăng xuất', style: TextStyle(fontWeight: FontWeight.bold)),
+                                    ),
+                                  ],
+                                ),
+                              );
+
+                              if (confirm != true) {
+                                return; // Ngừng tiến trình đăng xuất
+                              }
+                            }
+
+                            // Bước 3: Đã đồng bộ hết, HOẶC người dùng chấp nhận mất dữ liệu
+                            // Quét sạch dữ liệu của người dùng cũ trên thiết bị
+                            await DatabaseHelper.instance.clearAllLocalData();
+                            
+                            // Tiến hành đăng xuất Auth
                             await AuthService().signOut();
+
                             if (context.mounted) {
                               Navigator.pushAndRemoveUntil(
                                 context,
