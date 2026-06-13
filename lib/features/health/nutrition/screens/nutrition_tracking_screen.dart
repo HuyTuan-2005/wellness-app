@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../controllers/nutrition_controller.dart';
 import '../widgets/add_food_dialog.dart';
 import '../widgets/calo_painter.dart';
-import '../widgets/ai_advice_card.dart';
+import '../widgets/ai_meal_suggestion_card.dart';
 import '../models/nutrition_entry.dart';
 import 'package:wellness_app/core/utils/date_helper.dart';
 
