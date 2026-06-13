@@ -3,6 +3,7 @@ import '../controllers/water_controller.dart';
 import 'package:wellness_app/core/utils/circular_progress_painter.dart';
 import 'package:wellness_app/core/utils/date_helper.dart';
 import 'package:wellness_app/core/utils/app_helpers.dart';
+import 'package:wellness_app/core/theme/app_colors.dart';
 
 class WaterTrackingScreen extends StatefulWidget {
   const WaterTrackingScreen({super.key});
@@ -13,6 +14,7 @@ class WaterTrackingScreen extends StatefulWidget {
 
 class _WaterTrackingScreenState extends State<WaterTrackingScreen> {
   final WaterController _controller = WaterController();
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -30,10 +32,87 @@ class _WaterTrackingScreenState extends State<WaterTrackingScreen> {
     if (mounted) setState(() {});
   }
 
-  void _addWaterAndNotify(int ml) {
-    final reachedGoal = _controller.addWater(ml);
-    if (reachedGoal && mounted) {
-      AppHelpers.showSnackBar(context, 'Chúc mừng! Bạn đã đạt mục tiêu nước uống hôm nay.');
+  Future<void> _addWaterAndNotify(int ml) async {
+    if (_isLoading) return;
+    setState(() => _isLoading = true);
+    
+    try {
+      final reachedGoal = await Future.value(_controller.addWater(ml));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Lưu thành công!'), 
+            backgroundColor: AppColors.success,
+          ),
+        );
+        if (reachedGoal) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Chúc mừng! Bạn đã đạt mục tiêu nước uống hôm nay.'), 
+              backgroundColor: AppColors.success,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Có lỗi xảy ra, vui lòng thử lại!'), 
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _confirmAndDelete(int index) async {
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Xác nhận xóa'),
+        content: const Text('Bạn có chắc chắn muốn xóa bản ghi nước uống này không? Hành động này không thể hoàn tác.'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Không', style: TextStyle(color: Colors.grey)),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: FilledButton.styleFrom(backgroundColor: AppColors.error),
+            child: const Text('Đồng ý', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    setState(() => _isLoading = true);
+    try {
+      await Future.value(_controller.removeEntry(index));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Đã xóa thành công'), 
+            backgroundColor: AppColors.success,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Có lỗi xảy ra, vui lòng thử lại!'), 
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -240,7 +319,7 @@ class _WaterTrackingScreenState extends State<WaterTrackingScreen> {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4),
                       child: GestureDetector(
-                        onTap: () => _addWaterAndNotify(ml),
+                        onTap: _isLoading ? null : () => _addWaterAndNotify(ml),
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           decoration: BoxDecoration(
@@ -254,7 +333,9 @@ class _WaterTrackingScreenState extends State<WaterTrackingScreen> {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Text('+', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
+                              _isLoading 
+                                  ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                                  : const Text('+', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
                               Text('$ml ml', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white)),
                             ],
                           ),
@@ -326,7 +407,7 @@ class _WaterTrackingScreenState extends State<WaterTrackingScreen> {
                                   icon: Icon(Icons.delete_outline, color: Colors.red.shade300, size: 20),
                                   padding: EdgeInsets.zero,
                                   constraints: const BoxConstraints(),
-                                  onPressed: () => _controller.removeEntry(index),
+                                  onPressed: _isLoading ? null : () => _confirmAndDelete(index),
                                 ),
                               ],
                             ),

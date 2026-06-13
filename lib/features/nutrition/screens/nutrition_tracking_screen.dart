@@ -129,6 +129,12 @@ class _NutritionTrackingScreenState extends State<NutritionTrackingScreen> {
 
     if (!mounted || result == null) return;
     _controller.updateGoal(result);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Cập nhật mục tiêu Calo thành công!'),
+        backgroundColor: Colors.green,
+      ),
+    );
   }
 
   Future<void> _openAddFoodDialog() async {
@@ -152,6 +158,14 @@ class _NutritionTrackingScreenState extends State<NutritionTrackingScreen> {
         quantity: result.quantity,
         mealType: result.mealType,
       );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Đã thêm ${result.food!.name} thành công!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
       return;
     }
 
@@ -163,6 +177,14 @@ class _NutritionTrackingScreenState extends State<NutritionTrackingScreen> {
       carb: result.carb!,
       mealType: result.mealType,
     );
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Đã thêm ${result.foodName} thành công!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
   }
 
   @override

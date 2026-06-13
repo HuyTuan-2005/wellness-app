@@ -106,6 +106,15 @@ class _BMICalculatorScreenState extends State<BMICalculatorScreen> {
             debugPrint("Error syncing BMI metrics to Firestore: $e");
           });
         }
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Lưu kết quả BMI thành công!'),
+              backgroundColor: AppColors.success,
+            ),
+          );
+        }
       }
     }
   }
