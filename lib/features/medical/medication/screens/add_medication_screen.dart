@@ -12,6 +12,7 @@ class AddMedicationScreen extends StatefulWidget {
 
 class _AddMedicationScreenState extends State<AddMedicationScreen> {
   final _formKey = GlobalKey<FormState>();
+  bool _isSaving = false;
 
   // Khai báo các Controller
   final _notesController = TextEditingController();
@@ -234,67 +235,67 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                   ],
                 ),
                 child: ElevatedButton(
-                  onPressed: () async {
+                  onPressed: _isSaving ? null : () async {
                     if (_formKey.currentState!.validate()) {
-                      // Validation nghiệp vụ y tế
-                      int duration =
-                          int.tryParse(_durationController.text) ?? 0;
-                      int total =
-                          int.tryParse(_totalQuantityController.text) ?? 0;
+                      setState(() { _isSaving = true; });
+                      try {
+                        // Validation nghiệp vụ y tế
+                        int duration = int.tryParse(_durationController.text) ?? 0;
+                        int total = int.tryParse(_totalQuantityController.text) ?? 0;
 
-                      // Dùng Controller để parse liều lượng (tránh trùng lặp regex)
-                      int doseAmount = MedicationController.parseDoseAmount(
-                        _dosageController.text,
-                      );
-
-                      if (duration <= 0 || total <= 0) {
-                        AppHelpers.showSnackBar(
-                          context,
-                          "Số ngày và Tổng số viên phải lớn hơn 0!",
-                          isError: true,
+                        // Dùng Controller để parse liều lượng
+                        int doseAmount = MedicationController.parseDoseAmount(
+                          _dosageController.text,
                         );
-                        return;
-                      }
 
-                      if (total < doseAmount) {
-                        AppHelpers.showSnackBar(
-                          context,
-                          "Vô lý! Tổng số viên ($total) không thể nhỏ hơn liều lượng 1 lần uống ($doseAmount).",
-                          isError: true,
+                        if (duration <= 0 || total <= 0) {
+                          AppHelpers.showSnackBar(
+                            context,
+                            "Số ngày và Tổng số viên phải lớn hơn 0!",
+                            isError: true,
+                          );
+                          return;
+                        }
+
+                        if (total < doseAmount) {
+                          AppHelpers.showSnackBar(
+                            context,
+                            "Vô lý! Tổng số viên ($total) không thể nhỏ hơn liều lượng 1 lần uống ($doseAmount).",
+                            isError: true,
+                          );
+                          return;
+                        }
+
+                        // Gọi Controller lưu dữ liệu
+                        AppHelpers.showSnackBar(context, "Đang lưu dữ liệu...");
+
+                        bool isSuccess = await MedicationController.addMedication(
+                          name: _nameController.text,
+                          dosage: _dosageController.text,
+                          time: _selectedTime,
+                          durationDaysStr: _durationController.text,
+                          totalQuantityStr: _totalQuantityController.text,
+                          notes: _notesController.text,
+                          frequency: _selectedFrequency,
                         );
-                        return;
-                      }
 
-                      // Gọi Controller lưu dữ liệu
-                      AppHelpers.showSnackBar(context, "Đang lưu dữ liệu...");
+                        if (!mounted) return;
 
-                      bool isSuccess =
-                          await MedicationController.addMedication(
-                        name: _nameController.text,
-                        dosage: _dosageController.text,
-                        time: _selectedTime,
-                        durationDaysStr: _durationController.text,
-                        totalQuantityStr: _totalQuantityController.text,
-                        notes: _notesController.text,
-                        frequency: _selectedFrequency,
-                      );
-
-                      if (isSuccess) {
-                        if (context.mounted) {
+                        if (isSuccess) {
                           AppHelpers.showSnackBar(
                             context,
                             "Lưu lịch uống thuốc thành công!",
                           );
                           Navigator.pop(context);
-                        }
-                      } else {
-                        if (context.mounted) {
+                        } else {
                           AppHelpers.showSnackBar(
                             context,
                             "Lưu thất bại. Vui lòng thử lại!",
                             isError: true,
                           );
                         }
+                      } finally {
+                        if (mounted) setState(() { _isSaving = false; });
                       }
                     }
                   },
@@ -305,14 +306,20 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                   ),
-                  child: Text(
-                    "Lưu lịch uống",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: AppColors.surface,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  child: _isSaving 
+                      ? const SizedBox(
+                          height: 24, 
+                          width: 24, 
+                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5)
+                        )
+                      : Text(
+                          "Lưu lịch uống",
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: AppColors.surface,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                 ),
               ),
               const SizedBox(height: 40),

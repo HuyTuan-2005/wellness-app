@@ -5,6 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:wellness_app/app.dart';
 import 'package:wellness_app/firebase_options.dart';
 import 'package:wellness_app/data/services/notification_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,5 +19,9 @@ void main() async {
   // Yêu cầu quyền thông báo (Android 13+)
   await NotificationService().requestPermissions();
 
-  runApp(const WellnessApp());
+  // Kiểm tra xem ứng dụng đã từng được mở hay chưa
+  final prefs = await SharedPreferences.getInstance();
+  final bool isFirstTime = prefs.getBool('isFirstTime') ?? true;
+
+  runApp(WellnessApp(isFirstTime: isFirstTime));
 }

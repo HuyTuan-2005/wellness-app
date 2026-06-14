@@ -108,10 +108,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       setState(() {
         _nameController.text = UserProfile.userName;
         _emailController.text = UserProfile.email;
-        _ageController.text = UserProfile.age.toString();
-        _heightController.text = UserProfile.height.toString();
-        _weightController.text = UserProfile.weight.toString();
-        _targetWeightController.text = UserProfile.targetWeight.toString();
+        _ageController.text = UserProfile.age > 0 ? UserProfile.age.toString() : '';
+        _heightController.text = UserProfile.height > 0 ? UserProfile.height.toString() : '';
+        _weightController.text = UserProfile.weight > 0 ? UserProfile.weight.toString() : '';
+        _targetWeightController.text = UserProfile.targetWeight > 0 ? UserProfile.targetWeight.toString() : '';
         _allergiesController.text = UserProfile.allergies;
         _waterGoalController.text = UserProfile.dailyWaterGoal.toString();
         _exerciseGoalController.text = UserProfile.exerciseGoal;

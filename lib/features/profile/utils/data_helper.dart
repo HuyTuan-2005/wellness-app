@@ -2,20 +2,20 @@
 
 class UserProfile {
   // ==================== THÔNG TIN CÁ NHÂN ====================
-  static String userName = "Nguyễn Quốc Trường";
-  static String email = "truong.nguyen@example.com";
-  static int age = 28;
+  static String userName = "";
+  static String email = "";
+  static int age = 0;
   static String gender = "Nam";
-  static double height = 172.0; // cm
-  static double weight = 68.5; // kg
-  static double targetWeight = 65.0;
+  static double height = 0.0; // cm
+  static double weight = 0.0; // kg
+  static double targetWeight = 0.0;
 
   // ==================== THÔNG TIN SỨC KHỎE ====================
-  static String bloodType = "O+";
+  static String bloodType = "Chưa rõ";
   static String allergies = "Không có";
-  static int dailyWaterGoal = 2500; // ml
+  static int dailyWaterGoal = 2000; // ml
   static int dailyCaloGoal = 2000; // kcal
-  static String exerciseGoal = "Tập gym 5 buổi/tuần";
+  static String exerciseGoal = "Chưa rõ";
   static double sleepGoalHours = 8.0;
   static int targetSystolic = 120;
   static int targetDiastolic = 80;
@@ -75,25 +75,25 @@ class UserProfile {
 
   // Reset về giá trị mặc định (nếu cần)
   static void resetToDefault() {
-    userName = "Nguyễn Quốc Trường";
-    email = "truong.nguyen@example.com";
-    age = 28;
+    userName = "";
+    email = "";
+    age = 0;
     gender = "Nam";
-    height = 172.0;
-    weight = 68.5;
-    targetWeight = 65.0;
-    bloodType = "O+";
+    height = 0.0;
+    weight = 0.0;
+    targetWeight = 0.0;
+    bloodType = "Chưa rõ";
     allergies = "Không có";
-    dailyWaterGoal = 2500;
+    dailyWaterGoal = 2000;
     dailyCaloGoal = 2000;
-    exerciseGoal = "Tập gym 5 buổi/tuần";
+    exerciseGoal = "Chưa rõ";
     sleepGoalHours = 8.0;
     targetSystolic = 120;
     targetDiastolic = 80;
   }
 
   // Getter tiện lợi (tùy chọn)
-  static double get bmi => weight / ((height / 100) * (height / 100));
+  static double get bmi => height > 0 ? (weight / ((height / 100) * (height / 100))) : 0.0;
 
   static int getSuggestedCaloriesFor({
     required double weight,

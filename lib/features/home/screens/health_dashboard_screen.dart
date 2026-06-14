@@ -205,7 +205,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                         ),
                       ),
                       Text(
-                        bmi.toStringAsFixed(1),
+                        bmi > 0 ? bmi.toStringAsFixed(1) : '--',
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -218,7 +218,9 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                   LayoutBuilder(
                     builder: (context, constraints) {
                       double percentage;
-                      if (bmi < 18.5) {
+                      if (bmi == 0) {
+                        percentage = 0.5; // Giữa thanh nếu chưa có dữ liệu
+                      } else if (bmi < 18.5) {
                         percentage = (bmi - 15) / (18.5 - 15) * 0.25;
                       } else if (bmi < 23.0) {
                         percentage = 0.25 + (bmi - 18.5) / (23.0 - 18.5) * 0.25;
@@ -400,7 +402,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
             HealthSummaryCard(
               icon: Icons.monitor_weight,
               title: 'Cân nặng',
-              value: '${UserProfile.weight.toStringAsFixed(1)} kg',
+              value: UserProfile.weight > 0 ? '${UserProfile.weight.toStringAsFixed(1)} kg' : '-- kg',
               color: Colors.cyan,
               onTap: () {
                 Navigator.push(

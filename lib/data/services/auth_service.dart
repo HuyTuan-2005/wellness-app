@@ -2,7 +2,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wellness_app/data/services/data_sync_service.dart';
+import 'package:wellness_app/core/database/database_helper.dart';
+import 'package:wellness_app/features/profile/utils/data_helper.dart';
+import 'package:wellness_app/features/health/water/controllers/water_controller.dart';
+import 'package:wellness_app/features/health/sleep/controllers/sleep_controller.dart';
+import 'package:wellness_app/features/health/blood_pressure/controllers/blood_pressure_controller.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -196,12 +202,28 @@ class AuthService {
     }
   }
 
-  /// Đăng xuất khỏi cả Google và Firebase
   Future<void> signOut() async {
     try {
+      // 1. Quét sạch SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+      
+      // 2. Quét sạch SQLite (Để đảm bảo 100% an toàn dù logout ở đâu)
+      await DatabaseHelper.instance.clearAllLocalData();
+      
+      // 3. Reset các biến Static trong RAM (Tránh dính data người cũ khi login nick mới cùng phiên chạy)
+      UserProfile.resetToDefault();
+      
+      // 4. Xóa cache trong RAM của các Controller Singleton bằng cách reload lại SQLite rỗng
+      WaterController().reloadData();
+      SleepController().reloadData();
+      BloodPressureController().reloadData();
+
+      // 5. Đăng xuất Auth
       await GoogleSignIn.instance.signOut();
       await _auth.signOut();
-      debugPrint('[AuthService] Đã đăng xuất thành công.');
+      
+      debugPrint('[AuthService] Đã đăng xuất thành công và xóa toàn bộ Local Data.');
     } catch (e) {
       debugPrint('[AuthService] Lỗi khi đăng xuất: $e');
     }

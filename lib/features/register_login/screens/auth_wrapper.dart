@@ -8,6 +8,7 @@ import 'package:wellness_app/features/profile/utils/data_helper.dart';
 import 'package:wellness_app/features/admin/screens/dashboard_screen.dart';
 import 'package:wellness_app/features/home/screens/main_navigation_screen.dart';
 import 'package:wellness_app/features/register_login/screens/login_screen.dart';
+import 'package:wellness_app/features/register_login/screens/onboarding_screen.dart';
 
 class AuthWrapper extends StatefulWidget {
   const AuthWrapper({super.key});
@@ -179,6 +180,17 @@ class _AuthWrapperState extends State<AuthWrapper> with WidgetsBindingObserver {
 
               if (role == 'admin') {
                 return const DashboardScreen();
+              }
+
+              // Kiểm tra xem UserProfile đã có dữ liệu cơ bản chưa (cân nặng, chiều cao)
+              // Nếu chưa có (== 0.0), hiển thị màn hình Onboarding
+              if (role == 'user' && (UserProfile.height == 0.0 || UserProfile.weight == 0.0 || UserProfile.age == 0)) {
+                return const OnboardingScreen();
+              }
+            } else {
+              // Trường hợp fallback nếu user không có document trên Firestore
+              if (UserProfile.height == 0.0 || UserProfile.weight == 0.0 || UserProfile.age == 0) {
+                return const OnboardingScreen();
               }
             }
 

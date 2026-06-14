@@ -19,8 +19,8 @@ class MedicationController {
     required String frequency,
   }) async {
     try {
-      int durationDays = int.parse(durationDaysStr);
-      int totalQuantity = int.parse(totalQuantityStr);
+      int durationDays = int.tryParse(durationDaysStr) ?? 0;
+      int totalQuantity = int.tryParse(totalQuantityStr) ?? 0;
       String timeFormatted =
           '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
       String todayStr = DateTime.now().toIso8601String().split('T')[0];
@@ -45,18 +45,6 @@ class MedicationController {
 
       // Hẹn giờ báo thức liều đầu tiên
       if (id > 0) {
-        // Đồng bộ lên Firestore nếu user đã đăng nhập
-        final user = FirebaseAuth.instance.currentUser;
-        if (user != null) {
-          await FirebaseFirestore.instance
-              .collection('users')
-              .doc(user.uid)
-              .collection('medications')
-              .doc(id.toString())
-              .set(newMedication.toMap()..['id'] = id)
-              .catchError((e) => debugPrint("Error syncing medication to Firestore: $e"));
-        }
-
         DateTime now = DateTime.now();
         DateTime firstDoseTime = DateTime(
           now.year,
@@ -94,7 +82,7 @@ class MedicationController {
   /// Parse số liều từ chuỗi dosage (VD: "2 viên" → 2)
   static int parseDoseAmount(String dosage) {
     final match = RegExp(r'\d+').firstMatch(dosage);
-    return match != null ? int.parse(match.group(0)!) : 1;
+    return match != null ? (int.tryParse(match.group(0)!) ?? 1) : 1;
   }
 
   /// Xác định trạng thái hiển thị: "upcoming" / "overdue" / "completed"
@@ -120,8 +108,8 @@ class MedicationController {
           nextDate.year,
           nextDate.month,
           nextDate.day,
-          int.parse(timeParts[0]),
-          int.parse(timeParts[1]),
+          int.tryParse(timeParts[0]) ?? 0,
+          int.tryParse(timeParts[1]) ?? 0,
         );
         if (now.isAfter(medDateTime)) return "overdue";
       } catch (_) {
@@ -210,18 +198,6 @@ class MedicationController {
     // Ghi xuống DB
     await DatabaseHelper.instance.updateMedication(med);
 
-    // Đồng bộ lên Firestore nếu user đã đăng nhập
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .collection('medications')
-          .doc(med.id.toString())
-          .update(med.toMap())
-          .catchError((e) => debugPrint("Error syncing medication progress to Firestore: $e"));
-    }
-
     // Hủy báo thức hôm nay
     await NotificationService().cancelNotification(med.id!);
 
@@ -234,8 +210,8 @@ class MedicationController {
           nextDate.year,
           nextDate.month,
           nextDate.day,
-          int.parse(timeParts[0]),
-          int.parse(timeParts[1]),
+          int.tryParse(timeParts[0]) ?? 0,
+          int.tryParse(timeParts[1]) ?? 0,
         );
 
         await NotificationService().scheduleNotification(
@@ -257,19 +233,8 @@ class MedicationController {
   static Future<void> deleteMedication(int id) async {
     try {
       await DatabaseHelper.instance.deleteMedication(id);
-
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .collection('medications')
-            .doc(id.toString())
-            .delete()
-            .catchError((e) => debugPrint("Error deleting medication on Firestore: $e"));
-      }
-
       await NotificationService().cancelNotification(id);
+      DataSyncService.syncLocalToCloud();
     } catch (e) {
       debugPrint("Lỗi khi xóa thuốc: $e");
     }

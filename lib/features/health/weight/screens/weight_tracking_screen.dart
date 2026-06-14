@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:wellness_app/core/theme/app_colors.dart';
+import 'package:wellness_app/data/services/data_sync_service.dart';
 import 'package:wellness_app/features/profile/utils/data_helper.dart';
 import 'package:wellness_app/core/database/database_helper.dart';
 import 'package:wellness_app/features/health/weight/models/weight_record.dart';
@@ -28,8 +27,8 @@ class _WeightTrackingScreenState extends State<WeightTrackingScreen> {
   Future<void> _loadRecords() async {
     try {
       final records = await DatabaseHelper.instance.getAllWeightRecords();
-      if (records.isEmpty) {
-        // Add initial record if empty
+      if (records.isEmpty && UserProfile.weight > 0) {
+        // Add initial record if empty and have weight
         final initialRecord = WeightRecord(
           weight: UserProfile.weight,
           date: DateTime.now().subtract(const Duration(days: 7)),
@@ -61,8 +60,10 @@ class _WeightTrackingScreenState extends State<WeightTrackingScreen> {
 
   void _showAddWeightDialog() {
     // Initial values based on current weight
-    int selectedInteger = UserProfile.weight.truncate();
-    int selectedDecimal = ((UserProfile.weight - selectedInteger) * 10).round();
+    double initialWeight = UserProfile.weight > 0 ? UserProfile.weight : 65.0;
+    int selectedInteger = initialWeight.truncate();
+    int selectedDecimal = ((initialWeight - selectedInteger) * 10).round();
+    bool _isSaving = false;
 
     showModalBottomSheet(
       context: context,
@@ -89,47 +90,45 @@ class _WeightTrackingScreenState extends State<WeightTrackingScreen> {
                         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                       ),
                       TextButton(
-                        onPressed: () async {
-                          double newWeight = selectedInteger + (selectedDecimal / 10.0);
-                          final record = WeightRecord(
-                            weight: newWeight,
-                            date: DateTime.now(),
-                          );
-                          final id = await DatabaseHelper.instance.insertWeightRecord(record);
-                          
-                          // Update profile
-                          UserProfile.weight = newWeight;
+                        onPressed: _isSaving ? null : () async {
+                          setModalState(() => _isSaving = true);
+                          try {
+                            double newWeight = selectedInteger + (selectedDecimal / 10.0);
+                            final record = WeightRecord(
+                              weight: newWeight,
+                              date: DateTime.now(),
+                            );
+                            await DatabaseHelper.instance.insertWeightRecord(record);
+                            
+                            // Update profile
+                            UserProfile.weight = newWeight;
 
-                          final int caloGoal = UserProfile.getSuggestedCaloriesFor(
-                            weight: newWeight,
-                            height: UserProfile.height,
-                            age: UserProfile.age,
-                            gender: UserProfile.gender,
-                          );
-                          UserProfile.dailyCaloGoal = caloGoal;
-                          
-                          // Sync to Firestore
-                          final user = FirebaseAuth.instance.currentUser;
-                          if (user != null) {
-                            FirebaseFirestore.instance
-                                .collection('users')
-                                .doc(user.uid)
-                                .collection('weight_records')
-                                .doc(id.toString())
-                                .set(record.toMap()..['id'] = id)
-                                .catchError((e) => debugPrint("Error syncing weight to Firestore: $e"));
-
-                            FirebaseFirestore.instance.collection('users').doc(user.uid).update({
-                              'weight': newWeight,
-                              'dailyCaloGoal': caloGoal,
-                            }).catchError((e) => debugPrint("Error updating profile weight on Firestore: $e"));
+                            final int caloGoal = UserProfile.getSuggestedCaloriesFor(
+                              weight: newWeight,
+                              height: UserProfile.height,
+                              age: UserProfile.age,
+                              gender: UserProfile.gender,
+                            );
+                            UserProfile.dailyCaloGoal = caloGoal;
+                            
+                            DataSyncService.syncLocalToCloud(); // Kích hoạt đồng bộ Offline-First
+                            
+                            if (!context.mounted) return;
+                            Navigator.pop(context);
+                            _loadRecords(); // Reload
+                          } finally {
+                            if (context.mounted) {
+                              setModalState(() => _isSaving = false);
+                            }
                           }
-                          
-                          if (!context.mounted) return;
-                          Navigator.pop(context);
-                          _loadRecords(); // Reload
                         },
-                        child: const Text('Xác nhận', style: TextStyle(color: AppColors.primary, fontSize: 16)),
+                        child: _isSaving
+                            ? const SizedBox(
+                                width: 16, 
+                                height: 16, 
+                                child: CircularProgressIndicator(strokeWidth: 2)
+                              )
+                            : const Text('Xác nhận', style: TextStyle(color: AppColors.primary, fontSize: 16)),
                       ),
                     ],
                   ),

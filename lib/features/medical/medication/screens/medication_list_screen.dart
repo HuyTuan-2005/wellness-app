@@ -37,11 +37,14 @@ class _MedicationListScreenState extends State<MedicationListScreen> {
   }
 
   Future<void> _loadMedications() async {
+    if (!mounted) return;
     try {
       setState(() => _isLoading = true);
       final data = await DatabaseHelper.instance.getAllMedications();
       // Kiểm tra và cập nhật trạng thái hoàn thành (thay vì kiểm tra trong build)
       await MedicationController.checkAndUpdateCompletionStatus(data);
+      
+      if (!mounted) return;
       setState(() {
         _medications = data;
         _isLoading = false;
@@ -50,7 +53,7 @@ class _MedicationListScreenState extends State<MedicationListScreen> {
       debugPrint("===== SQLITE ERROR =====");
       debugPrint(e.toString());
       debugPrint(stack.toString());
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
